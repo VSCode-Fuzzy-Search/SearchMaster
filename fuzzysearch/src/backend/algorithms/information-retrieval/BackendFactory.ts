@@ -11,6 +11,10 @@ import LanguageModelBackend from "./LanguageModel/LanguageModelBackend";
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
 
+    /**
+     * Creates all query backends
+     * @param path path in which to look for documents
+     */
     public createAllBackends(path: string): void {
 
         let documents: Document[] = this.getDocuments(path);
@@ -31,6 +35,12 @@ export default class BackendFactory {
         return false;
     }
 
+
+    /**
+     * Checks if there are backends
+     * @param backendType Algorithm for required query
+     * @returns selected backend
+     */
     public getBackend(backendType: AlgorithmEnum){
 
         return this.backends.get(backendType);
