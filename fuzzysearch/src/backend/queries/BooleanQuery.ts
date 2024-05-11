@@ -1,4 +1,6 @@
-export default class BooleanQuery<T> {
+import Query from "./Query";
+
+export default class BooleanQuery<T> extends Query{
     // The formatted query that will be searched for
     protected formattedQuery: T | null = null;
 

@@ -1,4 +1,6 @@
-export default class VectorQuery<T> {
+import Query from "./Query";
+
+export default class VectorQuery<T> extends Query{
     // The formatted query that will be searched for
     protected formattedQuery: T | null = null;
 
