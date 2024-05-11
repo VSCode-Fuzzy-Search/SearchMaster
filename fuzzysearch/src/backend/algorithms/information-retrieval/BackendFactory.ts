@@ -2,14 +2,23 @@ import { AlgorithmEnum } from "../../AlgorithmEnum";
 import Document from "../../Document";
 import QueryBackend from "./QueryBackend";
 import {v7 as uuidv7 } from 'uuid';
+import * as fs from 'fs';
+import BooleanBackend from "./Boolean/BooleanBackend";
+import VectorBackend from "./Vector/VectorBackend";
+import LanguageModelBackend from "./LanguageModel/LanguageModelBackend";
 
 //TODO: im confused on this class. 
 export default class BackendFactory {
-    private backends: FactoryMap | null = null;
+    private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
 
-    // public createAllBackends(path: string): FactoryMap {
-    //     this.backends = FactoryMap;
-    // }
+    public createAllBackends(path: string): void {
+
+        let documents: Document[] = this.getDocuments(path);
+
+         this.backends.set(AlgorithmEnum.Boolean, new BooleanBackend(documents));
+         this.backends.set(AlgorithmEnum.Vector, new VectorBackend(documents));
+         this.backends.set(AlgorithmEnum.LanguageModel, new LanguageModelBackend(documents));
+     }
 
     /**
      * Checks if there are backends
@@ -22,6 +31,12 @@ export default class BackendFactory {
         return false;
     }
 
+    public getBackend(backendType: AlgorithmEnum){
+
+        return this.backends.get(backendType);
+
+    }
+
     /**
      * finds a list of documents in the path
      * @param path path in which to look for documents
@@ -29,15 +44,21 @@ export default class BackendFactory {
      */
     private getDocuments(path: string): Document[] {
         // TODO: implement this
+        let files: Array<string> = fs.readdirSync(path);
         const documents: Document[] = [];
-        documents.push({id: uuidv7(), filename: "test", contents: "testcontents"});
+
+        for (let i = 0; i < files.length; i++){
+
+            if (fs.lstatSync(path + "/" + files[i]).isFile()){
+                let fileOutput: string = fs.readFileSync(path + "/" + files[i], 'utf-8');
+            
+                // let fileSplit: Array<string> = fileOutput.replace(/[(),'.:]/g, "").replace("[", "").replace("]", "").split(" ");
+
+                documents.push({id: uuidv7(), filename: files[i], contents: fileOutput})
+            }
+
+        }
+
         return documents;
     }
-}
-
-/**
- * Structure of the map of enums to specific backends
- */
-interface FactoryMap {
-    AlgorithmEnum: QueryBackend
 }
