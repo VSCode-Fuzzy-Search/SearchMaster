@@ -1,3 +1,3 @@
-export abstract class Query{
+export default abstract class Query{
 
 }
