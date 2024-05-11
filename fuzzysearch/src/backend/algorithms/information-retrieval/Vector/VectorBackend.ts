@@ -1,7 +1,7 @@
-import Document from "../../Document";
-import QueryBackend from "./QueryBackend";
-import QueryResponse from "../../results/QueryResponse";
-import Query from "../../queries/Query";
+import Document from "../../../Document";
+import QueryBackend from "../QueryBackend";
+import QueryResponse from "../../../results/QueryResponse";
+import Query from "../../../queries/Query";
 
 export default class VectorBackend extends QueryBackend {
     

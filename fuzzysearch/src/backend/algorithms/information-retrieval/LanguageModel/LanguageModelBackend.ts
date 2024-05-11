@@ -1,9 +1,9 @@
-import Document from "../../Document";
-import QueryBackend from "./QueryBackend";
-import QueryResponse from "../../results/QueryResponse";
-import Query from "../../queries/Query";
+import Document from "../../../Document";
+import QueryBackend from "../QueryBackend";
+import QueryResponse from "../../../results/QueryResponse";
+import Query from "../../../queries/Query";
 
-export default class BooleanBackend extends QueryBackend {
+export default class LanguageModelBackend extends QueryBackend {
     
     /**
      * Creates the index used to handle queries
