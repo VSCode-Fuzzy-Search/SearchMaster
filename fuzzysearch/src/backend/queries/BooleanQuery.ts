@@ -1,16 +1,16 @@
 import Query from "./Query";
 
-export default class BooleanQuery<T> extends Query{
+export default class BooleanQuery extends Query{
     // The formatted query that will be searched for
-    protected formattedQuery: T | null = null;
 
     /**
      * converts string query into a usable format for specific backend
      * @param query query in string format
      */
-    protected parseFromString(query: string): T{
+    protected parseFromString(query: string){
         //TODO: implement this
-        return null as T;
+        let splitQuery = query.replace("(", "").replace(")", "").split(" ");
+        this.formattedQuery = splitQuery;
     }
 
     /**
@@ -18,7 +18,12 @@ export default class BooleanQuery<T> extends Query{
      * TODO: possibly create a custom error in case query is not formatted? 
      * @returns The query for backend to use
      */
-    public getFormattedQuery(): T {
-        return this.formattedQuery as T;
+    public getFormattedQuery(): string[] {
+        if (this.formattedQuery != null){
+            return this.formattedQuery;
+        }
+        else {
+            return [];
+        }
     }
 }

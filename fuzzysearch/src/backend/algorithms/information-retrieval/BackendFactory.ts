@@ -6,8 +6,7 @@ import * as fs from 'fs';
 import BooleanBackend from "./Boolean/BooleanBackend";
 import VectorBackend from "./Vector/VectorBackend";
 import LanguageModelBackend from "./LanguageModel/LanguageModelBackend";
-
-//TODO: im confused on this class. 
+ 
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
 
