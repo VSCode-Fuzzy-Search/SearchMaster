@@ -1,6 +1,6 @@
 export default abstract class Query {
     // The formatted query that will be searched for
-    protected formattedQuery: any | null = null;
+    protected formattedQuery: any;
 
     constructor(query: string){
         this.parseFromString(query);
@@ -10,7 +10,7 @@ export default abstract class Query {
      * converts string query into a usable format for specific backend
      * @param query query in string format
      */
-    protected abstract parseFromString(query: string): any;
+    protected abstract parseFromString(query: string): void;
 
     /**
      * returns the formatted query
