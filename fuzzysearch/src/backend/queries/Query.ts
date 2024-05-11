@@ -1,19 +1,19 @@
-export default abstract class Query<T> {
+export default abstract class Query {
     // The formatted query that will be searched for
-    protected formattedQuery: T | null = null;
+    protected formattedQuery: any | null = null;
 
     /**
      * converts string query into a usable format for specific backend
      * @param query query in string format
      */
-    protected abstract parseFromString(query: string): T;
+    protected abstract parseFromString(query: string): any;
 
     /**
      * returns the formatted query
      * TODO: possibly create a custom error in case query is not formatted? 
      * @returns The query for backend to use
      */
-    public getFormattedQuery(): T {
-        return this.formattedQuery as T;
+    public getFormattedQuery(): any {
+        return this.formattedQuery as any;
     }
 }
