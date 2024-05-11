@@ -5,11 +5,17 @@ import Document from "../../Document";
 export default abstract class QueryBackend {
     // Data structure used to perform the query matching on
     // TODO: is the "any" type okay here? - Aren
+    // ^^^ I'm thinking so ATM, not many other options - James
     protected index: any | null=null;
+
+    constructor(documents: Document[]){
+        this.generateIndex(documents)
+    }
 
     /**
      * Creates the index used to handle queries
      * TODO: not made async. please see here: https://stackoverflow.com/questions/65355164/error-ts1243-async-modifier-cannot-be-used-with-abstract-modifier 
+     * ^^^ Will have to just do it on the implementation side at the moment. - James
      * @param documents list of documents used to create the index
      */
     protected abstract generateIndex(documents: Document[]): void;
@@ -17,7 +23,9 @@ export default abstract class QueryBackend {
     /**
      * updates the index used to handle queries
      * TODO: not made async. please see here: https://stackoverflow.com/questions/65355164/error-ts1243-async-modifier-cannot-be-used-with-abstract-modifier
+     * ^^^ Will have to just do it on the implementation side at the moment. - James
      * TODO: could this method just invoke this.generateIndex rather than declare as abstract? perhaps fix the async todo in generateIndex first. 
+     * ^^^ There could be more effecient ways to do this, maybe we can check if any files have been modified. This can be a later implementation, not required for MVP yet. - James
      * @param documents list of documents used to create the index
      */
     protected abstract updateIndex(documents: Document[]): void;
