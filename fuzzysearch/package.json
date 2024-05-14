@@ -17,7 +17,26 @@
         "command": "fuzzysearch.helloWorld",
         "title": "Hello World"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "webview",
+          "title": "Fuzzy Search",
+          "icon": "./src/assets/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "webview": [
+        {
+          "type": "webview",
+          "id": "search-webview",
+          "name": "Fuzzy Search",
+          "icon": "./src/assets/icon.svg"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
