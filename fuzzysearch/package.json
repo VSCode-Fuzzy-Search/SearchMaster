@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "fs": "^0.0.1-security",
+    "node": "^20.13.1",
     "uuid": "^9.0.1"
   }
 }
