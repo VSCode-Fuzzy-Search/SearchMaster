@@ -2,6 +2,7 @@ import Document from "../../../Document";
 import QueryBackend from "../QueryBackend";
 import QueryResponse from "../../../results/QueryResponse";
 import Query from "../../../queries/Query";
+import { Index } from "./classes/Index";
 
 export default class VectorBackend extends QueryBackend {
     
@@ -10,7 +11,21 @@ export default class VectorBackend extends QueryBackend {
      * @param documents list of documents used to create the index
      */
     protected generateIndex(documents: Document[]): void {
-        // TODO: implement this.
+        this.index = new Index();
+
+        let words: string[];
+    
+        for (let i=0; i<documents.length; i++) {
+            words = documents[i].contents.split(" ");
+            words.forEach((word: string) => {
+                word = word.toLocaleLowerCase();
+                if (this.index.doesWordExist(word) && this.index.hasWordAlreadyAppearedInDocument(word, i.toString())) {
+                    this.index.incrementCount(word, i.toString());
+                } else {
+                    this.index.addWord(word, i.toString());
+                }
+            })
+        }
     }
 
     /**
@@ -27,8 +42,17 @@ export default class VectorBackend extends QueryBackend {
      * @returns A QueryResponse object with the results of the search
      */
     public handle(query: Query): QueryResponse {
-        // TODO: implement this.
         const response: QueryResponse = {results: []};
+        // TODO: implement this.
+
+        // see td-idf-cosine-similarity.ts main():
+        //  - create tf-vector for query
+        //  - create tf-vector for each document
+        //  - created idf-vector 
+        //  - create tf-idf vector for each document
+        //  - calculate consine similarity of each document to query vector
+        //  - rank output based on similarity
+
         return response;
     }
 
