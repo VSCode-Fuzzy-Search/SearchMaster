@@ -13,18 +13,21 @@ export default class MockQueryResponse implements QueryResponse {
         this.matchCount = 10; // Example match count
         this.corpusSize = 1000; // Example corpus size
 
-        // Example QueryResults
-        this.results = [
-            { documentID: "doc1" },
-            { documentID: "doc2" },
-            { documentID: "doc3" },
-            { documentID: "doc4" },
-            { documentID: "doc5" },
-            { documentID: "doc6" },
-            { documentID: "doc7" },
-            { documentID: "doc8" },
-            { documentID: "doc9" },
-            { documentID: "doc10" },
-        ];
+        // Generate random document IDs
+        this.results = Array.from({ length: 10 }, (_, index) => ({
+            documentID: `doc${index + 1}_${this.generateRandomString()}`
+        }));
+    }
+
+    private generateRandomString(): string {
+        const length = 10; // Length of the random string
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+
+        return result;
     }
 }
