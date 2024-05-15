@@ -11,7 +11,6 @@ import {
   window,
 } from "vscode";
 import { getNonce } from "../util";
-import { CenterPanel } from "./register-center-panel";
 import * as vscode from "vscode";
 import BackendFactory from "../backend/algorithms/information-retrieval/BackendFactory";
 import QueryFactory from "../backend/queries/QueryFactory";

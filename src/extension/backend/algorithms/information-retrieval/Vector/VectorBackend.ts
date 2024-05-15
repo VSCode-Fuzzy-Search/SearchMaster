@@ -24,7 +24,7 @@ export default class VectorBackend extends QueryBackend {
                 } else {
                     this.index.addWord(word, i.toString());
                 }
-            })
+            });
         }
     }
 
