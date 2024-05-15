@@ -1,13 +1,18 @@
 (function () {
     const vscode = acquireVsCodeApi();
 
-    const btnfirst = document.querySelector('.btn-first');
-    const btnsecond = document.querySelector('.btn-second');
+    const searchBtn = document.querySelector('.btn-search');
+
     const txtbox = document.querySelector('.txt-box');
-    const btnthird = document.querySelector('.btn-third');
-    const btnfourth = document.querySelector('.btn-fourth');
-    const btnfifth = document.querySelector('.btn-fifth');
-    const btnsixth = document.querySelector('.btn-sixth');
+    
+
+
+    const searchType = document.querySelector('.search-select');
+
+    searchBtn.addEventListener('click', () => {
+        vscode.postMessage({ type: 'btn-search', value: txtbox.value });
+        vscode.postMessage({ type: 'search-select', value: searchType.value });
+    });
 
     btnfirst.addEventListener('click', () => {
         vscode.postMessage({ type: 'btn-first', value: txtbox.value });
