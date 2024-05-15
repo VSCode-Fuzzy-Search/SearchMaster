@@ -11,10 +11,13 @@ export default class BooleanBackend extends QueryBackend {
      */
     protected generateIndex(documents: Document[]): void {
         // TODO: implement this.
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         this.index = { "Hello": [documents[0].filename, documents[1].filename, documents[2].filename],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         "Bye": [documents[1].filename, documents[2].filename],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         "Goodbye": [documents[0].filename]
-        }
+        };
     }
 
     /**
@@ -35,19 +38,19 @@ export default class BooleanBackend extends QueryBackend {
         const response: QueryResponse = {results: []};
 
         let processedQuery = query.getFormattedQuery();
-        let andArray = []
+        let andArray = [];
 
         for (let i = 0; i < processedQuery.length; i++){
 
-            if (processedQuery[i] == "AND"){
+            if (processedQuery[i] === "AND"){
 
-                let arr1 = (this.index as {[word: string]: string[]})[processedQuery[i - 1]]
-                let arr2 = (this.index as {[word: string]: string[]})[processedQuery[i + 1]]
+                let arr1 = (this.index as {[word: string]: string[]})[processedQuery[i - 1]];
+                let arr2 = (this.index as {[word: string]: string[]})[processedQuery[i + 1]];
                 
 
                 for (let j = 0; j < arr2.length; j++){
                     if (arr1.includes(arr2[j])){
-                        andArray.push(arr2[j])
+                        andArray.push(arr2[j]);
                     }
                 }
 
@@ -56,7 +59,7 @@ export default class BooleanBackend extends QueryBackend {
         }
 
         for (let i = 0; i < andArray.length; i++){
-            response.results.push({documentID: andArray[i]})
+            response.results.push({documentID: andArray[i]});
         }
         
         return response;
