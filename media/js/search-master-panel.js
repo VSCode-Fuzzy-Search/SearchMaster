@@ -6,8 +6,8 @@
     const searchType = document.querySelector('.search-select');
 
     searchBtn.addEventListener('click', () => {
-        vscode.postMessage({ type: 'btn-search', value: txtbox.value });
-        vscode.postMessage({ type: 'search-select', value: searchType.value });
+        vscode.postMessage([{ type: 'btn-search', value: txtbox.value }, { type: 'search-select', value: searchType.value }]);
+        //vscode.postMessage({ type: 'search-select', value: searchType.value });
     });
 
     window.addEventListener('message', event => {

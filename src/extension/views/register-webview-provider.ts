@@ -11,7 +11,6 @@ import {
   window,
 } from "vscode";
 import { getNonce } from "../util";
-import { CenterPanel } from "./register-center-panel";
 import * as vscode from "vscode";
 import BackendFactory from "../backend/algorithms/information-retrieval/BackendFactory";
 import QueryFactory from "../backend/queries/QueryFactory";
@@ -89,62 +88,90 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
-      this.extensionContext.secrets.store("searchmasterCacheKey", data.value);
-      const searchType = await this.extensionContext.secrets.get("searchType");
-      const keyword = data.value;
-      const backendFactory = new BackendFactory();
-      try {
-        vscode.window.showInformationMessage(
-          "Search triggered with term: " + keyword
+      let searchTerm = data[0].value;
+      let searchType = data[1].value;
+      // if (data.type === "btn-search") {
+      //   searchTerm = data.value;
+      // }
+      // if (data.type === "search-select") {
+      //   searchType = data.value;
+      // }
+      // this.extensionContext.secrets.store("searchmasterCacheKey", data.value);
+      // const searchType: string = await this.extensionContext.secrets.get("searchType") ?? "";
+
+      if(vscode.workspace.workspaceFolders !== undefined) {
+
+        let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
+      
+        const backendFactory = new BackendFactory();
+        backendFactory.createAllBackends(
+          path
         );
-        vscode.window.showInformationMessage("Search type: " + searchType);
+        console.log(path);
 
-        // backendFactory.createAllBackends("../backend/documents/");
-        // const queryFactory = new QueryFactory();
-        // const algorithm = algorithmEnumMapping[searchType || "boolean"];
-        // vscode.window.showInformationMessage("Algorithm: " + algorithm);
-        // const query = queryFactory.createQuery(keyword, algorithm);
-        let result: QueryResponse = await new MockQueryResponse();
-        if (result && webviewView.webview) {
-            webviewView.webview.postMessage({
-                type: 'searchResults',
-                results: result.results
-            });
-        }
+        const queryFactory = new QueryFactory();
 
-        // switch (algorithm) {
-        //     case AlgorithmEnum.Boolean:
-        //         vscode.window.showInformationMessage("Boolean search result: " + result.results);
-        //         // Action for Boolean algorithm
-        //         console.log("Performing action for Boolean algorithm");
-        //         let booleanQuery = queryFactory.createQuery(keyword, AlgorithmEnum.Boolean) as BooleanQuery;
-        //         let booleanBackend = backendFactory.getBackend(AlgorithmEnum.Boolean);
+        switch (searchType) {
+          case "boolean":
+            let booleanQuery = queryFactory.createQuery(
+              searchTerm,
+              AlgorithmEnum.Boolean
+            );
+            let booleanBackend = backendFactory.getBackend(
+              AlgorithmEnum.Boolean
+            );
+            if (booleanQuery !== null) {
+              const result = booleanQuery && booleanBackend?.handle(booleanQuery);
+              if (result && webviewView.webview) {
+                webviewView.webview.postMessage({
+                  type: "searchResults",
+                  results: result.results,
+                });
+              }
+            }
+            break;
+          case "vector":
+            let vectorQuery = queryFactory.createQuery(
+              searchTerm,
+              AlgorithmEnum.Vector
+            );
+            let vectorBackend = backendFactory.getBackend(AlgorithmEnum.Vector);
+            if (vectorQuery !== null) {
+              const result = vectorQuery && vectorBackend?.handle(vectorQuery);
+              if (result && webviewView.webview) {
+                webviewView.webview.postMessage({
+                  type: "searchResults",
+                  results: result.results,
+                });
+              }
+            }
+            break;
+          case "language":
+            let languageQuery = queryFactory.createQuery(
+              searchTerm,
+              AlgorithmEnum.LanguageModel
+            );
+            let languageBackend = backendFactory.getBackend(
+              AlgorithmEnum.LanguageModel
+            );
+            if (languageQuery !== null) {
+              const result =
+                languageQuery && languageBackend?.handle(languageQuery);
+              if (result && webviewView.webview) {
+                webviewView.webview.postMessage({
+                  type: "searchResults",
+                  results: result.results,
+                });
+              }
+            }
+            break;
 
-        //         if (booleanBackend) {
-        //             result = new MockQueryResponse();
-        //         }
+            default:
+              vscode.window.showInformationMessage("Search type not found");
+              break;
 
-        //         break;
-
-        //     case AlgorithmEnum.Vector:
-        //         // Action for Vector algorithm
-        //         console.log("Performing action for Vector algorithm");
-        //         break;
-        //     case AlgorithmEnum.LanguageModel:
-        //         // Action for LanguageModel algorithm
-        //         console.log("Performing action for LanguageModel algorithm");
-        //         break;
-        //     default:
-        //         // Default action if the algorithm is not recognized
-        //         console.log("Unknown algorithm");
-        // }
-      } catch (error) {
-        // Handle any errors that occur during the command execution
-        vscode.window.showInformationMessage(
-          "Error triggering search: " + error
-        );
       }
-    });
+    }});
   }
 
   private _getHtmlForWebview(webview: Webview) {
