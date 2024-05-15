@@ -1,4 +1,4 @@
-import QueryResult from "./QueryResult"
+import QueryResult from "./QueryResult";
 export default interface QueryResponse {
     readonly duration?: number; // in ms. How long the algorithm took
     readonly matchCount?: number; // number of times the query was found in the colleciton
