@@ -8,9 +8,41 @@ export default class BooleanQuery extends Query{
      * @param query query in string format
      */
     protected parseFromString(query: string){
+        const precedence: {[key: string]: number} = {};
+        precedence['*'] = 4;
+        precedence['NOT'] = 3;
+        precedence['AND'] = 2;
+        precedence['OR'] = 1;
+        precedence['('] = 0;
+        precedence[')'] = 0;
         //TODO: implement this
-        let splitQuery = query.replace("(", "").replace(")", "").split(" ");
-        this.formattedQuery = splitQuery;
+        const output: string[] = [];
+        const operatorStack: string[] = [];
+
+        for (const token of query) {
+            if (token === '(') {
+                operatorStack.push(token);
+            } else if (token === ')') {
+                let operator = operatorStack.pop() ?? '';
+                while (operator !== '(') {
+                    output.push(operator);
+                    operator = operatorStack.pop()!;
+                }
+            } else if (token in precedence) {
+                while (operatorStack.length && precedence[operatorStack[operatorStack.length - 1]] >= precedence[token]) {
+                    output.push(operatorStack.pop()!);
+                }
+                operatorStack.push(token);
+            } else {
+                output.push(token);
+            }
+        }
+
+        while (operatorStack.length) {
+            output.push(operatorStack.pop()!);
+        }
+
+        return output;
     }
 
     /**
@@ -19,7 +51,7 @@ export default class BooleanQuery extends Query{
      * @returns The query for backend to use
      */
     public getFormattedQuery(): string[] {
-        if (this.formattedQuery != null){
+        if (this.formattedQuery !== null){
             return this.formattedQuery;
         }
         else {
