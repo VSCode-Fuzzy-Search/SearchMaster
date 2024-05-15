@@ -63,7 +63,7 @@ export default class BackendFactory {
             
                 // let fileSplit: Array<string> = fileOutput.replace(/[(),'.:]/g, "").replace("[", "").replace("]", "").split(" ");
 
-                documents.push({id: uuidv4(), filename: files[i], contents: fileOutput})
+                documents.push({id: uuidv4(), filename: files[i], contents: fileOutput});
             }
 
         }

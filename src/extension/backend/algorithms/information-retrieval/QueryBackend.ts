@@ -9,7 +9,7 @@ export default abstract class QueryBackend {
     protected index: any | null=null;
 
     constructor(documents: Document[]){
-        this.generateIndex(documents)
+        this.generateIndex(documents);
     }
 
     /**

@@ -12,7 +12,7 @@ export function readSelectedOrAllText(op: OutputChannel) {
     } else {
 
         txt = activeTextEditor.document.getText(activeTextEditor.selection);
-        if (!txt) txt = activeTextEditor.document.getText();
+        if (!txt) {txt = activeTextEditor.document.getText();}
         op.appendLine(txt);
     }
     op.show();
