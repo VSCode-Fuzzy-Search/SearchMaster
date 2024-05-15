@@ -11,11 +11,22 @@ export default class BooleanBackend extends QueryBackend {
      * @param documents list of documents used to create the index
      */
     protected generateIndex(documents: Document[]): void {
-        // TODO: implement this.
-        this.index = { "Hello": [documents[0].filename, documents[1].filename, documents[2].filename],
-        "Bye": [documents[1].filename, documents[2].filename],
-        "Goodbye": [documents[0].filename]
+    const index: {[word: string]: string[]} = {};
+    for(let i = 0; i < documents.length; i++){
+        let words = documents[i].contents.split(" ");
+        for(let j = 0; j < words.length; j++){
+            if(index[words[j]] === undefined){
+                index[words[j]] = [];
+            }
+            if (!index[words[j]].includes(documents[i].filename)){
+                index[words[j]].push(documents[i].filename);
+            }
         }
+    }
+
+    console.log(index)
+
+    this.index = index;
     }
 
     /**

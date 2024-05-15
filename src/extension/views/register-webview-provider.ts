@@ -98,74 +98,80 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       // }
       // this.extensionContext.secrets.store("searchmasterCacheKey", data.value);
       // const searchType: string = await this.extensionContext.secrets.get("searchType") ?? "";
+
+      if(vscode.workspace.workspaceFolders !== undefined) {
+
+        let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
       
-      const backendFactory = new BackendFactory();
-      backendFactory.createAllBackends(
-        "/Users/jackwigney/Desktop/FIT4002/SearchMaster/src/extension/backend/documents"
-      );
-      const queryFactory = new QueryFactory();
+        const backendFactory = new BackendFactory();
+        backendFactory.createAllBackends(
+          path
+        );
+        console.log(path);
 
-      switch (searchType) {
-        case "boolean":
-          let booleanQuery = queryFactory.createQuery(
-            searchTerm,
-            AlgorithmEnum.Boolean
-          );
-          let booleanBackend = backendFactory.getBackend(
-            AlgorithmEnum.Boolean
-          );
-          if (booleanQuery !== null) {
-            const result = booleanQuery && booleanBackend?.handle(booleanQuery);
-            if (result && webviewView.webview) {
-              webviewView.webview.postMessage({
-                type: "searchResults",
-                results: result.results,
-              });
-            }
-          }
-          break;
-        case "vector":
-          let vectorQuery = queryFactory.createQuery(
-            searchTerm,
-            AlgorithmEnum.Vector
-          );
-          let vectorBackend = backendFactory.getBackend(AlgorithmEnum.Vector);
-          if (vectorQuery !== null) {
-            const result = vectorQuery && vectorBackend?.handle(vectorQuery);
-            if (result && webviewView.webview) {
-              webviewView.webview.postMessage({
-                type: "searchResults",
-                results: result.results,
-              });
-            }
-          }
-          break;
-        case "language":
-          let languageQuery = queryFactory.createQuery(
-            searchTerm,
-            AlgorithmEnum.LanguageModel
-          );
-          let languageBackend = backendFactory.getBackend(
-            AlgorithmEnum.LanguageModel
-          );
-          if (languageQuery !== null) {
-            const result =
-              languageQuery && languageBackend?.handle(languageQuery);
-            if (result && webviewView.webview) {
-              webviewView.webview.postMessage({
-                type: "searchResults",
-                results: result.results,
-              });
-            }
-          }
-          break;
+        const queryFactory = new QueryFactory();
 
-          default:
-            vscode.window.showInformationMessage("Search type not found");
+        switch (searchType) {
+          case "boolean":
+            let booleanQuery = queryFactory.createQuery(
+              searchTerm,
+              AlgorithmEnum.Boolean
+            );
+            let booleanBackend = backendFactory.getBackend(
+              AlgorithmEnum.Boolean
+            );
+            if (booleanQuery !== null) {
+              const result = booleanQuery && booleanBackend?.handle(booleanQuery);
+              if (result && webviewView.webview) {
+                webviewView.webview.postMessage({
+                  type: "searchResults",
+                  results: result.results,
+                });
+              }
+            }
+            break;
+          case "vector":
+            let vectorQuery = queryFactory.createQuery(
+              searchTerm,
+              AlgorithmEnum.Vector
+            );
+            let vectorBackend = backendFactory.getBackend(AlgorithmEnum.Vector);
+            if (vectorQuery !== null) {
+              const result = vectorQuery && vectorBackend?.handle(vectorQuery);
+              if (result && webviewView.webview) {
+                webviewView.webview.postMessage({
+                  type: "searchResults",
+                  results: result.results,
+                });
+              }
+            }
+            break;
+          case "language":
+            let languageQuery = queryFactory.createQuery(
+              searchTerm,
+              AlgorithmEnum.LanguageModel
+            );
+            let languageBackend = backendFactory.getBackend(
+              AlgorithmEnum.LanguageModel
+            );
+            if (languageQuery !== null) {
+              const result =
+                languageQuery && languageBackend?.handle(languageQuery);
+              if (result && webviewView.webview) {
+                webviewView.webview.postMessage({
+                  type: "searchResults",
+                  results: result.results,
+                });
+              }
+            }
             break;
 
+            default:
+              vscode.window.showInformationMessage("Search type not found");
+              break;
+
       }
-    });
+    }});
   }
 
   private _getHtmlForWebview(webview: Webview) {
