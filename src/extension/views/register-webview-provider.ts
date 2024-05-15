@@ -19,6 +19,7 @@ import { AlgorithmEnum } from "../backend/AlgorithmEnum";
 import BooleanQuery from "../backend/queries/BooleanQuery";
 import BooleanBackend from "../backend/algorithms/information-retrieval/Boolean/BooleanBackend";
 import QueryResponse from "../backend/results/QueryResponse";
+import MockQueryResponse from "../backend/results/MockQueryResponse";
 
 export function readSelectedOrAllText(op: OutputChannel) {
   op.clear();
@@ -61,11 +62,10 @@ export function registerWebViewProvider(
 }
 
 const algorithmEnumMapping: { [key: string]: AlgorithmEnum } = {
-    "boolean": AlgorithmEnum.Boolean,
-    "vector": AlgorithmEnum.Vector,
-    "language": AlgorithmEnum.LanguageModel
+  boolean: AlgorithmEnum.Boolean,
+  vector: AlgorithmEnum.Vector,
+  language: AlgorithmEnum.LanguageModel,
 };
-
 
 export class SidebarWebViewProvider implements WebviewViewProvider {
   constructor(
@@ -83,59 +83,67 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
 
     webviewView.webview.options = {
       enableScripts: true,
-
       localResourceRoots: [this._extensionUri],
     };
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
-        this.extensionContext.secrets.store("searchmasterCacheKey", data.value);
-        const searchType: string = await this.extensionContext.secrets.get("searchType") ?? "";
-        const keyword = data.value;
-        const backendFactory = new BackendFactory();
-        try {
-            vscode.window.showInformationMessage(
-              "Search triggered with term: " + keyword
-            );
-            vscode.window.showInformationMessage("Search type: " + searchType);
-          } catch (error) {
-            // Handle any errors that occur during the command execution
-            vscode.window.showInformationMessage(
-              "Error triggering search: " + error
-            );
-          }
-        backendFactory.createAllBackends("src/extension/backend/documents");
-            const queryFactory = new QueryFactory();
-            const algorithm = algorithmEnumMapping[searchType || "boolean"];
-            const query = queryFactory.createQuery(keyword, algorithm);
-            let result: QueryResponse;
-        
-            switch (algorithm) {
-                case AlgorithmEnum.Boolean:
-                    // Action for Boolean algorithm
-                    console.log("Performing action for Boolean algorithm");
-                    let booleanQuery = queryFactory.createQuery(keyword, AlgorithmEnum.Boolean) as BooleanQuery;
-                    let booleanBackend = backendFactory.getBackend(AlgorithmEnum.Boolean);
-                    if (booleanBackend) {
-                        result = booleanBackend.handle(booleanQuery);
-                    }
+      this.extensionContext.secrets.store("searchmasterCacheKey", data.value);
+      const searchType = await this.extensionContext.secrets.get("searchType");
+      const keyword = data.value;
+      const backendFactory = new BackendFactory();
+      try {
+        vscode.window.showInformationMessage(
+          "Search triggered with term: " + keyword
+        );
+        vscode.window.showInformationMessage("Search type: " + searchType);
 
-                    break;
+        // backendFactory.createAllBackends("../backend/documents/");
+        // const queryFactory = new QueryFactory();
+        // const algorithm = algorithmEnumMapping[searchType || "boolean"];
+        // vscode.window.showInformationMessage("Algorithm: " + algorithm);
+        // const query = queryFactory.createQuery(keyword, algorithm);
+        let result: QueryResponse = await new MockQueryResponse();
+        if (result && webviewView.webview) {
+            webviewView.webview.postMessage({
+                type: 'searchResults',
+                results: result.results
+            });
+        }
 
-                case AlgorithmEnum.Vector:
-                    // Action for Vector algorithm
-                    console.log("Performing action for Vector algorithm");
-                    break;
-                case AlgorithmEnum.LanguageModel:
-                    // Action for LanguageModel algorithm
-                    console.log("Performing action for LanguageModel algorithm");
-                    break;
-                default:
-                    // Default action if the algorithm is not recognized
-                    console.log("Unknown algorithm");
-            }
-      
+        // switch (algorithm) {
+        //     case AlgorithmEnum.Boolean:
+        //         vscode.window.showInformationMessage("Boolean search result: " + result.results);
+        //         // Action for Boolean algorithm
+        //         console.log("Performing action for Boolean algorithm");
+        //         let booleanQuery = queryFactory.createQuery(keyword, AlgorithmEnum.Boolean) as BooleanQuery;
+        //         let booleanBackend = backendFactory.getBackend(AlgorithmEnum.Boolean);
+
+        //         if (booleanBackend) {
+        //             result = new MockQueryResponse();
+        //         }
+
+        //         break;
+
+        //     case AlgorithmEnum.Vector:
+        //         // Action for Vector algorithm
+        //         console.log("Performing action for Vector algorithm");
+        //         break;
+        //     case AlgorithmEnum.LanguageModel:
+        //         // Action for LanguageModel algorithm
+        //         console.log("Performing action for LanguageModel algorithm");
+        //         break;
+        //     default:
+        //         // Default action if the algorithm is not recognized
+        //         console.log("Unknown algorithm");
+        // }
+      } catch (error) {
+        // Handle any errors that occur during the command execution
+        vscode.window.showInformationMessage(
+          "Error triggering search: " + error
+        );
+      }
     });
   }
 
@@ -192,9 +200,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
           </style>
            </head>
            <body>
-              <div>Search Engines</div>
-              <div>Input: </div>
-              <input type="text" class="txt-box" id="searchmastervalueid" name="searchmastervaluename"><br>
+              <input type="text" class="txt-box" id="searchmastervalueid" name="searchmastervaluename" placeholder="Enter search term..."><br>
               <label for="searchType">Choose a search type:</label>
                 <select id="searchType" class="search-select" name="searchTypeSelect">
                     <option value="boolean">Boolean</option>
@@ -203,7 +209,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                 </select>
                 <button type="button" class="btn-search">Search !</button><br>
 
-              <div id="output" class="output-container"> </div>
+              <div id="output" class="output-container"> Where the fuck is this</div>
           </div>
               <script nonce="${nonce}" src="${scriptUri}"></script>
            </body>
