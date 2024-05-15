@@ -9,3 +9,9 @@ This extension will demonstrate most of the vs code extension capabilities.
     - https://code.visualstudio.com/api/get-started/your-first-extension
     - https://code.visualstudio.com/api/working-with-extensions/publishing-extension
     - https://marketplace.visualstudio.com/manage 
+
+- Instruction on how to run the extension file:
+    cd to the extension folder
+    npm install
+    Open "extension.ts" file
+    Click F5 ( If it shows any errors, close it, and hit F5 again until the new VSCode window open )
