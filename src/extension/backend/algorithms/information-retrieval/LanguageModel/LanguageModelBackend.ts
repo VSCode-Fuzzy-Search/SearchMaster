@@ -72,6 +72,32 @@ export default class LanguageModelBackend extends QueryBackend {
     public handle(query: Query): QueryResponse {
         // TODO: implement this.
         const response: QueryResponse = {results: []};
+
+        let processedQuery = query.getFormattedQuery();
+         
+        //go through index and find the all files where all the searched words are present
+
+        //files need to contain all thhe words in the query
+        let files: {[fileName: string]: number} = {};
+        for (let i = 0; i < processedQuery.length; i++){
+            let word = processedQuery[i];
+            if (this.index[word] !== undefined){
+                for (let j = 0; j < this.index[word].length; j++){
+                    let file = this.index[word][j][0];
+                    if (files[file] === undefined){
+                        files[file] = 1;
+                    }
+                    else{
+                        files[file]++;
+                    }
+                }
+            }
+        }
+        
+        //add files to response
+        for (let file in files){
+            response.results.push({documentID: file});
+        }
         return response;
     }
 
