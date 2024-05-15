@@ -24,7 +24,7 @@ export default class BooleanBackend extends QueryBackend {
         }
     }
 
-    console.log(index)
+    console.log(index);
 
     this.index = index;
     }
@@ -47,19 +47,19 @@ export default class BooleanBackend extends QueryBackend {
         const response: QueryResponse = {results: []};
 
         let processedQuery = query.getFormattedQuery();
-        let andArray = []
+        let andArray = [];
 
         for (let i = 0; i < processedQuery.length; i++){
 
             if (processedQuery[i] == "AND"){
 
-                let arr1 = (this.index as {[word: string]: string[]})[processedQuery[i - 1]]
-                let arr2 = (this.index as {[word: string]: string[]})[processedQuery[i + 1]]
+                let arr1 = (this.index as {[word: string]: string[]})[processedQuery[i - 1]];
+                let arr2 = (this.index as {[word: string]: string[]})[processedQuery[i + 1]];
                 
 
                 for (let j = 0; j < arr2.length; j++){
                     if (arr1.includes(arr2[j])){
-                        andArray.push(arr2[j])
+                        andArray.push(arr2[j]);
                     }
                 }
 
@@ -68,7 +68,7 @@ export default class BooleanBackend extends QueryBackend {
         }
 
         for (let i = 0; i < andArray.length; i++){
-            response.results.push({documentID: andArray[i]})
+            response.results.push({documentID: andArray[i]});
         }
         
         return response;

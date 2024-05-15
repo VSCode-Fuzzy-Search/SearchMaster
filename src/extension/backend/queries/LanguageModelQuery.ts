@@ -9,6 +9,8 @@ export default class LanguageModelQuery extends Query {
      */
     protected parseFromString(query: string): void{
         //TODO: implement this
+        let splitQuery = query.split(" ");
+        this.formattedQuery = splitQuery;
     }
 
     /**
