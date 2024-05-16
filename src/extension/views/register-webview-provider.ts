@@ -229,11 +229,6 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               margin-top: 16px;
               background-color: #5D3FD3;
             }
-            .output-container p {
-              margin: 0;
-              padding: 8px;
-              border-bottom: 1px solid #eee;
-            }
             .output-container p:last-child {
               border-bottom: none;
             }
@@ -244,8 +239,8 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
           </style>
            </head>
            <body>
-              <input type="text" class="txt-box" id="searchmastervalueid" name="searchmastervaluename" placeholder="Enter search term..."><br>
-              <label for="searchType">Choose a search type:</label>
+              <input type="text" class="txt-box w-full p-2 border border-gray-300 rounded mb-2" id="searchmastervalueid" name="searchmastervaluename" placeholder="Enter search term..."><br>
+              <label for="searchType" class="block text-sm">Choose a search type:</label>
                 <div class="relative inline-block w-full text-gray-700">
                 <select
                   id="searchType"
@@ -253,8 +248,8 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                   name="searchTypeSelect"
                 >
                   <option value="boolean">Boolean</option>
-                  <option value="language">Language</option>
-                  <option value="vector">Vector</option>
+                  <option value="language">Language Model</option>
+                  <option value="vector">Vector Space Model</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
@@ -269,7 +264,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                 </div>
                 <button type="button" class="btn-search mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Search !</button><br>
 
-              <div id="output" class="output-container mt-4"></div>
+              <div id="output" class="output-container mt-4 rounded shadow"></div>
           </div>
               <script nonce="${nonce}" src="${scriptUri}"></script>
            </body>

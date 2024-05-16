@@ -25,7 +25,7 @@
     
         if (message.type === 'searchResults') {
             const outputContainer = document.getElementById('output');
-            outputContainer.innerHTML = "<p class='output-title'>Query Results:</p>";
+            outputContainer.innerHTML = "<p class='border-b border-gray-200 pb-2'>Query Results:</p>";
     
             message.results.forEach(queryResult => {
                 const listItem = document.createElement('p');
