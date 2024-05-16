@@ -88,16 +88,6 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
-      
-      // if (data.type === "btn-search") {
-      //   searchTerm = data.value;
-      // }
-      // if (data.type === "search-select") {
-      //   searchType = data.value;
-      // }
-      // this.extensionContext.secrets.store("searchmasterCacheKey", data.value);
-      // const searchType: string = await this.extensionContext.secrets.get("searchType") ?? "";
-
       if (data.type === "search-change"){
         switch (data.value) {
           case "boolean":
@@ -227,6 +217,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                  style-src ${webview.cspSource}
                  script-src 'nonce-${nonce}';">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
               <link href="${styleResetUri}" rel="stylesheet">
               <link href="${styleVSCodeUri}" rel="stylesheet">
               <script nonce="${nonce}"></script>
@@ -255,17 +246,30 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
            <body>
               <input type="text" class="txt-box" id="searchmastervalueid" name="searchmastervaluename" placeholder="Enter search term..."><br>
               <label for="searchType">Choose a search type:</label>
-                <select id="searchType" class="search-select" name="searchTypeSelect">
-                    <option value="boolean">Boolean</option>
-                    <option value="language">Language</option>
-                    <option value="vector">Vector</option>
+                <div class="relative inline-block w-full text-gray-700">
+                <select
+                  id="searchType"
+                  class="search-select w-full h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
+                  name="searchTypeSelect"
+                >
+                  <option value="boolean">Boolean</option>
+                  <option value="language">Language</option>
+                  <option value="vector">Vector</option>
                 </select>
-                <div id="searchDescription">
+                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                    <path
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+                <div id="searchDescription" class="mt-2 text-sm">
                 Boolean search is a type of search allowing users to combine keywords with operators (or modifiers) such as AND, NOT and OR to further produce more relevant results.
                 </div>
-                <button type="button" class="btn-search">Search !</button><br>
+                <button type="button" class="btn-search mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Search !</button><br>
 
-              <div id="output" class="output-container"></div>
+              <div id="output" class="output-container mt-4"></div>
           </div>
               <script nonce="${nonce}" src="${scriptUri}"></script>
            </body>
