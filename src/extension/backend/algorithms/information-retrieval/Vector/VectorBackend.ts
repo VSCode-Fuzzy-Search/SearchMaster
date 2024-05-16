@@ -5,6 +5,7 @@ import Query from "../../../queries/Query";
 import { VectorIndex } from "./classes/VectorIndex";
 import * as tf_idf from "./tf-idf-cosine-similarity";
 import { Vector } from "./classes/Vector";
+import RankedQueryResult from "../../../results/RankedQueryResult";
 
 export default class VectorBackend extends QueryBackend {
     
@@ -91,9 +92,11 @@ export default class VectorBackend extends QueryBackend {
         console.log(res);    
 
         for (let i=0; i<res.length; i++) {
-            if (res[i][1] > 0) {
-                // response.results.push();
-            }
+            // if (res[i][1] > 0) {      
+                
+            // }
+            const rankedResult: RankedQueryResult = {documentID: res[i][0], relativeRank: i+1, score: res[i][1]};
+            response.results.push(rankedResult);
         }
  
         return response;

@@ -16,6 +16,7 @@ let vectorBackend = backendFactory.getBackend(AlgorithmEnum.Vector);
 
 if (vectorQuery != null) {  
     let result = vectorBackend?.handle(vectorQuery);
+    console.log(result);
 }
 
 // if (booleanQuery !== null){
