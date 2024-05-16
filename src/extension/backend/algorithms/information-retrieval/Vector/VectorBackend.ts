@@ -80,16 +80,21 @@ export default class VectorBackend extends QueryBackend {
         //  - calculate consine similarity of each document to query vector
         for (let i = 0; i<tf_idf_vectors.length; i++) {
             // TODO: ensure query tf_idf vector always at beginning or end of tf_idf_vectors list
-            cosine_similarities.push(tf_idf.cosine_similarity(tf_idf_vectors[tf_idf_vectors.length-1], tf_idf_vectors[i]));
+            const tempSimilarity: number = tf_idf.cosine_similarity(tf_idf_vectors[tf_idf_vectors.length-1], tf_idf_vectors[i]);
+            // if (tempSimilarity > 0 || tempSimilarity !== undefined) {
+            //     cosine_similarities.push(tempSimilarity);
+            // }
+            console.log(tempSimilarity)
+            cosine_similarities.push(tempSimilarity);
         }
 
         //  - rank output based on similarity
-        // console.log(this.doc_details);
+        //console.log(this.doc_details);
         // console.log(cosine_similarities);
 
         const res: [string, number][] = Object.entries(this.doc_details).map(([key, value], index) => [key, cosine_similarities[index]]);
         res.sort((a: [string, number], b: [string, number]) => b[1] - a[1]);
-        console.log(res);    
+        //console.log(res);    
 
         for (let i=0; i<res.length; i++) {
             // if (res[i][1] > 0) {      
@@ -98,8 +103,15 @@ export default class VectorBackend extends QueryBackend {
             const rankedResult: RankedQueryResult = {documentID: res[i][0], relativeRank: i+1, score: res[i][1]};
             response.results.push(rankedResult);
         }
- 
-        return response;
+        console.log(response);
+        let filteredResponse: QueryResponse = {results: []};
+        for (let i = 0; i < response.results.length; i++) {
+            if ((response.results[i] as RankedQueryResult).score >0 && response.results[i].documentID !== 'query') {
+                filteredResponse.results.push(response.results[i]);
+            }
+        }
+        console.log(filteredResponse);
+        return filteredResponse;
     }
 
 }
