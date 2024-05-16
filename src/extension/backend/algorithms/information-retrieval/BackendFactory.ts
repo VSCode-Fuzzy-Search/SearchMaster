@@ -1,11 +1,11 @@
+import * as fs from 'fs';
+import { uuidv7 } from 'uuidv7';
 import { AlgorithmEnum } from "../../AlgorithmEnum";
 import Document from "../../Document";
-import QueryBackend from "./QueryBackend";
-import {v4 as uuidv4 } from 'uuid';
-import * as fs from 'fs';
 import BooleanBackend from "./Boolean/BooleanBackend";
-import VectorBackend from "./Vector/VectorBackend";
 import LanguageModelBackend from "./LanguageModel/LanguageModelBackend";
+import QueryBackend from "./QueryBackend";
+import VectorBackend from "./Vector/VectorBackend";
  
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
@@ -63,7 +63,7 @@ export default class BackendFactory {
             
                 // let fileSplit: Array<string> = fileOutput.replace(/[(),'.:]/g, "").replace("[", "").replace("]", "").split(" ");
 
-                documents.push({id: uuidv4(), filename: files[i], contents: fileOutput});
+                documents.push({id: uuidv7(), filename: files[i], contents: fileOutput});
             }
 
         }
