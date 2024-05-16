@@ -360,3 +360,6 @@ coverage/
 
 # Build
 out/
+
+.DS_Store
+*.js

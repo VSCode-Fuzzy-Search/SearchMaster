@@ -8,6 +8,9 @@ export default abstract class QueryBackend {
     // ^^^ I'm thinking so ATM, not many other options - James
     protected index: any | null=null;
 
+    protected doc_details: {[key: string]: number} = {};
+    // {"doc_id": num_words_in_doc}
+
     constructor(documents: Document[]){
         this.generateIndex(documents);
     }

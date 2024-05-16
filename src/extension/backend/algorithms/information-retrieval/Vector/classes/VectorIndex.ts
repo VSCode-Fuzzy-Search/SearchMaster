@@ -1,4 +1,4 @@
-export class Index {
+export class VectorIndex {
 
     self: { [key: string]: { [key: string]: number } };
 
@@ -26,10 +26,17 @@ export class Index {
         return document in this.self[word];
     }
 
-    // TODO: generateTF-IDFVectors(): Vector {}
-    //  - from the index create a list of tf vectors
-    //  - create an idf vector 
-    //  - for each tf vector:
-    //      - tf-idf vector = mmult(tf-vector, transpose(idf-vector))
+    addQuery(query: string): void {
+        let words = query.split(" ");
+        words.forEach((word: string) => {
+            word = word.toLocaleLowerCase();
+            const doc_id: string = "query"
+            if (this.doesWordExist(word) && this.hasWordAlreadyAppearedInDocument(word, doc_id)) {
+                this.incrementCount(word, doc_id);
+            } else {
+                this.addWord(word, doc_id);
+            }
+        });
+    }
 
 }

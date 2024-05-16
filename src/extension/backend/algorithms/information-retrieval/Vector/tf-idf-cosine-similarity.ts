@@ -1,68 +1,110 @@
+import { VectorIndex } from "./classes/VectorIndex";
 import { Vector } from "./classes/Vector";
 
 /**
- * Calculates the term-frequency vector of a given document and maintains a running record of the word frequencies
+ * Calculates the term-frequency vector of a given document
  * 
- * @param d - the document
- * @param words_dict - dictionary keeping track of word frequencies
- * @returns the tf vector and the updated dictionary of words which have appeared   
+ * @param doc_id - the document
+ * @param index - words index
+ * @returns the tf vector
  */
-export function tf(d: string, words_dict: Record<string, number> = {}): [Vector, Record<string, number>] {
+export function tf(doc_details: {[key: string]: number}, doc_id: string, index: VectorIndex): Vector {
 
-    let words: string[];
+    /**
+     *                 american     |n/M|
+     *                 best         |n/M|
+     *                 bibimap      |n/M|
+     *                 enjoy        |n/M|
+     *                 hamburger    |n/M|
+     * tf_vector(dx) = italian      |n/M|
+     *                 korean       |n/M|
+     *                 pasta        |n/M|
+     *                 restaurant   |n/M|
+     *                 the          |n/M|
+     * n = num occurrences of word
+     * M = num words in document
+     */    
+    
+    /**
+     *                 american     |0/8|
+     *                 best         |2/8|
+     *                 bibimap      |0/8|
+     *                 enjoy        |1/8|
+     *                 hamburger    |0/8|
+     * tf_vector(d0) = italian      |1/8|
+     *                 korean       |0/8|
+     *                 pasta        |1/8|
+     *                 restaurant   |1/8|
+     *                 the          |1/8|
+     */
 
-    words = d.split(" ");
+    // TODO a way to uniquely identify each document (see VectorBackend.ts line 23)
+    // TODO to maintain a count for the number of words each document (see VectorBackend.ts line 20)
+    const M: number = doc_details[doc_id];
 
-    words.forEach( (word: string) => {
-        word = word.toLocaleLowerCase();
-        if (words_dict[word]) {
-            words_dict[word] += 1;
-        } else {
-            words_dict[word] = 1;
-        }
-    });
+    let tf_vector = new Vector(Object.keys(index.self).length);
 
-    let tf_vector = new Vector(Object.keys(words_dict).length);
     let i = 0;
-    Object.keys(words_dict).forEach( (key) => {
-        tf_vector.set_component(i, words_dict[key] / words.length);
-        words_dict[key] = 0;
+    Object.keys(index.self).forEach( (key: string) => {
+        if (index.self[key][doc_id] == undefined) {
+            tf_vector.set_component(i, 0);
+        } else {
+            tf_vector.set_component(i, index.self[key][doc_id] / M);
+        }
         i++;
     });
 
-    return [tf_vector, words_dict];
+    return tf_vector;
     
 }
 
 /**
- * Calculates the inverse-document-frequency vector of a given list of documents
+ * Calculates the inverse-document-frequency vector from an index
  * 
- * @param documents - list of documents
+ * @param index - words index
  * @returns the idf vector
  */
-export function idf(documents: Vector[]): Vector {
+export function idf(doc_details: {[key: string]: number}, index: VectorIndex): Vector {
+
+    /**
+     *                 american     |Log(M/n)|
+     *                 best         |Log(M/n)|
+     *                 bibimap      |Log(M/n)|
+     *                 enjoy        |Log(M/n)|
+     *                 hamburger    |Log(M/n)|
+     * idf_vector =    italian      |Log(M/n)|
+     *                 korean       |Log(M/n)|
+     *                 pasta        |Log(M/n)|
+     *                 restaurant   |Log(M/n)|
+     *                 the          |Log(M/n)|
+     * M = number of documents
+     * n = num documents word appears in (Object.keys(index.self[word].length)
+     */  
+
+    /**
+     *                 american     |Log(4/2)|
+     *                 best         |Log(4/4)|
+     *                 bibimap      |Log(4/1)|
+     *                 enjoy        |Log(4/3)|
+     *                 hamburger    |Log(4/1)|
+     * idf_vector =    italian      |Log(4/1)|
+     *                 korean       |Log(4/1)|
+     *                 pasta        |Log(4/1)|
+     *                 restaurant   |Log(4/4)|
+     *                 the          |Log(4/4)|
+     */  
 
     
-    const n = documents.length;
+    // TODO a way of maintaining the number of documents ({"doc_id": num_words_in_doc} maybe?? -> N={"d0": 8, "d1": 6, "d2": 6, "d4": 6}.length)
+    const N = Object.keys(doc_details).length;
 
-    let counts: number[] = [];
+    let idf_v = new Vector(Object.keys(index.self).length);
 
-    const num_words = documents[0].get_length();
-
-    for (let i = 0; i < num_words; i++) {
-        let count = 0;
-        documents.forEach( (d) => {
-            if (d.get_component(i) > 0) {
-                count++;
-            }
-        });
-        counts.push(count);
-    }
-
-    let idf_v = new Vector(num_words);
-    for (let i = 0; i < num_words; i++) {
-        idf_v.set_component(i, Math.log10(n / counts[i]));
-    }
+    let i = 0;
+    Object.keys(index.self).forEach( (key: string) => {
+        idf_v.set_component(i, Math.log10(N / Object.keys(index.self[key]).length));   
+        i++;
+    });
 
     return idf_v;
 

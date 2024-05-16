@@ -75,7 +75,7 @@ function find_closest(query: string, word_list: string[], num_results: number, a
 // e.g. make sure edit-distance is current working directort
 // tsc edit-distance.ts
 // node edit-distance.js netwrok DL
-const filepath = './backend/algorithms/edit-distance/wordlist-10000.txt';
+const filepath = './src/extension/backend/algorithms/edit-distance/wordlist-10000.txt';
 const wordList = getWords(filepath);
 const process = require('process');
 

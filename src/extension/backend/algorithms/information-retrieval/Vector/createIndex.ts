@@ -1,7 +1,7 @@
-import { Index } from "./classes/Index";
+import { VectorIndex } from "./classes/VectorIndex";
 
-function createIndex(documents: string[]): Index {
-    let index = new Index();
+function createIndex(documents: string[]): VectorIndex {
+    let index = new VectorIndex();
 
     let words: string[];
 
@@ -26,7 +26,8 @@ const d0 = "the best Italian restaurant enjoy the best pasta";
 const d1 = "American restaurant enjoy the best hamburger";
 const d2 = "Korean restaurant enjoy the best bibimbap";
 const d3 = "the best the best American restaurant";
+const query = "American"
 
-const corpus = [d0, d1, d2, d3];
+const corpus = [d0, d1, d2, d3, query];
 
 createIndex(corpus)
