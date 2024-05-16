@@ -88,8 +88,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
-      let searchTerm = data[0].value;
-      let searchType = data[1].value;
+      
       // if (data.type === "btn-search") {
       //   searchTerm = data.value;
       // }
@@ -99,8 +98,35 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       // this.extensionContext.secrets.store("searchmasterCacheKey", data.value);
       // const searchType: string = await this.extensionContext.secrets.get("searchType") ?? "";
 
-      if(vscode.workspace.workspaceFolders !== undefined) {
+      if (data.type === "search-change"){
+        switch (data.value) {
+          case "boolean":
+            webviewView.webview.postMessage({
+              type: "searchDescription",
+              description: "Boolean search is a type of search allowing users to combine keywords with operators (or modifiers) such as AND, NOT and OR to further produce more relevant results.",
+            });
+            break;
+          case "language":
+            webviewView.webview.postMessage({
+              type: "searchDescription",
+              description: "Language model search is a type of search that uses a language model to predict the next word in a sentence.",
+            });
+            break;
+          case "vector":
+            webviewView.webview.postMessage({
+              type: "searchDescription",
+              description: "Vector search is a type of search that uses vectors to represent documents and queries.",
+            });
+            break;
+          default:
+            vscode.window.showInformationMessage("Search type not found");
+            break;
+          }
+      }
 
+      if(data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
+        let searchTerm = data[0].value;
+        let searchType = data[1].value;
         let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
       
         const backendFactory = new BackendFactory();
@@ -234,9 +260,12 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                     <option value="language">Language</option>
                     <option value="vector">Vector</option>
                 </select>
+                <div id="searchDescription">
+                Boolean search is a type of search allowing users to combine keywords with operators (or modifiers) such as AND, NOT and OR to further produce more relevant results.
+                </div>
                 <button type="button" class="btn-search">Search !</button><br>
 
-              <div id="output" class="output-container"> Where the fuck is this</div>
+              <div id="output" class="output-container"></div>
           </div>
               <script nonce="${nonce}" src="${scriptUri}"></script>
            </body>
