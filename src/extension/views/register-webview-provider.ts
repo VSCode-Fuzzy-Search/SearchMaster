@@ -99,13 +99,19 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
           case "language":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Language model search is a type of search that uses a language model to predict the next word in a sentence.",
+              description: "Language model search is a type of search that ranks documents based on the likelihood or how much relevant of a query appearing in a document. This kind of search also considers word order and context.",
             });
             break;
           case "vector":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Vector search is a type of search that uses vectors to represent documents and queries.",
+              description: "Vector search is a type of search that uses vectors to represent documents and queries. It helps ranking documents based on relevance to a query.",
+            });
+            break;
+          case "fuzzy":
+            webviewView.webview.postMessage({
+              type: "searchDescription",
+              description: "Fuzzy search is a type of search that searches for text that matches a term closely instead of exactly. Fuzzy searches help you find relevant results even when the search terms are misspelled.",
             });
             break;
           default:
@@ -250,6 +256,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                   <option value="boolean">Boolean</option>
                   <option value="language">Language Model</option>
                   <option value="vector">Vector Space Model</option>
+                  <option value="fuzzy">Fuzzy</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
