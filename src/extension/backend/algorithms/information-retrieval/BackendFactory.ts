@@ -28,10 +28,7 @@ export default class BackendFactory {
      * @returns true if there are backends
      */
     public hasBackends(): boolean {
-        if (this.backends !== null) {
-            return true;
-        }
-        return false;
+        return this.backends !== null;
     }
 
 
@@ -41,9 +38,7 @@ export default class BackendFactory {
      * @returns selected backend
      */
     public getBackend(backendType: AlgorithmEnum){
-
         return this.backends.get(backendType);
-
     }
 
     /**
