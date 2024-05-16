@@ -6,12 +6,6 @@ import * as vscode from 'vscode';
 // Extends objects with a `should` property for chaining assertions.
 var should = require('chai').should();
 
-suite('Extension Test Suite', () => {
+suite('Integration Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
-
-	test('Sanity Test', () => {
-		let a = 1;
-		a.should.be.equal(1);
-		a.should.be.a('number');
-	});
 });

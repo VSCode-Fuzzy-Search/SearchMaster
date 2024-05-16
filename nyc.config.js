@@ -6,7 +6,7 @@ const MIN_COVERAGE = { branches: 90, functions: 90, lines: 90, statements: 90 };
 module.exports = {
     extends : "@istanbuljs/nyc-config-typescript",
     all     : true,
-    include : "src/**/*.ts",
+    include : "src/extension/**/*.ts",
 
     reporter: ['text', 'lcov'],
 
