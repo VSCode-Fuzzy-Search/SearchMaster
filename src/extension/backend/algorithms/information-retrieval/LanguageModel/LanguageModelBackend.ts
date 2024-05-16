@@ -13,7 +13,7 @@ export default class LanguageModelBackend extends QueryBackend {
         // TODO: implement this.
         // index = {(gram: string): [(fileName: string, count: number, probability: number)]}
         let index: {[gram: string]: [string, number, number][]} = {};
-
+        const prefix: string = "word-"
         //get total words for each doc
         let totalWords: number[] = [];
 
@@ -28,7 +28,7 @@ export default class LanguageModelBackend extends QueryBackend {
             let words = documents[i].contents.split(" ");
             for (let j = 0; j < words.length; j++){
                 //get gram
-                let gram = words[j];
+                let gram = prefix + words[j];
                 //update count for this word
                 if (index[gram] === undefined){
                     index[gram] = [[documents[i].filename, 1, 1/totalWords[i]]];
@@ -45,6 +45,7 @@ export default class LanguageModelBackend extends QueryBackend {
                             found = true;
                             break;
                         }
+                        
                     }
                     if (!found){
                         index[gram].push([documents[i].filename, 1, 1/totalWords[i]]);
@@ -74,13 +75,13 @@ export default class LanguageModelBackend extends QueryBackend {
         const response: QueryResponse = {results: []};
 
         let processedQuery = query.getFormattedQuery();
-         
+        const prefix: string = "word-"
         //go through index and find the all files where all the searched words are present
 
         //files need to contain all thhe words in the query
         let files: {[fileName: string]: number} = {};
         for (let i = 0; i < processedQuery.length; i++){
-            let word = processedQuery[i];
+            let word = prefix +  processedQuery[i];
             if (this.index[word] !== undefined){
                 for (let j = 0; j < this.index[word].length; j++){
                     let file = this.index[word][j][0];

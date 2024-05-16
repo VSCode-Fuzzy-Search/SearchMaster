@@ -12,19 +12,20 @@ export default class BooleanBackend extends QueryBackend {
      */
     protected generateIndex(documents: Document[]): void {
     const index: {[word: string]: string[]} = {};
+    const prefix: string = "word-"
     for(let i = 0; i < documents.length; i++){
-        let words = documents[i].contents.split(" ");
+        let words = documents[i].contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
         for(let j = 0; j < words.length; j++){
-            if(index[words[j]] === undefined){
-                index[words[j]] = [];
-            }
-            if (!index[words[j]].includes(documents[i].filename)){
-                index[words[j]].push(documents[i].filename);
+            if (words[j] != ''){
+                if(index[prefix + words[j]] === undefined){
+                    index[prefix + words[j]] = [];
+                }
+                if (!index[prefix + words[j]].includes(documents[i].filename)){
+                    index[prefix + words[j]].push(documents[i].filename);
+                }
             }
         }
     }
-
-    console.log(index);
 
     this.index = index;
     }
@@ -45,6 +46,7 @@ export default class BooleanBackend extends QueryBackend {
     public handle(query: Query): QueryResponse {
         // TODO: implement this.
         const response: QueryResponse = {results: []};
+        const prefix: string = "word-"
 
         let processedQuery = query.getFormattedQuery();
         let andArray = [];
@@ -53,9 +55,12 @@ export default class BooleanBackend extends QueryBackend {
 
             if (processedQuery[i] == "AND"){
 
-                let arr1 = (this.index as {[word: string]: string[]})[processedQuery[i - 1]];
-                let arr2 = (this.index as {[word: string]: string[]})[processedQuery[i + 1]];
+                let arr1 = (this.index as {[word: string]: string[]})[prefix + processedQuery[i - 1]];
+                let arr2 = (this.index as {[word: string]: string[]})[prefix + processedQuery[i + 1]];
                 
+                if (arr1 == undefined || arr2 == undefined){
+                    return response;
+                }
 
                 for (let j = 0; j < arr2.length; j++){
                     if (arr1.includes(arr2[j])){
