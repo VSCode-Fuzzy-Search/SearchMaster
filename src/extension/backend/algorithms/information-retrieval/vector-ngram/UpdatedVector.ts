@@ -7,7 +7,11 @@ export default class UpdatedVector{
         this.vec[term] = magnitude;
     }
 
-    private getMagnitude(): number {
+    public getWeight(term: string): number {
+        return this.vec[term];
+    }
+
+    public getMagnitude(): number {
         let mag: number = 0;
         for (let term in this.vec) {
             mag += Math.pow(this.vec[term],2);
@@ -15,7 +19,20 @@ export default class UpdatedVector{
         return mag;
     }
 
-    public getSimScore(other: UpdatedVector): number {
-        throw new Error("Method not implemented.");
+    public hasComponent(term: string): boolean {
+        return term in this.vec;
     }
+
+    public getSimScore(other: UpdatedVector): number {
+        let score: number = 0;
+        for (let term in this.vec) {
+            if(other.hasComponent(term)) {
+                score += this.getWeight(term) * other.getWeight(term);
+            }    
+        }
+        score = score / this.getMagnitude();
+        score = score / other.getMagnitude();
+        return score;
+    }
+
 }
