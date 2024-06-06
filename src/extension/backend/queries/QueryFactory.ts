@@ -1,6 +1,7 @@
 import { AlgorithmEnum } from "../AlgorithmEnum";
 import BooleanQuery from "./BooleanQuery";
 import LanguageModelQuery from "./LanguageModelQuery";
+import UpdatedVectorQuery from "./UpdatedVectorQuery";
 import VectorQuery from "./VectorQuery";
 
 // potentially not an ideal approach, but can live with it for now - James
@@ -23,7 +24,7 @@ export default class QueryFactory {
         }
 
         else if (queryType == AlgorithmEnum.Vector){
-            return new VectorQuery(query);
+            return new UpdatedVectorQuery(query);
         }
 
     }

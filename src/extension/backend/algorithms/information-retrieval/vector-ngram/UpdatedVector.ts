@@ -33,4 +33,12 @@ export default class UpdatedVector{
         return score;
     }
 
+    /**
+     * gives the list of all terms represented in the vector
+     * @returns a list of the term components in the vector
+     */
+    public getComponents(): string[] {
+        return Object.keys(this.vec);
+    }
+
 }

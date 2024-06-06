@@ -9,6 +9,7 @@ export default class UpdatedVectorQuery extends Query{
      * @param query query in string format
      */
     protected parseFromString(query: string): void {
+        query = query.toLocaleLowerCase();
         let queryVec: UpdatedVector = new UpdatedVector();
         for (let term in query.split(" ")) {
             queryVec.addComponent(term, 1);

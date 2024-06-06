@@ -1,10 +1,13 @@
 import Document from "../../../Document";
 import Query from "../../../queries/Query";
 import QueryResponse from "../../../results/QueryResponse";
+import RankedQueryResult from "../../../results/RankedQueryResult";
 import QueryBackend from "../QueryBackend";
+import UpdatedVector from "./UpdatedVector";
 //TODO: no uuid is being used. should use this, but for now its filename
 export default class UpdatedVectorBackend extends QueryBackend{
     private numberOfDocs: number = 0;
+
     protected generateIndex(documents: Document[]): void {
         this.index = {};
         for(let doc of documents) { // iterate through all documents
@@ -27,13 +30,46 @@ export default class UpdatedVectorBackend extends QueryBackend{
             this.numberOfDocs += 1;
         }
     }
+
     protected updateIndex(documents: Document[]): void {
         throw new Error("Method not implemented.");
     }
-    public handle(query: Query): QueryResponse {
-        // let formattedQuery = query.toLocaleLowerCase();
 
-        throw new Error("Method not implemented.");
+    public handle(query: Query): QueryResponse {
+        let response: QueryResponse = {results: []}; 
+        let queryVec: UpdatedVector = query.getFormattedQuery();
+        let docVectors: {[document: string]: UpdatedVector} = {};
+        // create our map of document -> vector projections
+        for (let term in queryVec.getComponents()) {
+            if (term !in this.index) {
+                break;
+            }
+            for (let document in this.index[term]) {
+                if (document in docVectors) {
+                    docVectors[document].addComponent(term, this.getTFIDF(term, document));
+                } else {
+                    docVectors[document] = new UpdatedVector();
+                    docVectors[document].addComponent(term, this.getTFIDF(term, document));
+                }
+            }
+        }
+
+        // compute similarity scores between all relevant docs and query
+        let scores: {[key: string]: number}[] =[]; 
+        for (let doc in docVectors) {
+            scores.push({doc: queryVec.getSimScore(docVectors[doc])});
+        }
+
+        // sort??
+        const getValue = (obj: {[key: string]: number}) => Object.values(obj)[0];
+        scores.sort((obj1, obj2) => getValue(obj1) - getValue(obj2));
+
+        //returning result
+        for (let i = 0; i < scores.length; i++) {
+            let tempRankedResult: RankedQueryResult = {score: scores[i][Object.keys(scores[i])[0]], relativeRank : i+1, documentID: Object.keys(scores[i])[0]};
+            response.results.push(tempRankedResult);
+        }
+        return response;
     }
 
     private getIDF(word: string): number {
@@ -58,5 +94,4 @@ export default class UpdatedVectorBackend extends QueryBackend{
     private getTFIDF(word: string, doc: string) {
         return this.getTF(word, doc) * this.getIDF(word);
     }
-
 }

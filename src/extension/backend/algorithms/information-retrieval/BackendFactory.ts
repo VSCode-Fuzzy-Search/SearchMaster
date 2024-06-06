@@ -6,6 +6,7 @@ import BooleanBackend from "./Boolean/BooleanBackend";
 import LanguageModelBackend from "./LanguageModel/LanguageModelBackend";
 import QueryBackend from "./QueryBackend";
 import VectorBackend from "./Vector/VectorBackend";
+import UpdatedVectorBackend from './vector-ngram/UpdatedVectorBackend';
  
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
@@ -19,7 +20,7 @@ export default class BackendFactory {
         let documents: Document[] = this.getDocuments(path);
 
          this.backends.set(AlgorithmEnum.Boolean, new BooleanBackend(documents));
-         this.backends.set(AlgorithmEnum.Vector, new VectorBackend(documents));
+         this.backends.set(AlgorithmEnum.Vector, new UpdatedVectorBackend(documents));
          this.backends.set(AlgorithmEnum.LanguageModel, new LanguageModelBackend(documents));
      }
 
