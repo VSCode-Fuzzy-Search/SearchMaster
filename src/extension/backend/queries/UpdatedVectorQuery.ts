@@ -11,7 +11,7 @@ export default class UpdatedVectorQuery extends Query{
     protected parseFromString(query: string): void {
         query = query.toLocaleLowerCase();
         let queryVec: UpdatedVector = new UpdatedVector();
-        for (let term in query.split(" ")) {
+        for (let term of query.split(" ")) {
             queryVec.addComponent(term, 1);
         }
         this.formattedQuery = queryVec;

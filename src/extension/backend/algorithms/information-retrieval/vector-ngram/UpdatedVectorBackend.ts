@@ -6,9 +6,15 @@ import QueryBackend from "../QueryBackend";
 import UpdatedVector from "./UpdatedVector";
 //TODO: no uuid is being used. should use this, but for now its filename
 export default class UpdatedVectorBackend extends QueryBackend{
-    private numberOfDocs: number = 0;
+    private numberOfDocs: number;
+
+    constructor(documents: Document[]) {
+        super(documents);
+        this.numberOfDocs = documents.length;
+    }
 
     protected generateIndex(documents: Document[]): void {
+
         this.index = {};
         for(let doc of documents) { // iterate through all documents
             let tempIndex: {[key: string]: number } = {};
@@ -27,7 +33,6 @@ export default class UpdatedVectorBackend extends QueryBackend{
                     this.index[word] = { [doc.filename]: tempIndex[word] }; // maybe change .filename to .id after uuidv7 implemented properly
                 }
             }
-            this.numberOfDocs += 1;
         }
     }
 
@@ -40,8 +45,8 @@ export default class UpdatedVectorBackend extends QueryBackend{
         let queryVec: UpdatedVector = query.getFormattedQuery();
         let docVectors: {[document: string]: UpdatedVector} = {};
         // create our map of document -> vector projections
-        for (let term in queryVec.getComponents()) {
-            if (term !in this.index) {
+        for (let term of queryVec.getComponents()) {
+            if (!(term in this.index)) {
                 break;
             }
             for (let document in this.index[term]) {
@@ -57,12 +62,12 @@ export default class UpdatedVectorBackend extends QueryBackend{
         // compute similarity scores between all relevant docs and query
         let scores: {[key: string]: number}[] =[]; 
         for (let doc in docVectors) {
-            scores.push({doc: queryVec.getSimScore(docVectors[doc])});
+            scores.push({[doc]: queryVec.getSimScore(docVectors[doc])});
         }
 
         // sort??
         const getValue = (obj: {[key: string]: number}) => Object.values(obj)[0];
-        scores.sort((obj1, obj2) => getValue(obj1) - getValue(obj2));
+        scores.sort((obj1, obj2) => getValue(obj2) - getValue(obj1));
 
         //returning result
         for (let i = 0; i < scores.length; i++) {
@@ -73,18 +78,18 @@ export default class UpdatedVectorBackend extends QueryBackend{
     }
 
     private getIDF(word: string): number {
-        if (word.toLocaleLowerCase() !in this.index) {
+        if (!(word.toLocaleLowerCase() in this.index)) {
             return 0;
         }
-        return Math.log(this.numberOfDocs/this.index[word.toLocaleLowerCase()].length);
+        return Math.log(this.numberOfDocs/Object.keys(this.index[word.toLocaleLowerCase()]).length);
     }
 
     private getTF(word: string, doc: string): number {
         let lowerWord: string = word.toLocaleLowerCase();
-        if (lowerWord !in this.index) {
+        if (!(lowerWord in this.index)) {
             return 0;
         }  
-        if (doc !in this.index[lowerWord]) {
+        if (!(doc in this.index[lowerWord])) {
             return 0;
         }
         return this.index[lowerWord][doc];
