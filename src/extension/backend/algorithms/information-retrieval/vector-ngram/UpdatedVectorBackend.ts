@@ -35,4 +35,28 @@ export default class UpdatedVectorBackend extends QueryBackend{
 
         throw new Error("Method not implemented.");
     }
+
+    private getIDF(word: string): number {
+        if (word.toLocaleLowerCase() !in this.index) {
+            return 0;
+        }
+        return Math.log(this.numberOfDocs/this.index[word.toLocaleLowerCase()].length);
+    }
+
+    private getTF(word: string, doc: string): number {
+        let lowerWord: string = word.toLocaleLowerCase();
+        if (lowerWord !in this.index) {
+            return 0;
+        }  
+        if (doc !in this.index[lowerWord]) {
+            return 0;
+        }
+        return this.index[lowerWord][doc];
+
+    }
+
+    private getTFIDF(word: string, doc: string) {
+        return this.getTF(word, doc) * this.getIDF(word);
+    }
+
 }
