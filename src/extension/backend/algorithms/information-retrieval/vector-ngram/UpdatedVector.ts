@@ -1,5 +1,3 @@
-import { Vector } from "../Vector/classes/Vector";
-
 export default class UpdatedVector{
     private vec: {[key: string]: number} = {};
     
