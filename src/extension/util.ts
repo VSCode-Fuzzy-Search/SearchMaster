@@ -7,3 +7,8 @@ export function getNonce() {
     }
     return text;
 }
+
+export function getNGramList(N: number, input: string): string[] {
+    
+    return [];
+}
