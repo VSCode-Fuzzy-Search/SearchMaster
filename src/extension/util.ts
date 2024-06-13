@@ -8,7 +8,27 @@ export function getNonce() {
     return text;
 }
 
-export function getNGramList(N: number, input: string): string[] {
+/**
+ * splits a string into substrings of length N, whitespaces mark the end of a word
+ * @param n length of the substrings
+ * @param input the input string
+ * @returns a list of strings, each item being a substring of the input with max length N
+ */
+export function getListSubstringNLong(n: number, input: string): string[] {
     
-    return [];
+    const words = input.split(/\s+/).filter(word => word.length > 0);
+    
+    // Function to split a word into substrings of length N
+    function splitWord(word: string): string[] {
+        const substrings: string[] = [];
+        for (let i = 0; i <= word.length - n; i++) {
+            substrings.push(word.substring(i, i + n));
+        }
+        return substrings;
+    }
+    
+    // Split each word into substrings of length N and flatten the result using map and reduce
+    const result = words.map(splitWord).reduce((acc, val) => acc.concat(val), []);
+    
+    return result;
 }

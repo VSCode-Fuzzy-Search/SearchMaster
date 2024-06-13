@@ -1,5 +1,6 @@
 import UpdatedVector from "../algorithms/information-retrieval/vector-ngram/UpdatedVector";
 import Query from "./Query";
+import { getListSubstringNLong } from "../../util";
 
 export default class UpdatedVectorQuery extends Query{
     // The formatted query that will be searched for
@@ -11,7 +12,7 @@ export default class UpdatedVectorQuery extends Query{
     protected parseFromString(query: string): void {
         query = query.toLocaleLowerCase();
         let queryVec: UpdatedVector = new UpdatedVector();
-        for (let term of query.split(" ")) {
+        for (let term of getListSubstringNLong(2, query)) {
             queryVec.addComponent(term, 1);
         }
         this.formattedQuery = queryVec;

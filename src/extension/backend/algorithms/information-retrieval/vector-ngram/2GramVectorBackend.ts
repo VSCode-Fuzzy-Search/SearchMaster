@@ -4,12 +4,15 @@ import QueryResponse from "../../../results/QueryResponse";
 import RankedQueryResult from "../../../results/RankedQueryResult";
 import QueryBackend from "../QueryBackend";
 import UpdatedVector from "./UpdatedVector";
+import { getListSubstringNLong } from "../../../../util";
 //TODO: no uuid is being used. should use this, but for now its filename
 export default class UpdatedVectorBackend extends QueryBackend{
     private numberOfDocs: number;
+    private gramSize: number;
 
     constructor(documents: Document[]) {
         super(documents);
+        this.gramSize = 2;
         this.numberOfDocs = documents.length;
     }
 
@@ -18,7 +21,7 @@ export default class UpdatedVectorBackend extends QueryBackend{
         this.index = {};
         for(let doc of documents) { // iterate through all documents
             let tempIndex: {[key: string]: number } = {};
-            for (let word of doc["contents"].split(" ")) { // for each doc, add TF and doc id to index
+            for (let word of getListSubstringNLong(this.gramSize, doc["contents"])) { // for each doc, add TF and doc id to index
                 let lowercaseWord: string = word.toLocaleLowerCase();
                 if (lowercaseWord in tempIndex) {
                     tempIndex[lowercaseWord] += 1;
