@@ -3,6 +3,7 @@ import BooleanQuery from "./BooleanQuery";
 import LanguageModelQuery from "./LanguageModelQuery";
 import UpdatedVectorQuery from "./UpdatedVectorQuery";
 import VectorQuery from "./VectorQuery";
+import TwoGramVectorQuery from "./TwoGramVectorQuery";
 
 // potentially not an ideal approach, but can live with it for now - James
 export default class QueryFactory {
@@ -25,6 +26,10 @@ export default class QueryFactory {
 
         else if (queryType == AlgorithmEnum.Vector){
             return new UpdatedVectorQuery(query);
+        }
+
+        else if (queryType == AlgorithmEnum.TwoGramVector){
+            return new TwoGramVectorQuery(query);
         }
 
     }

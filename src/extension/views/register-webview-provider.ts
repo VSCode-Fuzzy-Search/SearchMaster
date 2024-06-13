@@ -64,6 +64,7 @@ const algorithmEnumMapping: { [key: string]: AlgorithmEnum } = {
   boolean: AlgorithmEnum.Boolean,
   vector: AlgorithmEnum.Vector,
   language: AlgorithmEnum.LanguageModel,
+  twoGramVector: AlgorithmEnum.TwoGramVector
 };
 
 export class SidebarWebViewProvider implements WebviewViewProvider {
@@ -108,10 +109,10 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               description: "Vector search is a type of search that uses vectors to represent documents and queries. It helps ranking documents based on relevance to a query.",
             });
             break;
-          case "fuzzy":
+          case "twoGramVector":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Fuzzy search is a type of search that searches for text that matches a term closely instead of exactly. Fuzzy searches help you find relevant results even when the search terms are misspelled.",
+              description: "2-Gram Vector is a type of fuzzy algorithm still in testing. It aims to split the query into substrings of length 2, which will be used to compare to the workspace words, also of substring 2. In theory, this will allow for a fuzzy search.",
             });
             break;
           default:
@@ -179,6 +180,22 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
             if (languageQuery !== null) {
               const result =
                 languageQuery && languageBackend?.handle(languageQuery);
+              if (result && webviewView.webview) {
+                webviewView.webview.postMessage({
+                  type: "searchResults",
+                  results: result.results,
+                });
+              }
+            }
+            break;
+            case "twoGramVector":
+            let twoGramVectorQuery = queryFactory.createQuery(
+              searchTerm,
+              AlgorithmEnum.TwoGramVector
+            );
+            let twoGramVectorBackend = backendFactory.getBackend(AlgorithmEnum.TwoGramVector);
+            if (twoGramVectorQuery !== null) {
+              const result = twoGramVectorQuery && twoGramVectorBackend?.handle(twoGramVectorQuery);
               if (result && webviewView.webview) {
                 webviewView.webview.postMessage({
                   type: "searchResults",
@@ -256,7 +273,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                   <option value="boolean">Boolean</option>
                   <option value="language">Language Model</option>
                   <option value="vector">Vector Space Model</option>
-                  <option value="fuzzy">Fuzzy</option>
+                  <option value="twoGramVector">2-Gram Vector</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">

@@ -7,6 +7,7 @@ import LanguageModelBackend from "./LanguageModel/LanguageModelBackend";
 import QueryBackend from "./QueryBackend";
 import VectorBackend from "./Vector/VectorBackend";
 import UpdatedVectorBackend from './vector-ngram/UpdatedVectorBackend';
+import TwoGramVectorBackend from './vector-ngram/TwoGramVectorBackend';
  
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
@@ -22,6 +23,7 @@ export default class BackendFactory {
          this.backends.set(AlgorithmEnum.Boolean, new BooleanBackend(documents));
          this.backends.set(AlgorithmEnum.Vector, new UpdatedVectorBackend(documents));
          this.backends.set(AlgorithmEnum.LanguageModel, new LanguageModelBackend(documents));
+         this.backends.set(AlgorithmEnum.TwoGramVector, new TwoGramVectorBackend(documents));
      }
 
     /**
