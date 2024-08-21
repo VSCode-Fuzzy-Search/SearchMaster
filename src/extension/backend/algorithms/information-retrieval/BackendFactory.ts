@@ -6,9 +6,11 @@ import BooleanBackend from "./Boolean/BooleanBackend";
 import LanguageModelBackend from "./LanguageModel/LanguageModelBackend";
 import QueryBackend from "./QueryBackend";
 import VectorBackend from "./Vector/VectorBackend";
+import StringMatchingBackend from '../string-matching/StringMatchingBackend';
  
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
+    private stringMatchBackend: StringMatchingBackend = new StringMatchingBackend(); 
 
     /**
      * Creates all query backends
@@ -21,6 +23,8 @@ export default class BackendFactory {
          this.backends.set(AlgorithmEnum.Boolean, new BooleanBackend(documents));
          this.backends.set(AlgorithmEnum.Vector, new VectorBackend(documents));
          this.backends.set(AlgorithmEnum.LanguageModel, new LanguageModelBackend(documents));
+
+         this.stringMatchBackend = new StringMatchingBackend();
      }
 
     /**
@@ -43,6 +47,12 @@ export default class BackendFactory {
     public getBackend(backendType: AlgorithmEnum){
 
         return this.backends.get(backendType);
+
+    }
+
+    public getStringMatchBackend(){
+
+        return this.stringMatchBackend;
 
     }
 
