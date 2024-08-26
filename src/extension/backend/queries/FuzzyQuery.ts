@@ -9,7 +9,10 @@ export default class FuzzyQuery extends Query{
      */
     protected parseFromString(query: string): void {
         //TODO: implement this
-        this.formattedQuery = query;
+
+        let splitQuery: String[] = query.split("/");
+
+        this.formattedQuery = splitQuery;
     }
 
     /**

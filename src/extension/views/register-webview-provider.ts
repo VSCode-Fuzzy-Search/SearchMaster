@@ -124,6 +124,11 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       if(data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
         let searchTerm = data[0].value;
         let searchType = data[1].value;
+        let editDistance = data[2].value;
+        if (editDistance == ''){
+          editDistance = 2;
+        }
+        console.log(data)
         let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
       
         const backendFactory = new BackendFactory();
@@ -190,7 +195,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
             break;
             case "fuzzy":
             let fuzzyQuery = queryFactory.createQuery(
-              searchTerm,
+              searchTerm + "/" + editDistance,
               AlgorithmEnum.Fuzzy
             );
             let fuzzyBackend = backendFactory.getBackend(
@@ -276,7 +281,8 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                   <option value="language">Language Model</option>
                   <option value="vector">Vector Space Model</option>
                   <option value="fuzzy">Fuzzy</option>
-                </select>
+                </select><br>
+                <input type="text" class="txt-box w-full p-2 border border-gray-300 rounded mb-2" id="searchmastereditdistanceid" name="searchmastereditdistance" placeholder="Enter edit distance..."><br>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
                     <path

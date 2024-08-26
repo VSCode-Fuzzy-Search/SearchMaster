@@ -4,10 +4,11 @@
     const searchBtn = document.querySelector('.btn-search');
     const txtbox = document.querySelector('.txt-box');
     const searchType = document.querySelector('.search-select');
+    const editDistance = document.getElementById('searchmastereditdistanceid')
     const searchDesc = document.getElementById('searchDescription');
 
     searchBtn.addEventListener('click', () => {
-        vscode.postMessage([{ type: 'btn-search', value: txtbox.value }, { type: 'search-select', value: searchType.value }]);
+        vscode.postMessage([{ type: 'btn-search', value: txtbox.value }, { type: 'search-select', value: searchType.value }, {type: 'edit-distance', value: editDistance.value}]);
         //vscode.postMessage({ type: 'search-select', value: searchType.value });
     });
 

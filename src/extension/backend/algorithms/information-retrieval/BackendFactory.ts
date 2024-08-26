@@ -59,6 +59,7 @@ export default class BackendFactory {
                 let fileOutput: string = fs.readFileSync(path + "/" + files[i], 'utf-8');
             
                 // let fileSplit: Array<string> = fileOutput.replace(/[(),'.:]/g, "").replace("[", "").replace("]", "").split(" ");
+                fileOutput = fileOutput.toLocaleLowerCase()
 
                 documents.push({id: uuidv7(), filename: files[i], contents: fileOutput});
             }

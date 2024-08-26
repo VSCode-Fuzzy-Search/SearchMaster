@@ -4,6 +4,7 @@ import QueryBackend from "../QueryBackend";
 import QueryResponse from "../../../results/QueryResponse";
 import Query from "../../../queries/Query";
 import Node from "./Node";
+import FuzzyQuery from "../../../queries/FuzzyQuery";
 
 export default class FuzzyBackend extends QueryBackend {
     
@@ -70,11 +71,11 @@ export default class FuzzyBackend extends QueryBackend {
      * @param query the query to perform search for in the index
      * @returns A QueryResponse object with the results of the search
      */
-    public handle(query: Query): QueryResponse {
+    public handle(query: FuzzyQuery): QueryResponse {
 
         let processedQuery = query.getFormattedQuery();
-        let word = processedQuery;
-        let distance = 2;
+        let word = processedQuery[0];
+        let distance = parseInt(processedQuery[1]);
         const response: QueryResponse = {results: []};
 
         for (const [filename, document] of Object.entries(this.index)){
