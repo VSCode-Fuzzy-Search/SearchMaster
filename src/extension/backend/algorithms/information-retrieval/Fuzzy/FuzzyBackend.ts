@@ -16,9 +16,7 @@ export default class FuzzyBackend extends QueryBackend {
     const prefix: string = "word-"
     for(let i = 0; i < documents.length; i++){
         let words = documents[i].contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
-        for(let j = 0; j < words.length; j++){
-            index[documents[i].filename] = this.createTrie(words)
-        }
+        index[documents[i].filename] = this.createTrie(words)
     }
 
     this.index = index;
@@ -26,7 +24,6 @@ export default class FuzzyBackend extends QueryBackend {
 
     private createTrie(strings: String[]): Node {
         const root = new Node("", "");  // Initialize the root of the trie
-
         // Add all the strings to the trie
         for (const string of strings) {
             let current = root;
@@ -128,7 +125,7 @@ export default class FuzzyBackend extends QueryBackend {
             endNodes.push(node.prefix)
         }
 
-        if (minimumElement < distance){
+        if (minimumElement <= distance){
             for (const child of Object.values(node.children)) {
                 this.matchStringRecursive(child, string, distance, endNodes, currentRow)
             }
