@@ -6,6 +6,7 @@ import BooleanBackend from "./Boolean/BooleanBackend";
 import LanguageModelBackend from "./LanguageModel/LanguageModelBackend";
 import QueryBackend from "./QueryBackend";
 import VectorBackend from "./Vector/VectorBackend";
+import FuzzyBackend from './Fuzzy/FuzzyBackend';
  
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
@@ -21,6 +22,7 @@ export default class BackendFactory {
          this.backends.set(AlgorithmEnum.Boolean, new BooleanBackend(documents));
          this.backends.set(AlgorithmEnum.Vector, new VectorBackend(documents));
          this.backends.set(AlgorithmEnum.LanguageModel, new LanguageModelBackend(documents));
+         this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents))
      }
 
     /**

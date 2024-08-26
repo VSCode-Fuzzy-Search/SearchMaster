@@ -64,6 +64,7 @@ const algorithmEnumMapping: { [key: string]: AlgorithmEnum } = {
   boolean: AlgorithmEnum.Boolean,
   vector: AlgorithmEnum.Vector,
   language: AlgorithmEnum.LanguageModel,
+  fuzzy: AlgorithmEnum.Fuzzy
 };
 
 export class SidebarWebViewProvider implements WebviewViewProvider {
@@ -187,7 +188,25 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               }
             }
             break;
-
+            case "fuzzy":
+            let fuzzyQuery = queryFactory.createQuery(
+              searchTerm,
+              AlgorithmEnum.Fuzzy
+            );
+            let fuzzyBackend = backendFactory.getBackend(
+              AlgorithmEnum.Fuzzy
+            );
+            if (fuzzyQuery !== null) {
+              const result =
+                fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
+              if (result && webviewView.webview) {
+                webviewView.webview.postMessage({
+                  type: "searchResults",
+                  results: result.results,
+                });
+              }
+            }
+            break;
             default:
               vscode.window.showInformationMessage("Search type not found");
               break;
