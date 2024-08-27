@@ -13,33 +13,41 @@ export default class FuzzyBackend extends QueryBackend {
      * @param documents list of documents used to create the index
      */
     protected generateIndex(documents: Document[]): void {
-    const index: {[documentName: string]: Node} = {};
-    const prefix: string = "word-"
-    for(let i = 0; i < documents.length; i++){
-        let words = documents[i].contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
-        index[documents[i].filename] = this.createTrie(words)
+        const index: { [documentName: string]: Node } = {};
+        for (let i = 0; i < documents.length; i++) {
+            let words = documents[i].contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
+            index[documents[i].filename] = this.createTrie(words, documents[i].contents);  // Pass the document contents
+        }
+    
+        this.index = index;
     }
 
-    this.index = index;
-    }
-
-    private createTrie(strings: String[]): Node {
+    private createTrie(words: string[], document: string): Node {
         const root = new Node("", "");  // Initialize the root of the trie
-        // Add all the strings to the trie
-        for (const string of strings) {
+        let currentPosition = 0;
+    
+        for (const word of words) {
             let current = root;
-            for (let j = 0; j < string.length; j++) {
-                const letter = string[j];
+            const wordPosition = document.indexOf(word, currentPosition);  // Find the position of the word in the document
+    
+            for (let j = 0; j < word.length; j++) {
+                const letter = word[j];
                 // Add the letter to the trie if it doesn't exist
                 if (!(letter in current.children)) {
-                    const node = new Node(letter, string.substring(0, j + 1));
+                    const node = new Node(letter, word.substring(0, j + 1));
                     current.children[letter] = node;
                 }
                 current = current.children[letter];
+                // Add the position of the substring within the entire document
+                if (j === word.length - 1) {
+                    current.positions.push(wordPosition);
+                }
             }
-            current.endOfPattern = true;     // Mark the end of a pattern
+            current.endOfPattern = true; // Mark the end of a pattern
+    
+            currentPosition = wordPosition + word.length;  // Update currentPosition to continue the search
         }
-
+    
         return root;
     }
 
@@ -92,7 +100,7 @@ export default class FuzzyBackend extends QueryBackend {
             }
 
             for (let j = 0; j < endNodes.length; j++){
-                response.results.push({documentID: filename + ": " + endNodes[j]})
+                response.results.push({documentID: filename + ": " + endNodes[j] + " with distance " + distance + " at position/s " + (document as Node).positions});
             }
         }
         

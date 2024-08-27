@@ -4,7 +4,7 @@
     const searchBtn = document.querySelector('.btn-search');
     const txtbox = document.querySelector('.txt-box');
     const searchType = document.querySelector('.search-select');
-    const editDistance = document.getElementById('searchmastereditdistanceid')
+    const editDistance = document.getElementById('searchmastereditdistanceid');
     const searchDesc = document.getElementById('searchDescription');
 
     searchBtn.addEventListener('click', () => {

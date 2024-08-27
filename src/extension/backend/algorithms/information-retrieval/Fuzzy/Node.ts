@@ -1,13 +1,15 @@
-export default class Node{
+export default class Node {
+    letter: string;
+    prefix: string;
+    children: { [key: string]: Node };
+    endOfPattern: boolean;
+    positions: number[]; 
 
-    letter: String;
-    children: {[child: string]: Node} = {};
-    endOfPattern: boolean = false;
-    prefix: String;
-
-    constructor(letter: String, prefix: String){
+    constructor(letter: string, prefix: string) {
         this.letter = letter;
         this.prefix = prefix;
+        this.children = {};
+        this.endOfPattern = false;
+        this.positions = [];
     }
-
 }

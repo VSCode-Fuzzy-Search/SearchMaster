@@ -125,11 +125,12 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
         let searchTerm = data[0].value;
         let searchType = data[1].value;
         let editDistance = data[2].value;
-        if (editDistance == ''){
+        if (editDistance === ''){
           editDistance = 2;
         }
         console.log(data)
-        let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
+        let path = "/Users/jackwigney/Desktop/FIT4002/FuzzySearch/src";
+        /* vscode.workspace.workspaceFolders[0].uri.path.substring(1); */
       
         const backendFactory = new BackendFactory();
         backendFactory.createAllBackends(
