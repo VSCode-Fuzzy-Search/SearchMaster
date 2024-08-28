@@ -129,8 +129,8 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
           editDistance = 2;
         }
         console.log(data)
-        let path = "/Users/jackwigney/Desktop/FIT4002/FuzzySearch/src";
-        /* vscode.workspace.workspaceFolders[0].uri.path.substring(1); */
+        let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
+        /*  */
       
         const backendFactory = new BackendFactory();
         backendFactory.createAllBackends(
