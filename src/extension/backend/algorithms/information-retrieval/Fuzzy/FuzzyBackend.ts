@@ -80,66 +80,69 @@ export default class FuzzyBackend extends QueryBackend {
      * @returns A QueryResponse object with the results of the search
      */
     public handle(query: FuzzyQuery): QueryResponse {
-
         let processedQuery = query.getFormattedQuery();
         let word = processedQuery[0];
         let distance = parseInt(processedQuery[1]);
-        const response: QueryResponse = {results: []};
-
-        for (const [filename, document] of Object.entries(this.index)){
-
-            let endNodes: string[] = [];
-
+        const response: QueryResponse = { results: [] };
+    
+        for (const [filename, document] of Object.entries(this.index)) {
+            let endNodes: { prefix: string; positions: number[] }[] = [];
+    
             for (const child of Object.values((document as Node).children)) {
                 let firstRow: number[] = [];
-                for (let i = 0; i < word.length + 1; i++){
+                for (let i = 0; i < word.length + 1; i++) {
                     firstRow.push(i);
                 }
-
-                this.matchStringRecursive(child as Node, word, distance, endNodes, firstRow);
+    
+                this.matchStringRecursive(child as Node, word, distance, endNodes, firstRow, 0);
             }
-
-            for (let j = 0; j < endNodes.length; j++){
-                response.results.push({documentID: filename + ": " + endNodes[j] + " with distance " + distance + " at position/s " + (document as Node).positions});
+    
+            for (let j = 0; j < endNodes.length; j++) {
+                response.results.push({
+                    documentID: `${filename}: ${endNodes[j].prefix} with distance ${distance} at position/s ${endNodes[j].positions}`
+                });
             }
         }
-        
+    
         return response;
     }
+    
 
-    private matchStringRecursive(node: Node, string: String, distance: number, endNodes: String[], previousRow: number[]): void{
-
+    private matchStringRecursive(
+        node: Node, 
+        string: string, 
+        distance: number, 
+        endNodes: { prefix: string; positions: number[] }[], 
+        previousRow: number[], 
+        currentStart: number
+    ): void {
         const size: number = previousRow.length;
         let currentRow: number[] = [];
-
+        
         currentRow.push(previousRow[0] + 1);
-
+        
         let minimumElement = currentRow[0];
-
-        for (let i = 1; i < size; i++){
-
-            if (string[i - 1] == node.letter){
+        
+        for (let i = 1; i < size; i++) {
+            if (string[i - 1] === node.letter) {
                 currentRow.push(previousRow[i - 1]);
+            } else {
+                currentRow.push(1 + Math.min(currentRow[i - 1], previousRow[i], previousRow[i - 1]));
             }
-            else {
-                currentRow.push(1 + Math.min(currentRow[i - 1], previousRow[i], previousRow[i - 1]))
-            }
-
+            
             if (currentRow[i] < minimumElement) {
                 minimumElement = currentRow[i];
             }
         }
-
-        if (currentRow[size - 1] <= distance && node.endOfPattern){
-            endNodes.push(node.prefix)
+        
+        if (currentRow[size - 1] <= distance && node.endOfPattern) {
+            endNodes.push({ prefix: node.prefix, positions: node.positions });
         }
-
-        if (minimumElement <= distance){
+        
+        if (minimumElement <= distance) {
             for (const child of Object.values(node.children)) {
-                this.matchStringRecursive(child, string, distance, endNodes, currentRow)
+                this.matchStringRecursive(child, string, distance, endNodes, currentRow, currentStart);
             }
         }
-
     }
-
 }
