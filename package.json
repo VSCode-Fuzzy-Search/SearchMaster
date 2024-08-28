@@ -76,6 +76,11 @@
 				"command": "searchmaster.send.data",
 				"title": "transfer Data From Ts To Ui",
 				"category": "searchmaster"
+			},
+			{
+				"command": "searchmaster.openFile",
+				"title": "Open File",
+				"category": "searchmaster"
 			}
 		],
 		"submenus": [
