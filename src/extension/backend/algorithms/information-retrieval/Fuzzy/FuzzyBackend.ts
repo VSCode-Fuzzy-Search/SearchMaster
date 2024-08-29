@@ -38,6 +38,8 @@ class VPTree {
      * @param items - The items to build the tree from, each containing a word and its positions.
      * @param distance - The distance function used to measure the difference between words (e.g., Levenshtein distance).
      * @returns The root node of the VP Tree.
+     * Construction Time Complexity: O(n log n) similar to quick sort
+     * Search Time: O(log n) cause it is mostly a balanced binary tree
      */
     private buildVPTree(items: { word: string; positions: WordPosition[] }[], distance: (a: string, b: string) => number): VPNode | null {
         if (items.length === 0) return null; // Base case: No items to process
@@ -155,10 +157,10 @@ export default class FuzzyBackend extends QueryBackend {
     protected updateIndex(documents: Document[]): void {
         this.generateIndex(documents); // Rebuild the tree with the new set of documents
     }
-
     /**
      * Levenshtein distance implementation to calculate edit distance between two strings.
-     */
+     * using 2D array
+     * 
     private levenshteinDistance(a: string, b: string): number {
         const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
         // Initialize DP table for base cases
@@ -178,6 +180,47 @@ export default class FuzzyBackend extends QueryBackend {
         }
 
         return dp[a.length][b.length]; // Return the edit distance between the two strings
+    }
+    **/
+
+    /**
+     * Levenshtein distance implementation to calculate edit distance between two strings.
+     * Using a 1D array for the distance matrix.This reduces the overhead of managing multiple rows and columns separately, 
+     * leading to a more compact representation in memory.The 1D array ensures that memory accesses are sequential and contiguous. 
+     * This access pattern makes better use of the CPU cache 
+     * because reading or writing one element in the array often prefetches nearby elements into the cache, reducing cache misses.
+     */
+    private levenshteinDistance(s1: string, s2: string): number {
+        const L1 = s1.length;
+        const L2 = s2.length;
+        const L1p1 = L1 + 1;
+        const L1p2 = L1 + 2;
+        const LD = (L1 + 1) * (L2 + 1) - 1;
+        const D = new Array(LD + 1).fill(0); // Initialize the distance matrix as a 1D array
+
+        // Initialize the first row and column of the distance matrix
+        for (let i = 0; i <= L1; i++) D[i] = i; // Fill first row
+        for (let j = 0; j <= LD; j += L1p1) D[j] = j / L1p1; // Fill first column
+
+        // Convert strings into arrays of characters
+        const sss1 = s1.split(''); // Split s1 into characters
+        const sss2 = s2.split(''); // Split s2 into characters
+
+        // Fill the rest of the distance matrix
+        for (let j = 1; j <= L2; j++) {
+            const ssL = L1p1 * j; // Offset for the start of the current row
+            for (let i = ssL + 1; i <= ssL + L1; i++) {
+                const cost = sss1[(i - ssL - 1)] !== sss2[j - 1] ? 1 : 0; // Cost is 1 if characters are different, 0 otherwise
+                const cI = D[i - 1] + 1; // Cost of insertion
+                const cD = D[i - L1p1] + 1; // Cost of deletion
+                const cS = D[i - L1p2] + cost; // Cost of substitution
+
+                // Determine the minimum cost operation (Insertion, Deletion, Substitution)
+                D[i] = Math.min(cI, cD, cS);
+            }
+        }
+
+        return D[LD]; // Return the edit distance between the two strings
     }
 
     /**
@@ -330,8 +373,8 @@ for Trie, we need to use BFS to search through every single node in the dataset 
 However, I don't think this way will be efficient enough since if the given query pattern is large, and
 the edit distance will be around 4-5, it will take a lot of time to generate all possible words!
 -----------------------------------------------------------------------------------------------
-
-Fuzzy search = Data Structure(Optimized) + Levenshtein distance
-The only thing left is we need to OPTIMIZE the Levenshtein distance!
-T.T But it is quiet hard to going through the paper by myself.
+Step need to do next:
+Fix the backend code so that the function generatedIndex will run automatically when user are using the extension
+--> reduce the time for user to wait for constructing VPTree. 
+Fix the backend code so that whenever user modify any documents, generatedIndex will invoke immidiately.
 */
