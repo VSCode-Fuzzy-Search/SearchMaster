@@ -19,6 +19,7 @@ import BooleanQuery from "../backend/queries/BooleanQuery";
 import BooleanBackend from "../backend/algorithms/information-retrieval/Boolean/BooleanBackend";
 import QueryResponse from "../backend/results/QueryResponse";
 import MockQueryResponse from "../backend/results/MockQueryResponse";
+import path = require("path");
 
 export function readSelectedOrAllText(op: OutputChannel) {
   op.clear();
@@ -119,6 +120,16 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
             vscode.window.showInformationMessage("Search type not found");
             break;
           }
+      }
+
+      if(data.command === "openFile"){
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+                    const fullPath = path.join(workspaceFolder || '', data.filePath);
+
+                    vscode.workspace.openTextDocument(fullPath).then(document => {
+                        vscode.window.showTextDocument(document);
+                    });
+                    return;
       }
 
       if(data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
@@ -313,9 +324,13 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                 <button type="button" class="btn-search mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Search !</button><br>
 
               <div id="output" class="output-container mt-4 rounded shadow"></div>
+              <div id="searchResults" class="output-container mt-4 rounded shadow"> Open register-webview-provider.ts </div>
           </div>
               <script nonce="${nonce}" src="${scriptUri}"></script>
            </body>
         </html>`;
   }
 }
+
+
+// /Users/jackwigney/Desktop/FIT4002/FuzzySearch/src/extension/views/register-webview-provider.ts
