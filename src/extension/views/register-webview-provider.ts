@@ -65,7 +65,7 @@ const algorithmEnumMapping: { [key: string]: AlgorithmEnum } = {
   boolean: AlgorithmEnum.Boolean,
   vector: AlgorithmEnum.Vector,
   language: AlgorithmEnum.LanguageModel,
-  fuzzy: AlgorithmEnum.Fuzzy
+  fuzzy: AlgorithmEnum.Fuzzy,
 };
 
 export class SidebarWebViewProvider implements WebviewViewProvider {
@@ -90,63 +90,77 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
-      if (data.type === "search-change"){
+      if (data.type === "search-change") {
         switch (data.value) {
           case "boolean":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Boolean search is a type of search allowing users to combine keywords with operators (or modifiers) such as AND, NOT and OR to further produce more relevant results.",
+              description:
+                "Boolean search is a type of search allowing users to combine keywords with operators (or modifiers) such as AND, NOT and OR to further produce more relevant results.",
             });
             break;
           case "language":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Language model search is a type of search that ranks documents based on the likelihood or how much relevant of a query appearing in a document. This kind of search also considers word order and context.",
+              description:
+                "Language model search is a type of search that ranks documents based on the likelihood or how much relevant of a query appearing in a document. This kind of search also considers word order and context.",
             });
             break;
           case "vector":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Vector search is a type of search that uses vectors to represent documents and queries. It helps ranking documents based on relevance to a query.",
+              description:
+                "Vector search is a type of search that uses vectors to represent documents and queries. It helps ranking documents based on relevance to a query.",
             });
             break;
           case "fuzzy":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Fuzzy search is a type of search that searches for text that matches a term closely instead of exactly. Fuzzy searches help you find relevant results even when the search terms are misspelled.",
+              description:
+                "Fuzzy search is a type of search that searches for text that matches a term closely instead of exactly. Fuzzy searches help you find relevant results even when the search terms are misspelled.",
             });
             break;
           default:
             vscode.window.showInformationMessage("Search type not found");
             break;
+        }
+      }
+
+      if (data.command === "openFile") {
+        const workspaceFolder =
+          vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const fullPath = path.join(workspaceFolder || "", data.filePath);
+
+        const document = await vscode.workspace.openTextDocument(fullPath);
+        const editor = await vscode.window.showTextDocument(document);
+
+        // Highlight the word if specified
+        if (data.word) {
+          const wordPosition = document.getText().indexOf(data.word);
+          if (wordPosition !== -1) {
+            const startPos = document.positionAt(wordPosition);
+            const endPos = document.positionAt(wordPosition + data.word.length);
+            const range = new vscode.Range(startPos, endPos);
+
+            editor.selection = new vscode.Selection(startPos, endPos);
+            editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
           }
+        }
       }
 
-      if(data.command === "openFile"){
-        const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-                    const fullPath = path.join(workspaceFolder || '', data.filePath);
-
-                    vscode.workspace.openTextDocument(fullPath).then(document => {
-                        vscode.window.showTextDocument(document);
-                    });
-                    return;
-      }
-
-      if(data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
+      if (data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
         let searchTerm = data[0].value;
         let searchType = data[1].value;
         let editDistance = data[2].value;
-        if (editDistance === ''){
+        if (editDistance === "") {
           editDistance = 2;
         }
-        console.log(data)
+        console.log(data);
         let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
         /*  */
-      
+
         const backendFactory = new BackendFactory();
-        backendFactory.createAllBackends(
-          path
-        );
+        backendFactory.createAllBackends(path);
         console.log(path);
 
         const queryFactory = new QueryFactory();
@@ -161,7 +175,8 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               AlgorithmEnum.Boolean
             );
             if (booleanQuery !== null) {
-              const result = booleanQuery && booleanBackend?.handle(booleanQuery);
+              const result =
+                booleanQuery && booleanBackend?.handle(booleanQuery);
               if (result && webviewView.webview) {
                 webviewView.webview.postMessage({
                   type: "searchResults",
@@ -205,17 +220,14 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               }
             }
             break;
-            case "fuzzy":
+          case "fuzzy":
             let fuzzyQuery = queryFactory.createQuery(
               searchTerm + "/" + editDistance,
               AlgorithmEnum.Fuzzy
             );
-            let fuzzyBackend = backendFactory.getBackend(
-              AlgorithmEnum.Fuzzy
-            );
+            let fuzzyBackend = backendFactory.getBackend(AlgorithmEnum.Fuzzy);
             if (fuzzyQuery !== null) {
-              const result =
-                fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
+              const result = fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
               if (result && webviewView.webview) {
                 webviewView.webview.postMessage({
                   type: "searchResults",
@@ -224,13 +236,15 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               }
             }
             break;
-            default:
-              vscode.window.showInformationMessage("Search type not found");
-              break;
-
+          default:
+            vscode.window.showInformationMessage("Search type not found");
+            break;
+        }
       }
-    }});
+    });
   }
+
+  // targetWord
 
   private _getHtmlForWebview(webview: Webview) {
     const styleResetUri = webview.asWebviewUri(
@@ -324,13 +338,10 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                 <button type="button" class="btn-search mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Search !</button><br>
 
               <div id="output" class="output-container mt-4 rounded shadow"></div>
-              <div id="searchResults" class="output-container mt-4 rounded shadow"> Open register-webview-provider.ts </div>
+              <div id="searchResults" class="output-container mt-4 rounded shadow"> Open register-webview-provider.ts at 'vector'</div>
           </div>
               <script nonce="${nonce}" src="${scriptUri}"></script>
            </body>
         </html>`;
   }
 }
-
-
-// /Users/jackwigney/Desktop/FIT4002/FuzzySearch/src/extension/views/register-webview-provider.ts

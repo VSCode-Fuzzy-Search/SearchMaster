@@ -36,15 +36,15 @@
         }
     });
 
-    document.getElementById('searchResults').addEventListener('click', function(event) {
-        // Assuming you have a data attribute or some other way to identify the file
-        const filePath = "src/extension/views/register-webview-provider.ts";
-        if (filePath) {
-            vscode.postMessage({
-                command: 'openFile',
-                filePath: filePath
-            });
-        }
+    document.getElementById('searchResults').addEventListener('click', function() {
+        const filePath = 'src/extension/views/register-webview-provider.ts';
+        const wordToHighlight = 'vector';
+
+        vscode.postMessage({
+            command: 'openFile',
+            filePath: filePath,
+            word: wordToHighlight
+        });
     });
     
 }());
