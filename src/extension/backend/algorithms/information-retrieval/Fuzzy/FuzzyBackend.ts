@@ -98,8 +98,12 @@ export default class FuzzyBackend extends QueryBackend {
             }
     
             for (let j = 0; j < endNodes.length; j++) {
-                response.results.push({
-                    documentID: `${filename}: ${endNodes[j].prefix} with distance ${distance} at position/s ${endNodes[j].positions}`
+                endNodes[j].positions.forEach(position => {
+                    response.results.push({
+                        documentID: `${filename}: ${endNodes[j].prefix} with distance ${distance} at position ${position}`,
+                        filePath: filename,  // Assuming filename is the relative path
+                        position: position   // Position within the document
+                    });
                 });
             }
         }
