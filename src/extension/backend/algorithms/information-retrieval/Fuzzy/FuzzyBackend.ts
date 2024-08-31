@@ -102,7 +102,8 @@ export default class FuzzyBackend extends QueryBackend {
                     response.results.push({
                         documentID: `${filename}: ${endNodes[j].prefix} with distance ${distance} at position ${position}`,
                         filePath: filename,  // Assuming filename is the relative path
-                        position: position   // Position within the document
+                        position: position,   // Position within the document
+                        word: endNodes[j].prefix
                     });
                 });
             }

@@ -127,26 +127,26 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       }
 
       if (data.command === "openFile") {
-        const workspaceFolder =
-          vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
         const fullPath = path.join(workspaceFolder || "", data.filePath);
-
+    
         const document = await vscode.workspace.openTextDocument(fullPath);
         const editor = await vscode.window.showTextDocument(document);
-
+    
         // Highlight the word if specified
         if (data.word) {
-          const wordPosition = document.getText().indexOf(data.word);
-          if (wordPosition !== -1) {
-            const startPos = document.positionAt(wordPosition);
-            const endPos = document.positionAt(wordPosition + data.word.length);
-            const range = new vscode.Range(startPos, endPos);
-
-            editor.selection = new vscode.Selection(startPos, endPos);
-            editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
-          }
+            const wordPosition = document.getText().indexOf(data.word);
+            if (wordPosition !== -1) {
+                const startPos = document.positionAt(wordPosition);
+                const endPos = document.positionAt(wordPosition + data.word.length);
+                const range = new vscode.Range(startPos, endPos);
+    
+                // Set the selection and reveal the range
+                editor.selection = new vscode.Selection(startPos, endPos);
+                editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+            }
         }
-      }
+    }
 
       if (data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
         let searchTerm = data[0].value;

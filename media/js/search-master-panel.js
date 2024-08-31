@@ -31,8 +31,10 @@
                 const listItem = document.createElement('p');
                 listItem.textContent = queryResult.documentID;
                 listItem.classList.add('query-result');
-                listItem.dataset.filePath = queryResult.filePath; // Assuming `filePath` is part of the queryResult
-                listItem.dataset.position = queryResult.position; // Assuming `position` is part of the queryResult
+                listItem.dataset.filePath = queryResult.filePath; 
+                listItem.dataset.position = queryResult.position; 
+                listItem.dataset.word = queryResult.word; 
+
                 outputContainer.appendChild(listItem);
             });
 
@@ -46,11 +48,13 @@
     function handleClick(event) {
         const filePath = event.target.dataset.filePath;
         const position = event.target.dataset.position;
+        const word = event.target.dataset.word;
 
         vscode.postMessage({
             command: 'openFile',
             filePath: filePath,
-            position: position
+            position: position,
+            word: word
         });
     }
 }());
