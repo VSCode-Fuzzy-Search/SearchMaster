@@ -22,7 +22,7 @@ export default class BackendFactory {
          this.backends.set(AlgorithmEnum.Boolean, new BooleanBackend(documents));
          this.backends.set(AlgorithmEnum.Vector, new VectorBackend(documents));
          this.backends.set(AlgorithmEnum.LanguageModel, new LanguageModelBackend(documents));
-         this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents))
+         this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents));
      }
 
     /**
@@ -49,23 +49,28 @@ export default class BackendFactory {
      * @returns list of documents in the specified path
      */
     private getDocuments(path: string): Document[] {
-        // TODO: implement this
-        let files: Array<string> = fs.readdirSync(path);
         const documents: Document[] = [];
-
-        for (let i = 0; i < files.length; i++){
-
-            if (fs.lstatSync(path + "/" + files[i]).isFile()){
-                let fileOutput: string = fs.readFileSync(path + "/" + files[i], 'utf-8');
-            
-                // let fileSplit: Array<string> = fileOutput.replace(/[(),'.:]/g, "").replace("[", "").replace("]", "").split(" ");
-                fileOutput = fileOutput.toLocaleLowerCase()
-
-                documents.push({id: uuidv7(), filename: files[i], contents: fileOutput});
+    
+        // Helper function to process files recursively
+        const processDirectory = (directoryPath: string) => {
+            const files = fs.readdirSync(directoryPath);
+    
+            for (let i = 0; i < files.length; i++) {
+                const fullPath = `${directoryPath}/${files[i]}`;
+    
+                if (fs.lstatSync(fullPath).isDirectory()) {
+                    // Recursively process subdirectories
+                    processDirectory(fullPath);
+                } else if (fs.lstatSync(fullPath).isFile()) {
+                    const fileOutput: string = fs.readFileSync(fullPath, 'utf-8').toLocaleLowerCase();
+                    documents.push({ id: uuidv7(), filename: files[i], contents: fileOutput });
+                }
             }
-
-        }
-
+        };
+    
+        // Start processing from the root path
+        processDirectory(path);
+    
         return documents;
     }
 }
