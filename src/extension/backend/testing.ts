@@ -14,9 +14,18 @@ let vectorQuery = queryFactory.createQuery("jupiter", AlgorithmEnum.Vector);
 let booleanBackend = backendFactory.getBackend(AlgorithmEnum.Boolean);
 let vectorBackend = backendFactory.getBackend(AlgorithmEnum.Vector);
 
-if (vectorQuery != null) {  
-    let result = vectorBackend?.handle(vectorQuery);
-    console.log(result);
+//if (vectorQuery != null) {  
+ //   let result = vectorBackend?.handle(vectorQuery);
+ //   console.log(result);
+//}
+
+let fuzzyBackend = backendFactory.getBackend(AlgorithmEnum.Fuzzy);
+
+let fuzzyQuery = queryFactory.createQuery("month", AlgorithmEnum.Fuzzy);
+
+if (fuzzyQuery != null) {
+    let result = fuzzyBackend?.handle(fuzzyQuery);
+    console.log(result)
 }
 
 // if (booleanQuery !== null){

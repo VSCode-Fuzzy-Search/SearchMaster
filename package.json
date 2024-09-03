@@ -76,6 +76,11 @@
 				"command": "searchmaster.send.data",
 				"title": "transfer Data From Ts To Ui",
 				"category": "searchmaster"
+			},
+			{
+				"command": "searchmaster.openFile",
+				"title": "Open File",
+				"category": "searchmaster"
 			}
 		],
 		"submenus": [
@@ -198,6 +203,7 @@
 		"webpack-cli": "^4.10.0"
 	},
 	"dependencies": {
+		"heap-js": "^2.5.0",
 		"uuidv7": "^1.0.0"
 	},
 	"overrides": {

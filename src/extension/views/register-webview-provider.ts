@@ -64,6 +64,7 @@ const algorithmEnumMapping: { [key: string]: AlgorithmEnum } = {
   boolean: AlgorithmEnum.Boolean,
   vector: AlgorithmEnum.Vector,
   language: AlgorithmEnum.LanguageModel,
+  fuzzy: AlgorithmEnum.Fuzzy
 };
 
 export class SidebarWebViewProvider implements WebviewViewProvider {
@@ -123,7 +124,13 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       if(data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
         let searchTerm = data[0].value;
         let searchType = data[1].value;
+        let editDistance = data[2].value;
+        if (editDistance === ''){
+          editDistance = 2;
+        }
+        console.log(data)
         let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
+        /*  */
       
         const backendFactory = new BackendFactory();
         backendFactory.createAllBackends(
@@ -187,7 +194,25 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               }
             }
             break;
-
+            case "fuzzy":
+            let fuzzyQuery = queryFactory.createQuery(
+              searchTerm + "/" + editDistance,
+              AlgorithmEnum.Fuzzy
+            );
+            let fuzzyBackend = backendFactory.getBackend(
+              AlgorithmEnum.Fuzzy
+            );
+            if (fuzzyQuery !== null) {
+              const result =
+                fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
+              if (result && webviewView.webview) {
+                webviewView.webview.postMessage({
+                  type: "searchResults",
+                  results: result.results,
+                });
+              }
+            }
+            break;
             default:
               vscode.window.showInformationMessage("Search type not found");
               break;
@@ -247,17 +272,33 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
            <body>
               <input type="text" class="txt-box w-full p-2 border border-gray-300 rounded mb-2" id="searchmastervalueid" name="searchmastervaluename" placeholder="Enter search term..."><br>
               <label for="searchType" class="block text-sm">Choose a search type:</label>
-                <div class="relative inline-block w-full text-gray-700">
+                <div class="relative inline-block w-full text-gray-700" style="display: flex; gap: 10px;">
                 <select
                   id="searchType"
                   class="search-select w-full h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
                   name="searchTypeSelect"
+                  style="flex: 3;"
                 >
                   <option value="boolean">Boolean</option>
                   <option value="language">Language Model</option>
                   <option value="vector">Vector Space Model</option>
                   <option value="fuzzy">Fuzzy</option>
                 </select>
+
+                <select
+                  id="searchmastereditdistanceid"
+                  class="search-select w-full h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
+                  name="searchEditDistanceSelect"
+                  style="flex: 1;"
+                >
+                  <option value="0">0 (exact)</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+                <br>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
                     <path
