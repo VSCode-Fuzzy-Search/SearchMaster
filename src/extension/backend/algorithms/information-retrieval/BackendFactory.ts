@@ -47,22 +47,25 @@ export default class BackendFactory {
      * @returns list of documents in the specified path
      */
     private getDocuments(path: string): Document[] {
-        // TODO: implement this
-        let files: Array<string> = fs.readdirSync(path);
         const documents: Document[] = [];
-
-        for (let i = 0; i < files.length; i++){
-
-            if (fs.lstatSync(path + "/" + files[i]).isFile()){
-                let fileOutput: string = fs.readFileSync(path + "/" + files[i], 'utf-8');
-            
-                // let fileSplit: Array<string> = fileOutput.replace(/[(),'.:]/g, "").replace("[", "").replace("]", "").split(" ");
-
-                documents.push({id: uuidv7(), filename: files[i], contents: fileOutput});
+    
+        function readDirectory(currentPath: string) {
+            let files: Array<string> = fs.readdirSync(currentPath);
+    
+            for (let i = 0; i < files.length; i++) {
+                const fullPath = currentPath + "/" + files[i];
+    
+                if (fs.lstatSync(fullPath).isFile()) {
+                    let fileOutput: string = fs.readFileSync(fullPath, 'utf-8');
+                    documents.push({ id: uuidv7(), filename: files[i], contents: fileOutput });
+                } else if (fs.lstatSync(fullPath).isDirectory()) {
+                    readDirectory(fullPath); // Recursively read the subdirectory
+                }
             }
-
         }
-
+    
+        readDirectory(path);
+    
         return documents;
     }
 }
