@@ -26,6 +26,7 @@
         if (message.type === 'searchResults') {
             const outputContainer = document.getElementById('output');
             outputContainer.innerHTML = "<p class='border-b border-gray-200 pb-2'>Query Results:</p>";
+            outputContainer.innerHTML += `<p class='text-sm text-gray-500'>Found ${message.results.length} results</p>`;
         
             message.results.forEach(queryResult => {
                 const resultContainer = document.createElement('div');
