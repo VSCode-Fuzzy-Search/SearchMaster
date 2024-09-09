@@ -26,7 +26,6 @@
         if (message.type === 'searchResults') {
             const outputContainer = document.getElementById('output');
             outputContainer.innerHTML = "<p class='border-b border-gray-200 pb-2'>Query Results:</p>";
-            outputContainer.innerHTML += `<p class='text-sm text-gray-500'>Found ${message.results.length} results</p>`;
         
             message.results.forEach(queryResult => {
                 const resultContainer = document.createElement('div');
@@ -38,8 +37,45 @@
                 
                 const fileIcon = document.createElement('span');
                 fileIcon.classList.add('file-icon');
-                fileIcon.textContent = 'JS'; // Replace with an icon or change based on file type
-                
+
+                const fileImage = document.createElement('img');
+                const fileExtension = queryResult.documentID.split('.').pop();
+
+                switch (fileExtension) {
+                    case 'ts':
+                      fileImage.src = tsLogoPath;
+                      fileImage.alt = 'TypeScript Logo';
+                      break;
+                    case 'js':
+                      fileImage.src = jsLogoPath;
+                      fileImage.alt = 'JavaScript Logo';
+                      break;
+                    case 'py':
+                      fileImage.src = pyLogoPath;
+                      fileImage.alt = 'Python Logo';
+                      break;
+                    case 'html':
+                      fileImage.src = htmlLogoPath;
+                      fileImage.alt = 'HTML Logo';
+                      break;
+                    case 'css':
+                      fileImage.src = cssLogoPath;
+                      fileImage.alt = 'CSS Logo';
+                      break;
+                    case 'json':
+                      fileImage.src = jsonLogoPath;
+                      fileImage.alt = 'JSON Logo';
+                      break;
+                    default:
+                      fileImage.src = defaultLogoPath;
+                      fileImage.alt = 'Default Logo';
+                      break;
+                  }
+                  
+                fileImage.classList.add('file-icon-img'); // Optional CSS class
+        
+                fileIcon.appendChild(fileImage);
+        
                 const filename = document.createElement('span');
                 filename.textContent = queryResult.documentID;
                 filename.classList.add('filename');
@@ -55,11 +91,6 @@
                 resultContainer.appendChild(fileDetails);
                 resultContainer.appendChild(codeSnippet);
         
-                // Attach file path, position, word data for event handling
-                resultContainer.dataset.filePath = queryResult.filePath; 
-                resultContainer.dataset.position = queryResult.position; 
-                resultContainer.dataset.word = queryResult.word; 
-        
                 outputContainer.appendChild(resultContainer);
             });
         
@@ -68,6 +99,8 @@
                 item.addEventListener('click', handleClick);
             });
         }
+        
+        
         
     });
 

@@ -127,26 +127,27 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       }
 
       if (data.command === "openFile") {
-        const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const workspaceFolder =
+          vscode.workspace.workspaceFolders?.[0].uri.fsPath;
         const fullPath = path.join(workspaceFolder || "", data.filePath);
-    
+
         const document = await vscode.workspace.openTextDocument(fullPath);
         const editor = await vscode.window.showTextDocument(document);
-    
+
         // Highlight the word if specified
         if (data.word) {
-            const wordPosition = document.getText().indexOf(data.word);
-            if (wordPosition !== -1) {
-                const startPos = document.positionAt(wordPosition);
-                const endPos = document.positionAt(wordPosition + data.word.length);
-                const range = new vscode.Range(startPos, endPos);
-    
-                // Set the selection and reveal the range
-                editor.selection = new vscode.Selection(startPos, endPos);
-                editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
-            }
+          const wordPosition = document.getText().indexOf(data.word);
+          if (wordPosition !== -1) {
+            const startPos = document.positionAt(wordPosition);
+            const endPos = document.positionAt(wordPosition + data.word.length);
+            const range = new vscode.Range(startPos, endPos);
+
+            // Set the selection and reveal the range
+            editor.selection = new vscode.Selection(startPos, endPos);
+            editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+          }
         }
-    }
+      }
 
       if (data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
         let searchTerm = data[0].value;
@@ -258,6 +259,69 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
     );
 
     const nonce = getNonce();
+    const jsLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "javascript.svg"
+      )
+    );
+    const cssLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "css.svg"
+      )
+    );
+    const htmlLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "html.svg"
+      )
+    );
+    const jsonLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "json.svg"
+      )
+    );
+    const tsLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "typescript.svg"
+      )
+    );
+    const pyLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "python.svg"
+      )
+    );
+    const defaultLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "default.svg"
+      )
+    );
 
     return `<!DOCTYPE html>
         <html lang="en">
@@ -278,66 +342,49 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               <link href="${styleVSCodeUri}" rel="stylesheet">
               <script nonce="${nonce}"></script>
               <style>
-              .result-container {
-    background-color: #1e1e1e; /* Dark background */
-    border: 1px solid #3c3c3c; /* Subtle border */
-    border-radius: 4px;
-    padding: 10px;
-    margin: 10px 0;
-    cursor: pointer;
-    color: #d4d4d4; /* Light text color */
-    font-family: "Consolas", "Courier New", monospace; /* Code-like font */
-}
+body {
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+                padding: 10px;
+            }
+            .result-container {
+                background-color: #1e1e1e;
+                border: 1px solid #3c3c3c;
+                border-radius: 4px;
+                padding: 10px;
+                margin: 10px 0;
+                cursor: pointer;
+            }
+            .result-container:hover {
+                background-color: #2d2d2d;
+            }
+            .file-details {
+                display: flex;
+                align-items: center;
+                margin-bottom: 5px;
+            }
+            .file-icon {
 
-.result-container:hover {
-    background-color: #2d2d2d; /* Hover effect */
-}
-
-.file-details {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.file-icon {
-    background-color: #f1c40f; /* Yellow color for JS */
-    color: black;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-weight: bold;
+            }
+            .filename {
+                font-weight: bold;
+            }
+            .code-snippet {
+                background-color: #252526;
+                padding: 5px;
+                border-radius: 3px;
+                white-space: pre;
+            }
+            .line-number {
+                color: #569cd6;
+                margin-right: 10px;
+            }
+                .file-icon-img {
+    width: 20px;
+    height: 20px;
     margin-right: 8px;
+    vertical-align: middle;
 }
-
-.filename {
-    font-weight: bold;
-}
-
-.code-snippet {
-    background-color: #252526; /* Darker background for code */
-    padding: 5px;
-    border-radius: 3px;
-    white-space: pre; /* Maintain whitespace */
-}
-
-.line-number {
-    color: #569cd6; /* Blue color for line number */
-    margin-right: 10px;
-}
-
-            .output-container {
-              border: none
-              border-radius: 0;
-              padding: 16px;
-              margin-top: 16px;
-              background-color: #252526;
-            }
-            .output-container p:last-child {
-              border-bottom: none;
-            }
-            .output-container .output-title {
-              font-weight: bold;
-              margin-bottom: 8px;
-            }
           </style>
            </head>
            <body>
@@ -386,6 +433,13 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               <div id="output" class="output-container mt-4 rounded shadow"></div>
           </div>
               <script nonce="${nonce}" src="${scriptUri}"></script>
+              <script>const jsLogoPath = "${jsLogoUri}";</script>
+              <script>const cssLogoPath = "${cssLogoUri}";</script>
+              <script>const htmlLogoPath = "${htmlLogoUri}";</script>
+              <script>const jsonLogoPath = "${jsonLogoUri}";</script>
+              <script>const tsLogoPath = "${tsLogoUri}";</script>
+              <script>const pyLogoPath = "${pyLogoUri}";</script>
+              <script>const defaultLogoPath = "${defaultLogoUri}";</script>
            </body>
         </html>`;
   }
