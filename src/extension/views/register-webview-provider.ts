@@ -278,12 +278,58 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               <link href="${styleVSCodeUri}" rel="stylesheet">
               <script nonce="${nonce}"></script>
               <style>
+              .result-container {
+    background-color: #1e1e1e; /* Dark background */
+    border: 1px solid #3c3c3c; /* Subtle border */
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px 0;
+    cursor: pointer;
+    color: #d4d4d4; /* Light text color */
+    font-family: "Consolas", "Courier New", monospace; /* Code-like font */
+}
+
+.result-container:hover {
+    background-color: #2d2d2d; /* Hover effect */
+}
+
+.file-details {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.file-icon {
+    background-color: #f1c40f; /* Yellow color for JS */
+    color: black;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.filename {
+    font-weight: bold;
+}
+
+.code-snippet {
+    background-color: #252526; /* Darker background for code */
+    padding: 5px;
+    border-radius: 3px;
+    white-space: pre; /* Maintain whitespace */
+}
+
+.line-number {
+    color: #569cd6; /* Blue color for line number */
+    margin-right: 10px;
+}
+
             .output-container {
-              border: 1px solid #ddd;
-              border-radius: 4px;
+              border: none
+              border-radius: 0;
               padding: 16px;
               margin-top: 16px;
-              background-color: #5D3FD3;
+              background-color: #252526;
             }
             .output-container p:last-child {
               border-bottom: none;
@@ -338,7 +384,6 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                 <button type="button" class="btn-search mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Search !</button><br>
 
               <div id="output" class="output-container mt-4 rounded shadow"></div>
-              <div id="searchResults" class="output-container mt-4 rounded shadow"> Open register-webview-provider.ts at 'vector'</div>
           </div>
               <script nonce="${nonce}" src="${scriptUri}"></script>
            </body>

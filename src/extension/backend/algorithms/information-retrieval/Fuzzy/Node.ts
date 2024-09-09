@@ -4,6 +4,7 @@ export default class Node {
     children: { [key: string]: Node };
     endOfPattern: boolean;
     positions: number[]; 
+    distance: number;
 
     constructor(letter: string, prefix: string) {
         this.letter = letter;
@@ -11,5 +12,6 @@ export default class Node {
         this.children = {};
         this.endOfPattern = false;
         this.positions = [];
+        this.distance = 0;
     }
 }

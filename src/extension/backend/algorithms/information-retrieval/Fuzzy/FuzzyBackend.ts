@@ -100,9 +100,10 @@ export default class FuzzyBackend extends QueryBackend {
             for (let j = 0; j < endNodes.length; j++) {
                 endNodes[j].positions.forEach(position => {
                     response.results.push({
-                        documentID: `${filename}: ${endNodes[j].prefix} with distance ${distance} at position ${position}`,
-                        filePath: filename,  // Assuming filename is the relative path
+                        documentID: filename, 
+                        filePath: filename, 
                         position: position,   // Position within the document
+                        distance: distance,   // Distance of the match
                         word: endNodes[j].prefix
                     });
                 });
