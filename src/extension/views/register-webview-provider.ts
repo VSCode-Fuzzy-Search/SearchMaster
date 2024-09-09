@@ -159,7 +159,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
         let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
         /*  */
 
-        const backendFactory = new BackendFactory();
+        const backendFactory = BackendFactory.getInstance();
         backendFactory.createAllBackends(path);
         console.log(path);
 

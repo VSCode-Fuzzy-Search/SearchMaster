@@ -10,6 +10,14 @@ import FuzzyBackend from './Fuzzy/FuzzyBackend';
  
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
+    private static instance: BackendFactory;
+
+    public static getInstance(): BackendFactory {
+        if (!BackendFactory.instance) {
+            BackendFactory.instance = new BackendFactory();
+        }
+        return BackendFactory.instance;
+    }
 
     /**
      * Creates all query backends
