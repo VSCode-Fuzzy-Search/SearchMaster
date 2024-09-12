@@ -52,7 +52,7 @@ jobs:
               run: npm install
 
             - name: Generate VSIX
-              run: npm vsce package
+              run: npx @vscode/vsce package
 
             - name: Store VSIX Name and Path in Environment Variables
               run: |
