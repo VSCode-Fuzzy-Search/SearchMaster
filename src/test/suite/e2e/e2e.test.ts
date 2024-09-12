@@ -28,6 +28,7 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 	});
 
 	// Example test using Chai assertion library.
+	// TODO: Replace with real tests!
 	test('Example Test', () => {
 		let a = 1;
 		a.should.be.equal(1);
