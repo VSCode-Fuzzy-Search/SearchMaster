@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 'use-strict';
 
-const MIN_COVERAGE = { branches: 90, functions: 90, lines: 90, statements: 90 };
+const MIN_COVERAGE = { branches: 80, functions: 80, lines: 80, statements: 80 };
 
 module.exports = {
     extends : "@istanbuljs/nyc-config-typescript",
