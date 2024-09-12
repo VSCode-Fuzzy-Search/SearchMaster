@@ -7,9 +7,14 @@ import * as vscode from 'vscode';
 var should = require('chai').should();
 
 suite('Extension Test Suite', () => {
+	// Show a message before running the tests.
 	vscode.window.showInformationMessage('Start all tests.');
 
-	test('Sanity Test', () => {
+	// When the test suite is finished, show a message.
+	suiteTeardown(() => vscode.window.showInformationMessage('All tests completed!'));
+
+	// Example test using Chai assertion library.
+	test('Example Test', () => {
 		let a = 1;
 		a.should.be.equal(1);
 		a.should.be.a('number');
