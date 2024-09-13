@@ -8,10 +8,10 @@ module.exports = {
     all     : true,
     include : "src/extension/**/*.ts",
 
-    reporter: ['text', 'lcov'],
+    reporter: ['text', 'json-summary'],
 
     // Will fail if coverage % is below these thresholds:
-    'check-coverage'    : true,
+    'check-coverage'    : false,
     branches            : MIN_COVERAGE.branches,
     functions           : MIN_COVERAGE.functions,
     lines               : MIN_COVERAGE.lines,

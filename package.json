@@ -192,6 +192,7 @@
     "minimatch": "^9.0.4",
     "mocha": "^10.0.0",
     "nyc": "^15.1.0",
+    "source-map-support": "^0.5.21",
     "ts-loader": "^9.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^4.8.4",
@@ -204,8 +205,5 @@
   "overrides": {
     "trim": "latest",
     "rimraf": "latest"
-  },
-  "trustedDependencies": [
-    "@vscode/vsce-sign"
-  ]
+  }
 }
