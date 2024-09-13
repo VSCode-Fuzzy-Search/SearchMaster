@@ -37,6 +37,7 @@ jobs:
                       .nvmrc
                       .eslintrc.json
                       .vscode
+                      bun.lockb
 
             - name: Check Coverage Artifact Exists
               id: coverage-artifact-exists
