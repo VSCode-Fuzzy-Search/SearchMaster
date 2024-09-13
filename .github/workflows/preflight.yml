@@ -1,0 +1,40 @@
+name: Preflight
+
+on:
+    push:
+        branches:
+            - '*'
+        tags:
+            - '*'
+    pull_request:
+        branches:
+            - '*'
+
+jobs:
+    # We want to make sure that the release is only created if changes were actually made to business logic.
+    preflight:
+        name: Preflight
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Release Check
+              id: release-check
+              uses: phish108/release-check@1.0.15
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Check Coverage Artifact Exists
+              id: coverage-artifact-exists
+              uses: xSAVIKx/artifact-exists-action@v0
+              with:
+                  name: 'coverage-summary.json'
+
+            - name: Share Preflight Results
+              uses: edumserrano/share-jobs-data@v1
+              with:
+                  command: set-data
+                  data: |
+                      release-check-proceed: ${{ steps.release-check.outputs.proceed }}
+                      coverage-artifact-exists: ${{ steps.coverage-artifact-exists.outputs.exists }}

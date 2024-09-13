@@ -1,57 +1,35 @@
+name: CD
+
 on:
-    push:
-        branches:
-            - main
-        tags:
-            - '*'
-    pull_request:
-        branches:
-            - main
+    workflow_run:
+        workflows: ['CI']
+        types:
+            - completed
 
 jobs:
-    test:
-        name: Test on ${{ matrix.os }}
-        runs-on: ${{ matrix.os }}
-        strategy:
-            matrix:
-                os: [macos-latest, ubuntu-latest, windows-latest]
+    # We want to make sure that the release is only created if changes were actually made to business logic.
+    read-release-check:
+        name: Read Release Check (from Re-Emitted Preflight)
+        runs-on: ubuntu-latest
         steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-
-            - name: Setup PNPM
-              uses: pnpm/action-setup@v4
+            - id: read-release-check
+              uses: edumserrano/share-jobs-data@v1
               with:
-                  version: 7
-                  run_install: false
+                  command: read-data-different-workflow
+                  run-id: ${{ github.event.workflow_run.id }} # We need to specify the run id of the workflow that shared the data.
 
-            - name: 'Install Node.js (Cache: PNPM)'
-              uses: actions/setup-node@v4
-              with:
-                  node-version-file: '.nvmrc'
-                  cache: 'pnpm'
-
-            - name: Install Dependencies
-              run: pnpm install
-
-            # In headless Linux CI machines XVFB is required to run VS Code, so if Linux is the current OS run the tests in an XVFB enabled environment.
-            - name: Run Tests
-              run: ${{ runner.os == 'Linux' && 'xvfb-run -a pnpm coverage' || 'pnpm coverage' }}
-
-            # For specifically pull requests, we want to comment the coverage results on the PR.
-            - name: Comment Coverage
-              if: github.event_name == 'pull_request'
-              uses: sidx1024/report-nyc-coverage-github-action@v1.2.7
-              with:
-                  coverage_file: coverage/coverage-summary.json
+        outputs:
+            RELEASE_CHECK_PROCEED: ${{ steps.read-release-check.outputs.release-check-proceed }}
 
     # Adapted from: https://github.com/prettier/prettier-vscode/blob/main/.github/workflows/main.yml
     package:
         name: Package
         runs-on: ubuntu-latest
-        needs: test
-        # Only package the extension when a new tag is created.
-        if: success() && startsWith(github.ref, 'refs/tags/')
+        needs: read-release-check
+        # Only proceed with packaging if:
+        # 1. All previous steps succeeded.
+        # 2. The release-check step indicates that business logic changes were made.
+        if: success() && needs.read-release-check.outputs.RELEASE_CHECK_PROCEED
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -91,23 +69,6 @@ jobs:
             VSIX_PATH: ${{ steps.vsix-output.outputs.VSIX_PATH }}
             VSIX_NAME: ${{ steps.vsix-output.outputs.VSIX_NAME }}
 
-    # We want to make sure that the release is only created if changes were actually made to business logic.
-    release-check:
-        name: Release Check
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-
-            - name: Check Release
-              id: release-check
-              uses: phish108/release-check@1.0.15
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-
-        outputs:
-            PROCEED_WITH_RELEASE: ${{ steps.release-check.outputs.proceed }}
-
     # Automatically create a release:
     # - If no tag is present, the release will be a prerelease with an automatically generated 'latest' tag.
     # - If a tag is present, the release will be a stable release with the tag name.
@@ -116,11 +77,7 @@ jobs:
     release:
         name: Release
         runs-on: ubuntu-latest
-        needs: [package, release-check]
-        # Only proceed with the release if:
-        # 1. All previous steps succeeded.
-        # 2. The release-check step indicates that business logic changes were made.
-        if: success() && needs.release-check.outputs.PROCEED_WITH_RELEASE
+        needs: package
         steps:
             - name: Checkout
               uses: actions/checkout@v4

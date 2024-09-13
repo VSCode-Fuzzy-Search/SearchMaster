@@ -1,0 +1,81 @@
+name: CI
+
+on:
+    workflow_run:
+        workflows: ['Preflight']
+        types:
+            - completed
+
+jobs:
+    read-preflight-results:
+        name: Read Preflight Results
+        runs-on: ubuntu-latest
+        steps:
+            - id: read-preflight-results
+              uses: edumserrano/share-jobs-data@v1
+              with:
+                  command: read-data-different-workflow
+                  run-id: ${{ github.event.workflow_run.id }} # We need to specify the run id of the workflow that shared the data.
+
+        outputs:
+            RELEASE_CHECK_PROCEED: ${{ steps.read-preflight-results.outputs.release-check-proceed }}
+            COVERAGE_ARTIFACT_EXISTS: ${{ steps.read-preflight-results.outputs.coverage-artifact-exists }}
+
+    test:
+        name: Test on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+        needs: read-preflight-results
+        # Only run the tests if the release check was successful and the coverage artifact does not exist.
+        if: 'needs.read-preflight-results.outputs.RELEASE_CHECK_PROCEED && !needs.read-preflight-results.outputs.COVERAGE_ARTIFACT_EXISTS'
+        strategy:
+            matrix:
+                os: [macos-latest, ubuntu-latest, windows-latest]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PNPM
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 7
+                  run_install: false
+
+            - name: 'Install Node.js (Cache: PNPM)'
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: 'pnpm'
+
+            - name: Install Dependencies
+              run: pnpm install
+
+            # In headless Linux CI machines XVFB is required to run VS Code, so if Linux is the current OS run the tests in an XVFB enabled environment.
+            - name: Run Tests
+              run: ${{ runner.os == 'Linux' && 'xvfb-run -a pnpm coverage' || 'pnpm coverage' }}
+
+            # For specifically pull requests, we want to comment the coverage results on the PR.
+            - name: Comment Coverage
+              if: github.event_name == 'pull_request'
+              uses: sidx1024/report-nyc-coverage-github-action@v1.2.7
+              with:
+                  coverage_file: coverage/coverage-summary.json
+
+            # Upload the coverage summary JSON file as an artifact.
+            - name: Upload Coverage Summary JSON
+              uses: actions/upload-artifact@v4
+              with:
+                  name: coverage
+                  path: coverage/coverage-summary.json
+
+    # Re-emit any preflight results for any dependent workflows.
+    re-emit-preflight-results:
+        name: Re-Emit Preflight Results
+        runs-on: ubuntu-latest
+        needs: read-preflight-results
+        steps:
+            - uses: edumserrano/share-jobs-data@v1
+              with:
+                  command: set-data
+                  data: |
+                      release-check-proceed: ${{ needs.read-preflight-results.outputs.RELEASE_CHECK_PROCEED }}
+                      coverage-artifact-exists: ${{ needs.read-preflight-results.outputs.COVERAGE_ARTIFACT_EXISTS }}
