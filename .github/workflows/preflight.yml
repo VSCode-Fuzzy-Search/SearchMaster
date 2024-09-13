@@ -15,30 +15,7 @@ jobs:
     preflight:
         name: Preflight
         runs-on: ubuntu-latest
-        permissions:
-            contents: read
         steps:
-            - name: Release Check
-              id: release-check
-              uses: phish108/release-check@1.0.15
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  protected-paths: |
-                      webpack.config.js
-                      vsc-extension-quickstart.md
-                      tsconfig.json
-                      README.md
-                      nyc.config.js
-                      LICENSE
-                      CHANGELOG.md
-                      .vscodeignore
-                      .vscode-test.mjs
-                      .nvmrc
-                      .eslintrc.json
-                      .vscode
-                      bun.lockb
-                      src/test
-
             - name: Check Coverage Artifact Exists
               id: coverage-artifact-exists
               uses: xSAVIKx/artifact-exists-action@v0
@@ -50,5 +27,4 @@ jobs:
               with:
                   command: set-data
                   data: |
-                      release-check-proceed: ${{ steps.release-check.outputs.proceed }}
                       coverage-artifact-exists: ${{ steps.coverage-artifact-exists.outputs.exists }}
