@@ -23,14 +23,14 @@ jobs:
                   version: 7
                   run_install: false
 
+            - name: Generate PNPM Lockfile
+              run: pnpm import
+
             - name: 'Install Node.js (Cache: PNPM)'
               uses: actions/setup-node@v4
               with:
                   node-version-file: '.nvmrc'
                   cache: 'pnpm'
-
-            - name: Generate PNPM Lockfile
-              run: pnpm import
 
             - name: Install Dependencies
               run: pnpm install
