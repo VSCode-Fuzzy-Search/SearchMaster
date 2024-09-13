@@ -38,18 +38,18 @@ jobs:
             # For specifically pull requests, we want to comment the coverage results on the PR.
             - name: Comment Coverage
               if: steps.check-pr.outputs.pr_found == 'true'
-              uses: sidx1024/report-nyc-coverage-github-action@v1.2.7
+              uses: kcjpop/coverage-comments@v2.2
               with:
-                  coverage_file: coverage/coverage-summary.json
+                  coverage-file: coverage/lcov.info
 
-            # Upload the coverage summary JSON file as an artifact.
-            - name: Upload Coverage Summary JSON
-              # We don't want to upload the coverage summary JSON file multiple times.
+            # Upload the coverage files as an artifact.
+            - name: Upload Coverage File
+              # We don't want to upload the coverage file multiple times.
               if: matrix.os == 'ubuntu-latest'
               uses: actions/upload-artifact@v4
               with:
                   name: coverage
-                  path: coverage/coverage-summary.json
+                  path: coverage/
 
     # Adapted from: https://github.com/prettier/prettier-vscode/blob/main/.github/workflows/main.yml
     cd-package:
