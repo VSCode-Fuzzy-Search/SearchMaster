@@ -29,6 +29,9 @@ jobs:
                   node-version-file: '.nvmrc'
                   cache: 'pnpm'
 
+            - name: Generate PNPM Lockfile
+              run: pnpm import
+
             - name: Install Dependencies
               run: pnpm install
 
