@@ -78,7 +78,7 @@ jobs:
                   prerelease: true
                   title: Development Build [${{ github.ref }}] [${{ github.sha }}]
                   files: |
-                      LICENSE.txt
+                      LICENSE
                       ${{ needs.package.outputs.VSIX_PATH }}/${{ needs.package.outputs.VSIX_NAME }}
 
             - name: Manual Release
