@@ -19,8 +19,8 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
               with:
-                  # We need the previous commit to compare changes in the release check.
-                  fetch-depth: 2
+                  # We need the history to compare changes in release-check.
+                  fetch-depth: 0
 
             - name: Release Check
               id: release-check
