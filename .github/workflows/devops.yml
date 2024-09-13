@@ -12,6 +12,8 @@ jobs:
                 os: [macos-latest, ubuntu-latest, windows-latest]
         name: Test on ${{ matrix.os }}
         runs-on: ${{ matrix.os }}
+        permissions:
+            pull-requests: write # This is required to comment on PRs.
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -53,9 +55,6 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
-
-            - name: 'Manually Fetch Tags (Workaround | See: https://github.com/actions/checkout/issues/1467)'
-              run: git fetch --tags
 
             - name: 'Install Node.js'
               uses: actions/setup-node@v4
@@ -106,9 +105,6 @@ jobs:
                   fetch-tags: true
                   filter: tree:0
 
-            - name: 'Manually Fetch Tags (Workaround | See: https://github.com/actions/checkout/issues/1467)'
-              run: git fetch --tags
-
             - name: Download VSIX Artifact
               uses: actions/download-artifact@v4
               with:
@@ -117,8 +113,6 @@ jobs:
 
             - name: Automatic Release
               uses: dciborow/action-github-releases@v1.0.1
-              # Only proceed if no tag is present.
-              if: startsWith(github.ref, 'refs/tags/') != true
               with:
                   repo_token: ${{ secrets.GITHUB_TOKEN }}
                   automatic_release_tag: latest
@@ -130,7 +124,7 @@ jobs:
 
             - name: Manual Release
               uses: ncipollo/release-action@v1
-              # Only proceed if a manual tag is present.
+              # Only proceed if a manual tag is present - this will result in a release parallel to the 'latest' tag, but this one will remain static.
               if: startsWith(github.ref, 'refs/tags/')
               with:
                   artifacts: ${{ needs.cd-package.outputs.VSIX_PATH }}/${{ needs.cd-package.outputs.VSIX_NAME }}
