@@ -64,6 +64,8 @@ jobs:
 
             # Upload the coverage summary JSON file as an artifact.
             - name: Upload Coverage Summary JSON
+              # We don't want to upload the coverage summary JSON file multiple times.
+              if: runner.os == 'Linux'
               uses: actions/upload-artifact@v4
               with:
                   name: coverage
