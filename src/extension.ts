@@ -7,7 +7,7 @@ export function activate(context: ExtensionContext) {
 	registerCacheCommand(context);
 	registerWebViewProvider(context, op);
 	commands.executeCommand('setContext', 'isPrintContextMenu', true);
-	console.log("I'm sorry all I gotta test the devops I hate how many PRs I've had to spam for this...");
+	console.log("I'm sorry all I gotta test the devops bruh");
 }
 
 export function deactivate() {}
