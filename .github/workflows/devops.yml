@@ -12,7 +12,8 @@ jobs:
                 os: [macos-latest, ubuntu-latest, windows-latest]
         name: Test on ${{ matrix.os }}
         runs-on: ${{ matrix.os }}
-        permissions: write-all # This is required to comment on PRs.
+        permissions:
+            pull-requests: write # This is required to comment on PRs.
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -36,10 +37,11 @@ jobs:
 
             # For specifically pull requests, we want to comment the coverage results on the PR.
             - name: Comment Coverage
-              if: steps.check-pr.outputs.pr_found == 'true'
+              # We don't want to upload the coverage file multiple times.
+              if: matrix.os == 'ubuntu-latest' && steps.check-pr.outputs.pr_found == 'true'
               uses: kcjpop/coverage-comments@v2.2
               with:
-                  coverage-file: coverage/lcov.info
+                  coverage-file: ./coverage/lcov.info
 
             # Upload the coverage files as an artifact.
             - name: Upload Coverage File
@@ -48,7 +50,7 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: coverage
-                  path: coverage/
+                  path: ./coverage/
 
     # Adapted from: https://github.com/prettier/prettier-vscode/blob/main/.github/workflows/main.yml
     cd-package:
