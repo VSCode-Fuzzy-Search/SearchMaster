@@ -31,9 +31,13 @@ jobs:
             - name: Run Tests
               run: ${{ runner.os == 'Linux' && 'xvfb-run -a' || '' }} npm run coverage
 
+            - name: Check if Pull Request
+              id: check-pr
+              uses: 8BitJonny/gh-get-current-pr@3.0.0
+
             # For specifically pull requests, we want to comment the coverage results on the PR.
             - name: Comment Coverage
-              if: github.event_name == 'pull_request'
+              if: steps.check-pr.outputs.pr_found == 'true'
               uses: sidx1024/report-nyc-coverage-github-action@v1.2.7
               with:
                   coverage_file: coverage/coverage-summary.json
@@ -41,7 +45,7 @@ jobs:
             # Upload the coverage summary JSON file as an artifact.
             - name: Upload Coverage Summary JSON
               # We don't want to upload the coverage summary JSON file multiple times.
-              if: runner.os == 'Linux'
+              if: matrix.os == 'ubuntu-latest'
               uses: actions/upload-artifact@v4
               with:
                   name: coverage
