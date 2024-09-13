@@ -1,21 +1,68 @@
-name: CD
-
 on:
-    workflow_run:
-        workflows: ['CI']
-        types:
-            - completed
+    push:
+        branches:
+            - 'main'
+        tags:
+            - '*'
 
 jobs:
-    # Adapted from: https://github.com/prettier/prettier-vscode/blob/main/.github/workflows/main.yml
-    package:
-        name: Package
-        runs-on: ubuntu-latest
-        # Only proceed with packaging if the CI workflow was successful.
-        if: github.event.workflow_run.conclusion == 'success'
+    ci-test:
+        strategy:
+            matrix:
+                os: [macos-latest, ubuntu-latest, windows-latest]
+        name: Test on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  fetch-tags: false # See: https://github.com/actions/checkout/issues/1467
+
+            - name: 'Manually Fetch Tags (Workaround | See: https://github.com/actions/checkout/issues/1467)'
+              run: git fetch --tags
+
+            - name: 'Install Node.js'
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
+
+            - name: Install Dependencies
+              run: npm install
+
+            # In headless Linux CI machines XVFB is required to run VS Code, so if Linux is the current OS run the tests in an XVFB enabled environment.
+            - name: Run Tests
+              run: ${{ runner.os == 'Linux' && 'xvfb-run -a' || '' }} npm run coverage
+
+            # For specifically pull requests, we want to comment the coverage results on the PR.
+            - name: Comment Coverage
+              if: github.event_name == 'pull_request'
+              uses: sidx1024/report-nyc-coverage-github-action@v1.2.7
+              with:
+                  coverage_file: coverage/coverage-summary.json
+
+            # Upload the coverage summary JSON file as an artifact.
+            - name: Upload Coverage Summary JSON
+              # We don't want to upload the coverage summary JSON file multiple times.
+              if: runner.os == 'Linux'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: coverage
+                  path: coverage/coverage-summary.json
+
+    # Adapted from: https://github.com/prettier/prettier-vscode/blob/main/.github/workflows/main.yml
+    cd-package:
+        name: Package
+        runs-on: ubuntu-latest
+        needs: ci-test
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-tags: false # See: https://github.com/actions/checkout/issues/1467
+
+            - name: 'Manually Fetch Tags (Workaround | See: https://github.com/actions/checkout/issues/1467)'
+              run: git fetch --tags
 
             - name: 'Install Node.js'
               uses: actions/setup-node@v4
@@ -51,21 +98,26 @@ jobs:
     # - If a tag is present, the release will be a stable release with the tag name.
     # NOTE: In future, if CD encounters issues after the release step (for example, failing to publish),
     # it's possible to rollback the release: https://github.com/author/action-rollback
-    release:
+    cd-release:
         name: Release
         runs-on: ubuntu-latest
         permissions:
             contents: write
-        needs: package
+        needs: cd-package
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  fetch-tags: false # See: https://github.com/actions/checkout/issues/1467
+
+            - name: 'Manually Fetch Tags (Workaround | See: https://github.com/actions/checkout/issues/1467)'
+              run: git fetch --tags
 
             - name: Download VSIX Artifact
               uses: actions/download-artifact@v4
               with:
-                  name: ${{ needs.package.outputs.VSIX_NAME }}
-                  path: ${{ needs.package.outputs.VSIX_PATH }}
+                  name: ${{ needs.cd-package.outputs.VSIX_NAME }}
+                  path: ${{ needs.cd-package.outputs.VSIX_PATH }}
 
             - name: Automatic Release
               uses: dciborow/action-github-releases@v1.0.1
@@ -74,18 +126,17 @@ jobs:
               with:
                   repo_token: ${{ secrets.GITHUB_TOKEN }}
                   automatic_release_tag: latest
-                  # If a tag is present, the release will be a stable release with the tag name.
                   prerelease: true
                   title: Development Build [${{ github.ref }}] [${{ github.sha }}]
                   files: |
                       LICENSE
-                      ${{ needs.package.outputs.VSIX_PATH }}/${{ needs.package.outputs.VSIX_NAME }}
+                      ${{ needs.cd-package.outputs.VSIX_PATH }}/${{ needs.cd-package.outputs.VSIX_NAME }}
 
             - name: Manual Release
               uses: ncipollo/release-action@v1
-              # Only proceed if a tag is present.
+              # Only proceed if a manual tag is present.
               if: startsWith(github.ref, 'refs/tags/')
               with:
-                  artifacts: ${{ needs.package.outputs.VSIX_PATH }}/${{ needs.package.outputs.VSIX_NAME }}
+                  artifacts: ${{ needs.cd-package.outputs.VSIX_PATH }}/${{ needs.cd-package.outputs.VSIX_NAME }}
                   # Tags ending in '-snapshot', '-alpha', '-beta', or '-rc' (release candidate) are considered prereleases.
                   prerelease: ${{ endsWith(github.ref, '-snapshot') || endsWith(github.ref, '-alpha') || endsWith(github.ref, '-beta') || endsWith(github.ref, '-rc') }}
