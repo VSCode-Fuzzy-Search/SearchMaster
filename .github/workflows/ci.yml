@@ -33,27 +33,18 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
-            - name: Setup PNPM
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 7
-                  run_install: false
-
-            - name: Generate PNPM Lockfile
-              run: pnpm import
-
-            - name: 'Install Node.js (Cache: PNPM)'
+            - name: 'Install Node.js'
               uses: actions/setup-node@v4
               with:
                   node-version-file: '.nvmrc'
-                  cache: 'pnpm'
+                  cache: 'npm'
 
             - name: Install Dependencies
-              run: pnpm install
+              run: npm install
 
             # In headless Linux CI machines XVFB is required to run VS Code, so if Linux is the current OS run the tests in an XVFB enabled environment.
             - name: Run Tests
-              run: ${{ runner.os == 'Linux' && 'xvfb-run -a pnpm coverage' || 'pnpm coverage' }}
+              run: ${{ runner.os == 'Linux' && 'xvfb-run -a npm coverage' || 'npm coverage' }}
 
             # For specifically pull requests, we want to comment the coverage results on the PR.
             - name: Comment Coverage
