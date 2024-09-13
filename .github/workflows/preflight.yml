@@ -38,6 +38,7 @@ jobs:
                       .eslintrc.json
                       .vscode
                       bun.lockb
+                      src/test
 
             - name: Check Coverage Artifact Exists
               id: coverage-artifact-exists
