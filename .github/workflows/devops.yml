@@ -12,8 +12,7 @@ jobs:
                 os: [macos-latest, ubuntu-latest, windows-latest]
         name: Test on ${{ matrix.os }}
         runs-on: ${{ matrix.os }}
-        permissions:
-            pull-requests: write # This is required to comment on PRs.
+        permissions: write-all # This is required to comment on PRs.
         steps:
             - name: Checkout
               uses: actions/checkout@v4
