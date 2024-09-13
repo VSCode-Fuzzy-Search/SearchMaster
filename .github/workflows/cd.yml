@@ -7,29 +7,12 @@ on:
             - completed
 
 jobs:
-    # We want to make sure that the release is only created if changes were actually made to business logic.
-    read-release-check:
-        name: Read Release Check (from Re-Emitted Preflight)
-        runs-on: ubuntu-latest
-        steps:
-            - id: read-release-check
-              uses: edumserrano/share-jobs-data@v1
-              with:
-                  command: read-data-different-workflow
-                  run-id: ${{ github.event.workflow_run.id }} # We need to specify the run id of the workflow that shared the data.
-
-        outputs:
-            RELEASE_CHECK_PROCEED: ${{ steps.read-release-check.outputs.release-check-proceed }}
-
     # Adapted from: https://github.com/prettier/prettier-vscode/blob/main/.github/workflows/main.yml
     package:
         name: Package
         runs-on: ubuntu-latest
-        needs: read-release-check
-        # Only proceed with packaging if:
-        # 1. All previous steps succeeded.
-        # 2. The release-check step indicates that business logic changes were made.
-        if: success() && needs.read-release-check.outputs.RELEASE_CHECK_PROCEED
+        # Only proceed with packaging if the CI workflow was successful.
+        if: github.event.workflow_run.conclusion == 'success'
         steps:
             - name: Checkout
               uses: actions/checkout@v4
