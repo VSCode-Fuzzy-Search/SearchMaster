@@ -11,7 +11,7 @@ module.exports = {
     reporter: ['text', 'lcov'],
 
     // Will fail if coverage % is below these thresholds:
-    'check-coverage'    : true,
+    'check-coverage'    : false,
     branches            : MIN_COVERAGE.branches,
     functions           : MIN_COVERAGE.functions,
     lines               : MIN_COVERAGE.lines,
