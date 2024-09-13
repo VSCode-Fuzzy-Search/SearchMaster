@@ -8,7 +8,7 @@ on:
             - '*'
     pull_request:
         branches:
-            - '*'
+            - 'main'
 
 jobs:
     # We want to make sure that the release is only created if changes were actually made to business logic.
