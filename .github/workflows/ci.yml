@@ -44,7 +44,7 @@ jobs:
 
             # In headless Linux CI machines XVFB is required to run VS Code, so if Linux is the current OS run the tests in an XVFB enabled environment.
             - name: Run Tests
-              run: ${{ runner.os == 'Linux' && 'xvfb-run -a npm coverage' || 'npm coverage' }}
+              run: ${{ runner.os == 'Linux' && 'xvfb-run -a npm run coverage' || 'npm run coverage' }}
 
             # For specifically pull requests, we want to comment the coverage results on the PR.
             - name: Comment Coverage
