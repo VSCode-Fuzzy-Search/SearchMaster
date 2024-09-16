@@ -93,6 +93,11 @@
                   // Add file details to the result container
                   resultContainer.appendChild(fileDetails);
       
+                  // Create and append the matches container
+                  const matchesContainer = document.createElement('div');
+                  matchesContainer.classList.add('matches-container');
+                  resultContainer.appendChild(matchesContainer);
+      
                   // Store the container by file name
                   fileContainers[queryResult.documentID] = resultContainer;
       
@@ -100,13 +105,67 @@
                   outputContainer.appendChild(resultContainer);
               }
       
-              // Create and append the code snippet for the current match
+              // Add the matches to the matches container for this file
+              const matchesContainer = resultContainer.querySelector('.matches-container');
               const codeSnippet = document.createElement('p');
               codeSnippet.classList.add('code-snippet');
               codeSnippet.innerHTML = `<span class="line-number">${queryResult.position}</span> ${queryResult.word}`;
       
-              // Append the match to the container for this file
-              resultContainer.appendChild(codeSnippet);
+              matchesContainer.appendChild(codeSnippet);
+          });
+      
+          // Now handle showing the first 15 matches and adding "Show More" and "Show Less" buttons
+          Object.values(fileContainers).forEach(container => {
+              const matchesContainer = container.querySelector('.matches-container');
+              const allMatches = Array.from(matchesContainer.children);
+              const maxToShow = 15;
+      
+              // If there are more than 15 matches, hide the excess and add a "Show More" button
+              if (allMatches.length > maxToShow) {
+                  // Hide the extra matches
+                  allMatches.slice(maxToShow).forEach(match => {
+                      match.style.display = 'none';
+                  });
+      
+                  // Create the "Show More" button
+                  const showMoreButton = document.createElement('button');
+                  showMoreButton.classList.add('show-more-button');
+                  showMoreButton.textContent = "Show More";
+                  
+                  // Create the "Show Less" button
+                  const showLessButton = document.createElement('button');
+                  showLessButton.classList.add('show-less-button');
+                  showLessButton.textContent = "Show Less";
+                  showLessButton.style.display = 'none';  // Initially hidden
+      
+                  // Show More button functionality
+                  showMoreButton.addEventListener('click', () => {
+                      // Show all hidden matches
+                      allMatches.slice(maxToShow).forEach(match => {
+                          match.style.display = 'block';
+                      });
+      
+                      // Hide the "Show More" button and display the "Show Less" button
+                      showMoreButton.style.display = 'none';
+                      showLessButton.style.display = 'block';
+                  });
+      
+                  // Show Less button functionality
+                  showLessButton.addEventListener('click', () => {
+                      // Hide the extra matches again
+                      allMatches.slice(maxToShow).forEach(match => {
+                          match.style.display = 'none';
+                      });
+      
+                      // Hide the "Show Less" button and display the "Show More" button
+                      showLessButton.style.display = 'none';
+                      showMoreButton.style.display = 'block';
+                  });
+      
+                  // Append both buttons after the matches container
+                  container.appendChild(showMoreButton);
+                  container.appendChild(showLessButton);
+              }
           });
       
           // Attach event listeners to each result
@@ -114,6 +173,8 @@
               item.addEventListener('click', handleClick);
           });
       }
+      
+      
     });
       
 
