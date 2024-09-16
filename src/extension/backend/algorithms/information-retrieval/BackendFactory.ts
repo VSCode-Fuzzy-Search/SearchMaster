@@ -2,10 +2,7 @@ import * as fs from 'fs';
 import { uuidv7 } from 'uuidv7';
 import { AlgorithmEnum } from "../../AlgorithmEnum";
 import Document from "../../Document";
-import BooleanBackend from "./Boolean/BooleanBackend";
-import LanguageModelBackend from "./LanguageModel/LanguageModelBackend";
 import QueryBackend from "./QueryBackend";
-import VectorBackend from "./Vector/VectorBackend";
 import FuzzyBackend from './Fuzzy/FuzzyBackend';
  
 export default class BackendFactory {
@@ -27,9 +24,6 @@ export default class BackendFactory {
 
         let documents: Document[] = this.getDocuments(path);
 
-         this.backends.set(AlgorithmEnum.Boolean, new BooleanBackend(documents));
-         this.backends.set(AlgorithmEnum.Vector, new VectorBackend(documents));
-         this.backends.set(AlgorithmEnum.LanguageModel, new LanguageModelBackend(documents));
          this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents));
      }
 
