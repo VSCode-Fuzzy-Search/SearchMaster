@@ -347,6 +347,21 @@ body {
                 color: #d4d4d4;
                 padding: 10px;
             }
+                .label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.txt-box {
+    width: 100%;
+    flex: 70%; /* Ensure the input takes 70% of the container */
+}
+
+.search-select {
+    flex: 30%; /* Ensure the select takes 30% of the container */
+    padding: 5px;
+}
+
             .result-container {
                 background-color: #1e1e1e;
                 border: 1px solid #3c3c3c;
@@ -388,27 +403,26 @@ body {
           </style>
            </head>
            <body>
-              <input type="text" class="txt-box w-full p-2 border border-gray-300 rounded mb-2" id="searchmastervalueid" name="searchmastervaluename" placeholder="Enter search term..."><br>
-              <label for="searchType" class="block text-sm">Choose a search type:</label>
-                <div class="relative inline-block w-full text-gray-700" style="display: flex; gap: 10px;">
-                <select
-                  id="searchType"
-                  class="search-select w-full h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
-                  name="searchTypeSelect"
-                  style="flex: 3;"
-                >
-                  <option value="boolean">Boolean</option>
-                  <option value="language">Language Model</option>
-                  <option value="vector">Vector Space Model</option>
-                  <option value="fuzzy">Fuzzy</option>
-                </select>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+  
+              <!-- Label and Flex Container for Input and Select -->
+              <label for="searchmastervalueid" class="block text-sm">Search Term:</label>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <!-- Search Term Input -->
+                <input 
+                  type="text" 
+                  class="txt-box p-2 border border-gray-300 rounded" 
+                  id="searchmastervalueid" 
+                  name="searchmastervaluename" 
+                  placeholder="Enter search term..." 
+                  style="flex: 70%;" >
+                <label for="searchmastereditdistanceid" class="block text-sm">Edit distance:</label>
 
                 <select
                   id="searchmastereditdistanceid"
-                  class="search-select w-full h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
+                  class="search-select h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
                   name="searchEditDistanceSelect"
-                  style="flex: 1;"
-                >
+                  style="flex: 30%;" >
                   <option value="0">0 (exact)</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
@@ -416,6 +430,10 @@ body {
                   <option value="4">4</option>
                   <option value="5">5</option>
                 </select>
+              </div>
+            </div>
+
+
                 <br>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
@@ -425,9 +443,6 @@ body {
                   </svg>
                 </div>
               </div>
-                <div id="searchDescription" class="mt-2 text-sm">
-                Boolean search is a type of search allowing users to combine keywords with operators (or modifiers) such as AND, NOT and OR to further produce more relevant results.
-                </div>
                 <button type="button" class="btn-search mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Search !</button><br>
 
               <div id="output" class="output-container mt-4 rounded shadow"></div>

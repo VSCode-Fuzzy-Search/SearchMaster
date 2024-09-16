@@ -8,13 +8,13 @@
     const searchDesc = document.getElementById('searchDescription');
 
     searchBtn.addEventListener('click', () => {
-        vscode.postMessage([{ type: 'btn-search', value: txtbox.value }, { type: 'search-select', value: searchType.value }, { type: 'edit-distance', value: editDistance.value }]);
+        vscode.postMessage([{ type: 'btn-search', value: txtbox.value }, { type: 'search-select', value: 'fuzzy' }, { type: 'edit-distance', value: editDistance.value }]);
     });
 
-    searchType.addEventListener('change', () => {
-        console.log("Search type has changed");
-        vscode.postMessage({ type: 'search-change', value: searchType.value });
-    });
+    // searchType.addEventListener('change', () => {
+    //     console.log("Search type has changed");
+    //     vscode.postMessage({ type: 'search-change', value: searchType.value });
+    // });
 
     window.addEventListener('message', event => {
         const message = event.data;
