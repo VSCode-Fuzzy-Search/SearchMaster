@@ -406,7 +406,6 @@ body {
               <div style="display: flex; flex-direction: column; gap: 10px;">
   
               <!-- Label and Flex Container for Input and Select -->
-              <label for="searchmastervalueid" class="block text-sm">Search Term:</label>
               <div style="display: flex; gap: 10px; align-items: center;">
                 <!-- Search Term Input -->
                 <input 
@@ -416,7 +415,6 @@ body {
                   name="searchmastervaluename" 
                   placeholder="Enter search term..." 
                   style="flex: 70%;" >
-                <label for="searchmastereditdistanceid" class="block text-sm">Edit distance:</label>
 
                 <select
                   id="searchmastereditdistanceid"
@@ -432,9 +430,6 @@ body {
                 </select>
               </div>
             </div>
-
-
-                <br>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
                     <path

@@ -109,7 +109,9 @@
               const matchesContainer = resultContainer.querySelector('.matches-container');
               const codeSnippet = document.createElement('p');
               codeSnippet.classList.add('code-snippet');
-              codeSnippet.innerHTML = `<span class="line-number">${queryResult.position}</span> ${queryResult.word}`;
+      
+              // Add the matched word along with its position and edit distance
+              codeSnippet.innerHTML = `<span class="line-number">${queryResult.position}</span> ${queryResult.word} (Edit Distance: ${queryResult.distance})`;
       
               matchesContainer.appendChild(codeSnippet);
           });
