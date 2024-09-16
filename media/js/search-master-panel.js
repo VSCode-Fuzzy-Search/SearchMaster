@@ -27,104 +27,139 @@
           const outputContainer = document.getElementById('output');
           outputContainer.innerHTML = "<p class='border-b border-gray-200 pb-2'>Query Results:</p>";
       
-          // Object to store result containers by document ID (filename)
+          // Object to store result containers by document ID and distance
           const fileContainers = {};
       
+          // Group results by document and distance
+          const resultsByFileAndDistance = {};
+      
           message.results.forEach(queryResult => {
-              // Check if we already have a container for this file
-              let resultContainer = fileContainers[queryResult.documentID];
+              const { documentID, distance } = queryResult;
       
-              if (!resultContainer) {
-                  // Create a new result container if it doesn't exist for the file
-                  resultContainer = document.createElement('div');
-                  resultContainer.classList.add('result-container');
-      
-                  // File icon and filename
-                  const fileDetails = document.createElement('div');
-                  fileDetails.classList.add('file-details');
-                  
-                  const fileIcon = document.createElement('span');
-                  fileIcon.classList.add('file-icon');
-      
-                  const fileImage = document.createElement('img');
-                  const fileExtension = queryResult.documentID.split('.').pop();
-      
-                  switch (fileExtension) {
-                      case 'ts':
-                          fileImage.src = tsLogoPath;
-                          fileImage.alt = 'TypeScript Logo';
-                          break;
-                      case 'js':
-                          fileImage.src = jsLogoPath;
-                          fileImage.alt = 'JavaScript Logo';
-                          break;
-                      case 'py':
-                          fileImage.src = pyLogoPath;
-                          fileImage.alt = 'Python Logo';
-                          break;
-                      case 'html':
-                          fileImage.src = htmlLogoPath;
-                          fileImage.alt = 'HTML Logo';
-                          break;
-                      case 'css':
-                          fileImage.src = cssLogoPath;
-                          fileImage.alt = 'CSS Logo';
-                          break;
-                      case 'json':
-                          fileImage.src = jsonLogoPath;
-                          fileImage.alt = 'JSON Logo';
-                          break;
-                      default:
-                          fileImage.src = defaultLogoPath;
-                          fileImage.alt = 'Default Logo';
-                          break;
-                  }
-      
-                  fileImage.classList.add('file-icon-img'); // Optional CSS class
-                  fileIcon.appendChild(fileImage);
-      
-                  const filename = document.createElement('span');
-                  filename.textContent = queryResult.documentID;
-                  filename.classList.add('filename');
-      
-                  fileDetails.appendChild(fileIcon);
-                  fileDetails.appendChild(filename);
-      
-                  // Add file details to the result container
-                  resultContainer.appendChild(fileDetails);
-      
-                  // Create and append the matches container
-                  const matchesContainer = document.createElement('div');
-                  matchesContainer.classList.add('matches-container');
-                  resultContainer.appendChild(matchesContainer);
-      
-                  // Store the container by file name
-                  fileContainers[queryResult.documentID] = resultContainer;
-      
-                  // Append the result container to the output
-                  outputContainer.appendChild(resultContainer);
+              if (!resultsByFileAndDistance[documentID]) {
+                  resultsByFileAndDistance[documentID] = {};
               }
       
-              // Add the matches to the matches container for this file
-              const matchesContainer = resultContainer.querySelector('.matches-container');
-              const codeSnippet = document.createElement('p');
-              codeSnippet.classList.add('code-snippet');
+              if (!resultsByFileAndDistance[documentID][distance]) {
+                  resultsByFileAndDistance[documentID][distance] = [];
+              }
       
-              // Add the matched word along with its position and edit distance
-              codeSnippet.innerHTML = `<span class="line-number">${queryResult.position}</span> ${queryResult.word} (Edit Distance: ${queryResult.distance})`;
-      
-              matchesContainer.appendChild(codeSnippet);
+              // Add the match to the group for the specific file and distance
+              resultsByFileAndDistance[documentID][distance].push(queryResult);
           });
       
-          // Now handle showing the first 15 matches and adding "Show More" and "Show Less" buttons
-          Object.values(fileContainers).forEach(container => {
-              const matchesContainer = container.querySelector('.matches-container');
-              const allMatches = Array.from(matchesContainer.children);
+          // Loop through each file and its associated distances
+          Object.keys(resultsByFileAndDistance).forEach(documentID => {
+              // Sort distances in ascending order
+              const distances = Object.keys(resultsByFileAndDistance[documentID]).sort((a, b) => a - b);
+      
+              // Create the main file container
+              const fileContainer = document.createElement('div');
+              fileContainer.classList.add('file-container');
+      
+              // File icon and filename
+              const fileDetails = document.createElement('div');
+              fileDetails.classList.add('file-details');
+              
+              const fileIcon = document.createElement('span');
+              fileIcon.classList.add('file-icon');
+      
+              const fileImage = document.createElement('img');
+              const fileExtension = documentID.split('.').pop();
+      
+              switch (fileExtension) {
+                  case 'ts':
+                      fileImage.src = tsLogoPath;
+                      fileImage.alt = 'TypeScript Logo';
+                      break;
+                  case 'js':
+                      fileImage.src = jsLogoPath;
+                      fileImage.alt = 'JavaScript Logo';
+                      break;
+                  case 'py':
+                      fileImage.src = pyLogoPath;
+                      fileImage.alt = 'Python Logo';
+                      break;
+                  case 'html':
+                      fileImage.src = htmlLogoPath;
+                      fileImage.alt = 'HTML Logo';
+                      break;
+                  case 'css':
+                      fileImage.src = cssLogoPath;
+                      fileImage.alt = 'CSS Logo';
+                      break;
+                  case 'json':
+                      fileImage.src = jsonLogoPath;
+                      fileImage.alt = 'JSON Logo';
+                      break;
+                  default:
+                      fileImage.src = defaultLogoPath;
+                      fileImage.alt = 'Default Logo';
+                      break;
+              }
+      
+              fileImage.classList.add('file-icon-img'); // Optional CSS class
+              fileIcon.appendChild(fileImage);
+      
+              const filename = document.createElement('span');
+              filename.textContent = documentID;
+              filename.classList.add('filename');
+      
+              fileDetails.appendChild(fileIcon);
+              fileDetails.appendChild(filename);
+      
+              // Add file details to the main file container
+              fileContainer.appendChild(fileDetails);
+      
+              // Create a container to hold all the subcontainers for different distances
+              const allMatchesContainer = document.createElement('div');
+              allMatchesContainer.classList.add('all-matches-container');
+      
+              // Create a separate subcontainer for each distance
+              distances.forEach(distance => {
+                  const matchesForDistance = resultsByFileAndDistance[documentID][distance];
+      
+                  // Create a subcontainer for each distance
+                  const distanceContainer = document.createElement('div');
+                  distanceContainer.classList.add('distance-container');
+      
+                  // Add a label for the distance
+                  const distanceLabel = document.createElement('p');
+                  distanceLabel.textContent = `Edit Distance: ${distance}`;
+                  distanceLabel.classList.add('distance-label');
+                  distanceContainer.appendChild(distanceLabel);
+      
+                  // Create a matches container to hold the individual matches for this distance
+                  const matchesContainer = document.createElement('div');
+                  matchesContainer.classList.add('matches-container');
+      
+                  // Add the matches to the matches container
+                  matchesForDistance.forEach(queryResult => {
+                      const codeSnippet = document.createElement('p');
+                      codeSnippet.classList.add('code-snippet');
+                      codeSnippet.innerHTML = `<span class="line-number">${queryResult.position}</span> ${queryResult.word}`;
+                      matchesContainer.appendChild(codeSnippet);
+                  });
+      
+                  // Append matches container to the distance container
+                  distanceContainer.appendChild(matchesContainer);
+      
+                  // Append the distance container to the all matches container
+                  allMatchesContainer.appendChild(distanceContainer);
+              });
+      
+              // Append the all matches container to the main file container
+              fileContainer.appendChild(allMatchesContainer);
+      
+              // Append the main file container to the output
+              outputContainer.appendChild(fileContainer);
+      
+              // Handle showing only the first 15 matches across all distances and adding Show More/Show Less
+              const allMatches = Array.from(allMatchesContainer.querySelectorAll('.code-snippet'));
               const maxToShow = 15;
       
-              // If there are more than 15 matches, hide the excess and add a "Show More" button
               if (allMatches.length > maxToShow) {
-                  // Hide the extra matches
+                  // Hide the extra matches (beyond the first 15)
                   allMatches.slice(maxToShow).forEach(match => {
                       match.style.display = 'none';
                   });
@@ -164,17 +199,18 @@
                       showMoreButton.style.display = 'block';
                   });
       
-                  // Append both buttons after the matches container
-                  container.appendChild(showMoreButton);
-                  container.appendChild(showLessButton);
+                  // Append both buttons after the all matches container
+                  allMatchesContainer.appendChild(showMoreButton);
+                  allMatchesContainer.appendChild(showLessButton);
               }
           });
       
           // Attach event listeners to each result
-          document.querySelectorAll('.result-container').forEach(item => {
+          document.querySelectorAll('.file-container').forEach(item => {
               item.addEventListener('click', handleClick);
           });
       }
+      
       
       
     });

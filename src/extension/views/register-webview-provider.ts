@@ -361,6 +361,74 @@ body {
     flex: 30%; /* Ensure the select takes 30% of the container */
     padding: 5px;
 }
+    .file-container {
+    border: 1px solid #3c3c3c;
+    background-color: #1e1e1e;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+.file-details {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.file-icon {
+    margin-right: 10px;
+}
+
+.filename {
+    font-weight: bold;
+    color: #d4d4d4;
+}
+
+.distance-container {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #2d2d2d;
+    border-radius: 4px;
+}
+
+.distance-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #cccccc;
+}
+
+.matches-container {
+    margin-left: 10px;
+}
+
+.code-snippet {
+    padding: 5px;
+    margin-bottom: 5px;
+    background-color: #333333;
+    border-radius: 4px;
+    color: #e0e0e0;
+}
+
+.line-number {
+    color: #569cd6;
+    margin-right: 5px;
+}
+
+.show-more-button, .show-less-button {
+    background-color: #007acc;
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.show-more-button:hover, .show-less-button:hover {
+    background-color: #005f9e;
+}
+
 
             .result-container {
                 background-color: #1e1e1e;
