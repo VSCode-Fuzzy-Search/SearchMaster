@@ -86,7 +86,7 @@ export default class FuzzyBackend extends QueryBackend {
         const response: QueryResponse = { results: [] };
     
         for (const [filename, document] of Object.entries(this.index)) {
-            let endNodes: { prefix: string; positions: number[] }[] = [];
+            let endNodes: { prefix: string; positions: number[], actualDistance: number }[] = [];
     
             for (const child of Object.values((document as Node).children)) {
                 let firstRow: number[] = [];
@@ -97,13 +97,14 @@ export default class FuzzyBackend extends QueryBackend {
                 this.matchStringRecursive(child as Node, word, distance, endNodes, firstRow, 0);
             }
     
+            // Process results with actual distances
             for (let j = 0; j < endNodes.length; j++) {
                 endNodes[j].positions.forEach(position => {
                     response.results.push({
-                        documentID: filename, 
-                        filePath: filename, 
+                        documentID: filename,
+                        filePath: filename,
                         position: position,   // Position within the document
-                        distance: distance,   // Distance of the match
+                        distance: endNodes[j].actualDistance,   // Actual distance of the match
                         word: endNodes[j].prefix
                     });
                 });
@@ -113,13 +114,12 @@ export default class FuzzyBackend extends QueryBackend {
         return response;
     }
     
-
     private matchStringRecursive(
-        node: Node, 
-        string: string, 
-        distance: number, 
-        endNodes: { prefix: string; positions: number[] }[], 
-        previousRow: number[], 
+        node: Node,
+        string: string,
+        distance: number,
+        endNodes: { prefix: string; positions: number[], actualDistance: number }[],
+        previousRow: number[],
         currentStart: number
     ): void {
         const size: number = previousRow.length;
@@ -141,14 +141,20 @@ export default class FuzzyBackend extends QueryBackend {
             }
         }
         
+        // If the currentRow indicates a match within the distance and it's the end of a pattern
         if (currentRow[size - 1] <= distance && node.endOfPattern) {
-            endNodes.push({ prefix: node.prefix, positions: node.positions });
+            endNodes.push({ 
+                prefix: node.prefix, 
+                positions: node.positions, 
+                actualDistance: currentRow[size - 1]  // Store the actual edit distance
+            });
         }
         
+        // Continue the search recursively if within distance
         if (minimumElement <= distance) {
             for (const child of Object.values(node.children)) {
                 this.matchStringRecursive(child, string, distance, endNodes, currentRow, currentStart);
             }
         }
-    }
+    }    
 }
