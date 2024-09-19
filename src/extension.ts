@@ -4,7 +4,15 @@ import { registerWebViewProvider } from "./extension/views/register-webview-prov
 import * as vscode from 'vscode';
 import * as path from 'path';
 
+let globalContext: ExtensionContext;
+
 export function activate(context: ExtensionContext) {
+	globalContext = context;
+
+	// Clear searchTerm and editDistance from workspaceState
+	context.workspaceState.update("searchTerm", undefined);
+	context.workspaceState.update("editDistance", undefined);	
+
 	const op = window.createOutputChannel('Search Master');
 	registerCacheCommand(context);
 	registerWebViewProvider(context, op);
@@ -21,4 +29,8 @@ export function activate(context: ExtensionContext) {
 	});
 }
 
-export function deactivate() { }
+export function deactivate() {
+	// Clear the index from workspaceState
+	globalContext.workspaceState.update("index", undefined);
+	console.log("index removed from workspace");
+ }
