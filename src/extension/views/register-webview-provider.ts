@@ -222,19 +222,28 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
             }
             break;
           case "fuzzy":
-            let fuzzyQuery = queryFactory.createQuery(
-              searchTerm + "/" + editDistance,
-              AlgorithmEnum.Fuzzy
-            );
-            let fuzzyBackend = backendFactory.getBackend(AlgorithmEnum.Fuzzy);
-            if (fuzzyQuery !== null) {
-              const result = fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
-              if (result && webviewView.webview) {
-                webviewView.webview.postMessage({
-                  type: "searchResults",
-                  results: result.results,
-                });
+            if (searchTerm.length/2 > parseInt(editDistance)){
+              let fuzzyQuery = queryFactory.createQuery(
+                searchTerm + "/" + editDistance,
+                AlgorithmEnum.Fuzzy
+              );
+              let fuzzyBackend = backendFactory.getBackend(AlgorithmEnum.Fuzzy);
+              if (fuzzyQuery !== null) {
+                const result = fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
+                if (result && webviewView.webview) {
+                  webviewView.webview.postMessage({
+                    type: "searchResults",
+                    results: result.results,
+                  });
+                }
               }
+            }
+            else {
+              console.log("TOO SHORT")
+              webviewView.webview.postMessage({
+                type: "errorScreen",
+                results: "Search Query too Short for given Edit Distance",
+              });
             }
             break;
           default:
