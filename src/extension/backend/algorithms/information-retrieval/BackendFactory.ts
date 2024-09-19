@@ -5,6 +5,7 @@ import Document from "../../Document";
 import QueryBackend from "./QueryBackend";
 import FuzzyBackend from './Fuzzy/FuzzyBackend';
 import { ExtensionContext } from 'vscode';
+import * as path from 'path';
  
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
@@ -74,10 +75,21 @@ export default class BackendFactory {
                 }
             }
         };
+
+        // 
     
         // Start processing from the root path
         processDirectory(path);
     
         return documents;
+    }
+
+    updateBackendIndex(filePath: string, extensionContext: ExtensionContext): void {
+        if (!filePath.includes('node_modules') && fs.lstatSync(filePath).isFile()) {
+            let fileName = path.basename(filePath);
+            let documentContents: string = fs.readFileSync(filePath, 'utf-8').toLocaleLowerCase();
+            let document: Document = { id: uuidv7(), filename: fileName, contents: documentContents }
+            this.getBackend(AlgorithmEnum.Fuzzy)?.updateIndex(document, extensionContext);
+        }
     }
 }

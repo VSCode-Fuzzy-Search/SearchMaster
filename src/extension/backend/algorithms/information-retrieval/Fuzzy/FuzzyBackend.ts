@@ -84,8 +84,19 @@ export default class FuzzyBackend extends QueryBackend {
      * updates the index used to handle queries
      * @param documents list of documents used to create the index
      */
-    protected updateIndex(documents: Document[]): void {
+    public updateIndex(document: Document, extensionContext: ExtensionContext): void {
         // TODO: implement this.
+        const existingIndex = extensionContext.workspaceState.get<{ [documentName: string]: Node }>("index");
+        if (existingIndex) {
+            this.index = existingIndex;
+
+            let words = document.contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
+            this.index[document.filename] = this.createTrie(words, document.contents);
+
+            extensionContext.workspaceState.update("index", this.index);
+        }
+
+
     }
 
     /**

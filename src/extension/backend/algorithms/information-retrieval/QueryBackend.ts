@@ -32,7 +32,7 @@ export default abstract class QueryBackend {
      * ^^^ There could be more effecient ways to do this, maybe we can check if any files have been modified. This can be a later implementation, not required for MVP yet. - James
      * @param documents list of documents used to create the index
      */
-    protected abstract updateIndex(documents: Document[]): void;
+    public abstract updateIndex(documents: Document, extensionContext: ExtensionContext): void;
 
     /**
      * Checks if the backend has an index

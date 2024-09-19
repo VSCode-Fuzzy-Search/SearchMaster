@@ -61,7 +61,7 @@ export default class LanguageModelBackend extends QueryBackend {
      * updates the index used to handle queries
      * @param documents list of documents used to create the index
      */
-    protected updateIndex(documents: Document[]): void {
+    protected updateIndex(documents: Document): void {
         // TODO: implement this.
     }
 
