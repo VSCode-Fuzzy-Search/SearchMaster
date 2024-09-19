@@ -90,10 +90,10 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
     // Function to update the webview witht the latest values from the workspaceState
     const updateWebViewState = () => {
       const savedSearchTerm = this.extensionContext.workspaceState.get<string>("searchTerm", "");
-      const savedEditDistance = this.extensionContext.workspaceState.get<string>("editDistance", "2");
+      const savedEditDistance = this.extensionContext.workspaceState.get<string>("editDistance", "0");
 
-      console.log("Updated search term:", savedSearchTerm);
-      console.log("Updated edit distance:", savedEditDistance);
+      console.log("saved search term:", savedSearchTerm);
+      console.log("saved edit distance:", savedEditDistance);
 
       webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, savedSearchTerm, savedEditDistance);
     };
@@ -108,9 +108,8 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       }
     });
 
-    webviewView.webview.onDidReceiveMessage(async (data) => {
-      
-      console.log(data);
+    webviewView.webview.onDidReceiveMessage(async (data) => {      
+      // console.log(data);
 
       if (data.type === "search-change") {
         switch (data.value) {
@@ -181,7 +180,6 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
 
         // Save value in workspaceState
         this.extensionContext.workspaceState.update("searchTerm", searchTerm);
-        this.extensionContext.workspaceState.update("searchType", searchType);
         this.extensionContext.workspaceState.update("editDistance", editDistance);
 
         // console.log(data);
@@ -189,7 +187,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
         /*  */
 
         const backendFactory = BackendFactory.getInstance();
-        backendFactory.createAllBackends(path);
+        backendFactory.createAllBackends(path, this.extensionContext);
         // console.log(path);
 
         const queryFactory = new QueryFactory();
@@ -508,7 +506,7 @@ body {
                   type="text" 
                   class="txt-box p-2 border border-gray-300 rounded" 
                   id="searchmastervalueid" 
-                  value="${savedSearchTerm}"
+                  value="${savedSearchTerm !== undefined ? savedSearchTerm : 'default search term'}"
                   name="searchmastervaluename" 
                   placeholder="Enter search term..." 
                   style="flex: 70%;" >
@@ -518,7 +516,7 @@ body {
                   class="search-select h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
                   name="searchEditDistanceSelect"
                   style="flex: 30%;" >
-                  <option value="0" ${savedEditDistance === "0" ? "selected" : ""}>0 (exact)</option>
+                  <option value="0" ${savedEditDistance === "0" ? "selected" : savedEditDistance === undefined ? "selected" : ""}>0 (exact)</option>
                   <option value="1" ${savedEditDistance === "1" ? "selected" : ""}>1</option>
                   <option value="2" ${savedEditDistance === "2" ? "selected" : ""}>2</option>
                   <option value="3" ${savedEditDistance === "3" ? "selected" : ""}>3</option>

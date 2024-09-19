@@ -5,6 +5,7 @@ import QueryResponse from "../../../results/QueryResponse";
 import Query from "../../../queries/Query";
 import Node from "./Node";
 import FuzzyQuery from "../../../queries/FuzzyQuery";
+import { ExtensionContext } from "vscode";
 
 export default class FuzzyBackend extends QueryBackend {
     
@@ -12,14 +13,27 @@ export default class FuzzyBackend extends QueryBackend {
      * Creates the index used to handle queries
      * @param documents list of documents used to create the index
      */
-    protected generateIndex(documents: Document[]): void {
-        const index: { [documentName: string]: Node } = {};
-        for (let i = 0; i < documents.length; i++) {
-            let words = documents[i].contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
-            index[documents[i].filename] = this.createTrie(words, documents[i].contents);  // Pass the document contents
-        }
-    
-        this.index = index;
+    protected generateIndex(documents: Document[], extensionContext: ExtensionContext): void {
+        // Try to retrieve existing index
+        const existingIndex = extensionContext.workspaceState.get<{ [documentName: string]: Node }>("index");
+        
+        // Use existing index or create new one if it doesn't exist
+        if (existingIndex) {
+            this.index = existingIndex;
+            console.log("using existing index");
+        } else {
+            console.log("creating index");
+
+            const index: { [documentName: string]: Node } = {};
+            for (let i = 0; i < documents.length; i++) {
+                let words = documents[i].contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
+                index[documents[i].filename] = this.createTrie(words, documents[i].contents);  // Pass the document contents
+            }
+            extensionContext.workspaceState.update("index", index);
+            this.index = index;
+            
+            console.log("created new index");
+        }            
     }
 
     private createTrie(words: string[], document: string): Node {

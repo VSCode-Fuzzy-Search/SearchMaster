@@ -4,6 +4,7 @@ import { AlgorithmEnum } from "../../AlgorithmEnum";
 import Document from "../../Document";
 import QueryBackend from "./QueryBackend";
 import FuzzyBackend from './Fuzzy/FuzzyBackend';
+import { ExtensionContext } from 'vscode';
  
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
@@ -20,11 +21,11 @@ export default class BackendFactory {
      * Creates all query backends
      * @param path path in which to look for documents
      */
-    public createAllBackends(path: string): void {
+    public createAllBackends(path: string, extensionContext: ExtensionContext): void {
 
         let documents: Document[] = this.getDocuments(path);
 
-        this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents));
+        this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents, extensionContext));
      }
 
     /**
