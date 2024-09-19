@@ -224,7 +224,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
           case "fuzzy":
             if (searchTerm.length/2 > parseInt(editDistance)){
               let fuzzyQuery = queryFactory.createQuery(
-                searchTerm + "/" + editDistance,
+                searchTerm.toLocaleLowerCase() + "/" + editDistance,
                 AlgorithmEnum.Fuzzy
               );
               let fuzzyBackend = backendFactory.getBackend(AlgorithmEnum.Fuzzy);
