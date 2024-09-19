@@ -24,7 +24,7 @@ export default class BackendFactory {
 
         let documents: Document[] = this.getDocuments(path);
 
-         this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents));
+        this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents));
      }
 
     /**

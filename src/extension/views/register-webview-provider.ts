@@ -87,9 +87,31 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       localResourceRoots: [this._extensionUri],
     };
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    // Function to update the webview witht the latest values from the workspaceState
+    const updateWebViewState = () => {
+      const savedSearchTerm = this.extensionContext.workspaceState.get<string>("searchTerm", "");
+      const savedEditDistance = this.extensionContext.workspaceState.get<string>("editDistance", "2");
+
+      console.log("Updated search term:", savedSearchTerm);
+      console.log("Updated edit distance:", savedEditDistance);
+
+      webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, savedSearchTerm, savedEditDistance);
+    };
+
+    // Initial load of workspaceState values
+    updateWebViewState();
+
+    // Listen for visibility changes
+    webviewView.onDidChangeVisibility(() => {
+      if (webviewView.visible) {
+        updateWebViewState();
+      }
+    });
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
+      
+      console.log(data);
+
       if (data.type === "search-change") {
         switch (data.value) {
           case "boolean":
@@ -156,13 +178,19 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
         if (editDistance === "") {
           editDistance = 2;
         }
-        console.log(data);
+
+        // Save value in workspaceState
+        this.extensionContext.workspaceState.update("searchTerm", searchTerm);
+        this.extensionContext.workspaceState.update("searchType", searchType);
+        this.extensionContext.workspaceState.update("editDistance", editDistance);
+
+        // console.log(data);
         let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
         /*  */
 
         const backendFactory = BackendFactory.getInstance();
         backendFactory.createAllBackends(path);
-        console.log(path);
+        // console.log(path);
 
         const queryFactory = new QueryFactory();
 
@@ -247,7 +275,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
 
   // targetWord
 
-  private _getHtmlForWebview(webview: Webview) {
+  private _getHtmlForWebview(webview: Webview, savedSearchTerm: string, savedEditDistance: string) {
     const styleResetUri = webview.asWebviewUri(
       Uri.joinPath(this._extensionUri, "media", "css", "reset.css")
     );
@@ -480,6 +508,7 @@ body {
                   type="text" 
                   class="txt-box p-2 border border-gray-300 rounded" 
                   id="searchmastervalueid" 
+                  value="${savedSearchTerm}"
                   name="searchmastervaluename" 
                   placeholder="Enter search term..." 
                   style="flex: 70%;" >
@@ -489,12 +518,12 @@ body {
                   class="search-select h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
                   name="searchEditDistanceSelect"
                   style="flex: 30%;" >
-                  <option value="0">0 (exact)</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
+                  <option value="0" ${savedEditDistance === "0" ? "selected" : ""}>0 (exact)</option>
+                  <option value="1" ${savedEditDistance === "1" ? "selected" : ""}>1</option>
+                  <option value="2" ${savedEditDistance === "2" ? "selected" : ""}>2</option>
+                  <option value="3" ${savedEditDistance === "3" ? "selected" : ""}>3</option>
+                  <option value="4" ${savedEditDistance === "4" ? "selected" : ""}>4</option>
+                  <option value="5" ${savedEditDistance === "5" ? "selected" : ""}>5</option>
                 </select>
               </div>
             </div>
