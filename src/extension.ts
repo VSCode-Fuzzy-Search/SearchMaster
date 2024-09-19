@@ -9,9 +9,10 @@ let globalContext: ExtensionContext;
 export function activate(context: ExtensionContext) {
 	globalContext = context;
 
-	// Clear searchTerm and editDistance from workspaceState
+	// Clear searchTerm, editDistance, and index from workspaceState
 	context.workspaceState.update("searchTerm", undefined);
-	context.workspaceState.update("editDistance", undefined);	
+	context.workspaceState.update("editDistance", undefined);
+	globalContext.workspaceState.update("index", undefined);
 
 	const op = window.createOutputChannel('Search Master');
 	registerCacheCommand(context);
@@ -29,8 +30,4 @@ export function activate(context: ExtensionContext) {
 	});
 }
 
-export function deactivate() {
-	// Clear the index from workspaceState
-	globalContext.workspaceState.update("index", undefined);
-	console.log("index removed from workspace");
- }
+export function deactivate() { }
