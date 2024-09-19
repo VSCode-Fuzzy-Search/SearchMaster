@@ -56,6 +56,10 @@ export default class BackendFactory {
     
         // Helper function to process files recursively
         const processDirectory = (directoryPath: string) => {
+            if (directoryPath.includes('node_modules')) {
+                return;
+            }
+
             const files = fs.readdirSync(directoryPath);
     
             for (let i = 0; i < files.length; i++) {
