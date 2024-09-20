@@ -210,7 +210,12 @@
               item.addEventListener('click', handleClick);
           });
       }
-      
+      if  (message.type === "errorScreen") {
+
+        const outputContainer = document.getElementById('output');
+          outputContainer.innerHTML = "<p class='border-b border-gray-200 pb-2'>Query length too short for given edit distance.</p>";
+
+      }
       
       
     });
