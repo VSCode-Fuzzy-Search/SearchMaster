@@ -2,25 +2,31 @@ import * as fs from 'fs';
 import { uuidv7 } from 'uuidv7';
 import { AlgorithmEnum } from "../../AlgorithmEnum";
 import Document from "../../Document";
-import BooleanBackend from "./Boolean/BooleanBackend";
-import LanguageModelBackend from "./LanguageModel/LanguageModelBackend";
 import QueryBackend from "./QueryBackend";
-import VectorBackend from "./Vector/VectorBackend";
+import FuzzyBackend from './Fuzzy/FuzzyBackend';
+import { ExtensionContext } from 'vscode';
+import * as path from 'path';
  
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
+    private static instance: BackendFactory;
+
+    public static getInstance(): BackendFactory {
+        if (!BackendFactory.instance) {
+            BackendFactory.instance = new BackendFactory();
+        }
+        return BackendFactory.instance;
+    }
 
     /**
      * Creates all query backends
      * @param path path in which to look for documents
      */
-    public createAllBackends(path: string): void {
+    public createAllBackends(path: string, extensionContext: ExtensionContext): void {
 
         let documents: Document[] = this.getDocuments(path);
 
-         this.backends.set(AlgorithmEnum.Boolean, new BooleanBackend(documents));
-         this.backends.set(AlgorithmEnum.Vector, new VectorBackend(documents));
-         this.backends.set(AlgorithmEnum.LanguageModel, new LanguageModelBackend(documents));
+        this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents, extensionContext));
      }
 
     /**
@@ -47,22 +53,43 @@ export default class BackendFactory {
      * @returns list of documents in the specified path
      */
     private getDocuments(path: string): Document[] {
-        // TODO: implement this
-        let files: Array<string> = fs.readdirSync(path);
         const documents: Document[] = [];
-
-        for (let i = 0; i < files.length; i++){
-
-            if (fs.lstatSync(path + "/" + files[i]).isFile()){
-                let fileOutput: string = fs.readFileSync(path + "/" + files[i], 'utf-8');
-            
-                // let fileSplit: Array<string> = fileOutput.replace(/[(),'.:]/g, "").replace("[", "").replace("]", "").split(" ");
-
-                documents.push({id: uuidv7(), filename: files[i], contents: fileOutput});
+    
+        // Helper function to process files recursively
+        const processDirectory = (directoryPath: string) => {
+            if (directoryPath.includes('node_modules')) {
+                return;
             }
 
-        }
+            const files = fs.readdirSync(directoryPath);
+    
+            for (let i = 0; i < files.length; i++) {
+                const fullPath = `${directoryPath}/${files[i]}`;
+    
+                if (fs.lstatSync(fullPath).isDirectory()) {
+                    // Recursively process subdirectories
+                    processDirectory(fullPath);
+                } else if (fs.lstatSync(fullPath).isFile()) {
+                    const fileOutput: string = fs.readFileSync(fullPath, 'utf-8').toLocaleLowerCase();
+                    documents.push({ id: uuidv7(), filename: files[i], contents: fileOutput });
+                }
+            }
+        };
 
+        // 
+    
+        // Start processing from the root path
+        processDirectory(path);
+    
         return documents;
+    }
+
+    updateBackendIndex(filePath: string, extensionContext: ExtensionContext): void {
+        if (!filePath.includes('node_modules') && fs.lstatSync(filePath).isFile()) {
+            let fileName = path.basename(filePath);
+            let documentContents: string = fs.readFileSync(filePath, 'utf-8').toLocaleLowerCase();
+            let document: Document = { id: uuidv7(), filename: fileName, contents: documentContents }
+            this.getBackend(AlgorithmEnum.Fuzzy)?.updateIndex(document, extensionContext);
+        }
     }
 }

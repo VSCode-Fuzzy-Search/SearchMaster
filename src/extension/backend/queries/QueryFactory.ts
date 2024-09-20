@@ -1,5 +1,6 @@
 import { AlgorithmEnum } from "../AlgorithmEnum";
 import BooleanQuery from "./BooleanQuery";
+import FuzzyQuery from "./FuzzyQuery";
 import LanguageModelQuery from "./LanguageModelQuery";
 import VectorQuery from "./VectorQuery";
 
@@ -24,6 +25,10 @@ export default class QueryFactory {
 
         else if (queryType == AlgorithmEnum.Vector){
             return new VectorQuery(query);
+        }
+
+        else if (queryType == AlgorithmEnum.Fuzzy){
+            return new FuzzyQuery(query);
         }
 
     }

@@ -19,6 +19,7 @@ import BooleanQuery from "../backend/queries/BooleanQuery";
 import BooleanBackend from "../backend/algorithms/information-retrieval/Boolean/BooleanBackend";
 import QueryResponse from "../backend/results/QueryResponse";
 import MockQueryResponse from "../backend/results/MockQueryResponse";
+import path = require("path");
 
 export function readSelectedOrAllText(op: OutputChannel) {
   op.clear();
@@ -64,6 +65,7 @@ const algorithmEnumMapping: { [key: string]: AlgorithmEnum } = {
   boolean: AlgorithmEnum.Boolean,
   vector: AlgorithmEnum.Vector,
   language: AlgorithmEnum.LanguageModel,
+  fuzzy: AlgorithmEnum.Fuzzy,
 };
 
 export class SidebarWebViewProvider implements WebviewViewProvider {
@@ -85,51 +87,108 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       localResourceRoots: [this._extensionUri],
     };
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    // Function to update the webview witht the latest values from the workspaceState
+    const updateWebViewState = () => {
+      const savedSearchTerm = this.extensionContext.workspaceState.get<string>("searchTerm", "");
+      const savedEditDistance = this.extensionContext.workspaceState.get<string>("editDistance", "0");
 
-    webviewView.webview.onDidReceiveMessage(async (data) => {
-      if (data.type === "search-change"){
+      console.log("saved search term:", savedSearchTerm);
+      console.log("saved edit distance:", savedEditDistance);
+
+      webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, savedSearchTerm, savedEditDistance);
+    };
+
+    // Initial load of workspaceState values
+    updateWebViewState();
+
+    // Listen for visibility changes
+    webviewView.onDidChangeVisibility(() => {
+      if (webviewView.visible) {
+        updateWebViewState();
+      }
+    });
+
+    webviewView.webview.onDidReceiveMessage(async (data) => {      
+      // console.log(data);
+
+      if (data.type === "search-change") {
         switch (data.value) {
           case "boolean":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Boolean search is a type of search allowing users to combine keywords with operators (or modifiers) such as AND, NOT and OR to further produce more relevant results.",
+              description:
+                "Boolean search is a type of search allowing users to combine keywords with operators (or modifiers) such as AND, NOT and OR to further produce more relevant results.",
             });
             break;
           case "language":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Language model search is a type of search that ranks documents based on the likelihood or how much relevant of a query appearing in a document. This kind of search also considers word order and context.",
+              description:
+                "Language model search is a type of search that ranks documents based on the likelihood or how much relevant of a query appearing in a document. This kind of search also considers word order and context.",
             });
             break;
           case "vector":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Vector search is a type of search that uses vectors to represent documents and queries. It helps ranking documents based on relevance to a query.",
+              description:
+                "Vector search is a type of search that uses vectors to represent documents and queries. It helps ranking documents based on relevance to a query.",
             });
             break;
           case "fuzzy":
             webviewView.webview.postMessage({
               type: "searchDescription",
-              description: "Fuzzy search is a type of search that searches for text that matches a term closely instead of exactly. Fuzzy searches help you find relevant results even when the search terms are misspelled.",
+              description:
+                "Fuzzy search is a type of search that searches for text that matches a term closely instead of exactly. Fuzzy searches help you find relevant results even when the search terms are misspelled.",
             });
             break;
           default:
             vscode.window.showInformationMessage("Search type not found");
             break;
-          }
+        }
       }
 
-      if(data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
+      if (data.command === "openFile") {
+        const workspaceFolder =
+          vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const fullPath = path.join(workspaceFolder || "", data.filePath);
+
+        const document = await vscode.workspace.openTextDocument(fullPath);
+        const editor = await vscode.window.showTextDocument(document);
+
+        // Highlight the word if specified
+        if (data.word) {
+          const wordPosition = document.getText().indexOf(data.word);
+          if (wordPosition !== -1) {
+            const startPos = document.positionAt(wordPosition);
+            const endPos = document.positionAt(wordPosition + data.word.length);
+            const range = new vscode.Range(startPos, endPos);
+
+            // Set the selection and reveal the range
+            editor.selection = new vscode.Selection(startPos, endPos);
+            editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+          }
+        }
+      }
+
+      if (data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
         let searchTerm = data[0].value;
         let searchType = data[1].value;
+        let editDistance = data[2].value;
+        if (editDistance === "") {
+          editDistance = 2;
+        }
+
+        // Save value in workspaceState
+        this.extensionContext.workspaceState.update("searchTerm", searchTerm);
+        this.extensionContext.workspaceState.update("editDistance", editDistance);
+
+        // console.log(data);
         let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
-      
-        const backendFactory = new BackendFactory();
-        backendFactory.createAllBackends(
-          path
-        );
-        console.log(path);
+        /*  */
+
+        const backendFactory = BackendFactory.getInstance();
+        backendFactory.createAllBackends(path, this.extensionContext);
+        // console.log(path);
 
         const queryFactory = new QueryFactory();
 
@@ -143,7 +202,8 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               AlgorithmEnum.Boolean
             );
             if (booleanQuery !== null) {
-              const result = booleanQuery && booleanBackend?.handle(booleanQuery);
+              const result =
+                booleanQuery && booleanBackend?.handle(booleanQuery);
               if (result && webviewView.webview) {
                 webviewView.webview.postMessage({
                   type: "searchResults",
@@ -187,16 +247,33 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               }
             }
             break;
-
-            default:
-              vscode.window.showInformationMessage("Search type not found");
-              break;
-
+          case "fuzzy":
+            let fuzzyQuery = queryFactory.createQuery(
+              searchTerm + "/" + editDistance,
+              AlgorithmEnum.Fuzzy
+            );
+            let fuzzyBackend = backendFactory.getBackend(AlgorithmEnum.Fuzzy);
+            if (fuzzyQuery !== null) {
+              const result = fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
+              if (result && webviewView.webview) {
+                webviewView.webview.postMessage({
+                  type: "searchResults",
+                  results: result.results,
+                });
+              }
+            }
+            break;
+          default:
+            vscode.window.showInformationMessage("Search type not found");
+            break;
+        }
       }
-    }});
+    });
   }
 
-  private _getHtmlForWebview(webview: Webview) {
+  // targetWord
+
+  private _getHtmlForWebview(webview: Webview, savedSearchTerm: string, savedEditDistance: string) {
     const styleResetUri = webview.asWebviewUri(
       Uri.joinPath(this._extensionUri, "media", "css", "reset.css")
     );
@@ -208,6 +285,69 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
     );
 
     const nonce = getNonce();
+    const jsLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "javascript.svg"
+      )
+    );
+    const cssLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "css.svg"
+      )
+    );
+    const htmlLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "html.svg"
+      )
+    );
+    const jsonLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "json.svg"
+      )
+    );
+    const tsLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "typescript.svg"
+      )
+    );
+    const pyLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "python.svg"
+      )
+    );
+    const defaultLogoUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "results",
+        "default.svg"
+      )
+    );
 
     return `<!DOCTYPE html>
         <html lang="en">
@@ -228,36 +368,163 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               <link href="${styleVSCodeUri}" rel="stylesheet">
               <script nonce="${nonce}"></script>
               <style>
-            .output-container {
-              border: 1px solid #ddd;
-              border-radius: 4px;
-              padding: 16px;
-              margin-top: 16px;
-              background-color: #5D3FD3;
+body {
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+                padding: 10px;
             }
-            .output-container p:last-child {
-              border-bottom: none;
+                .label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.txt-box {
+    width: 100%;
+    flex: 70%; /* Ensure the input takes 70% of the container */
+}
+
+.search-select {
+    flex: 30%; /* Ensure the select takes 30% of the container */
+    padding: 5px;
+}
+    .file-container {
+    border: 1px solid #3c3c3c;
+    background-color: #1e1e1e;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+.file-details {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.file-icon {
+    margin-right: 10px;
+}
+
+.filename {
+    font-weight: bold;
+    color: #d4d4d4;
+}
+
+.distance-container {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #2d2d2d;
+    border-radius: 4px;
+}
+
+.distance-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #cccccc;
+}
+
+.matches-container {
+    margin-left: 10px;
+}
+
+.code-snippet {
+    padding: 5px;
+    margin-bottom: 5px;
+    background-color: #333333;
+    border-radius: 4px;
+    color: #e0e0e0;
+}
+
+.line-number {
+    color: #569cd6;
+    margin-right: 5px;
+}
+
+.show-more-button, .show-less-button {
+    background-color: #007acc;
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.show-more-button:hover, .show-less-button:hover {
+    background-color: #005f9e;
+}
+
+
+            .result-container {
+                background-color: #1e1e1e;
+                border: 1px solid #3c3c3c;
+                border-radius: 4px;
+                padding: 10px;
+                margin: 10px 0;
+                cursor: pointer;
             }
-            .output-container .output-title {
-              font-weight: bold;
-              margin-bottom: 8px;
+            .result-container:hover {
+                background-color: #2d2d2d;
             }
+            .file-details {
+                display: flex;
+                align-items: center;
+                margin-bottom: 5px;
+            }
+            .file-icon {
+
+            }
+            .filename {
+                font-weight: bold;
+            }
+            .code-snippet {
+                background-color: #252526;
+                padding: 5px;
+                border-radius: 3px;
+                white-space: pre;
+            }
+            .line-number {
+                color: #569cd6;
+                margin-right: 10px;
+            }
+                .file-icon-img {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
           </style>
            </head>
            <body>
-              <input type="text" class="txt-box w-full p-2 border border-gray-300 rounded mb-2" id="searchmastervalueid" name="searchmastervaluename" placeholder="Enter search term..."><br>
-              <label for="searchType" class="block text-sm">Choose a search type:</label>
-                <div class="relative inline-block w-full text-gray-700">
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+  
+              <!-- Label and Flex Container for Input and Select -->
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <!-- Search Term Input -->
+                <input 
+                  type="text" 
+                  class="txt-box p-2 border border-gray-300 rounded" 
+                  id="searchmastervalueid" 
+                  value="${savedSearchTerm !== undefined ? savedSearchTerm : 'default search term'}"
+                  name="searchmastervaluename" 
+                  placeholder="Enter search term..." 
+                  style="flex: 70%;" >
+
                 <select
-                  id="searchType"
-                  class="search-select w-full h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
-                  name="searchTypeSelect"
-                >
-                  <option value="boolean">Boolean</option>
-                  <option value="language">Language Model</option>
-                  <option value="vector">Vector Space Model</option>
-                  <option value="fuzzy">Fuzzy</option>
+                  id="searchmastereditdistanceid"
+                  class="search-select h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
+                  name="searchEditDistanceSelect"
+                  style="flex: 30%;" >
+                  <option value="0" ${savedEditDistance === "0" ? "selected" : savedEditDistance === undefined ? "selected" : ""}>0 (exact)</option>
+                  <option value="1" ${savedEditDistance === "1" ? "selected" : ""}>1</option>
+                  <option value="2" ${savedEditDistance === "2" ? "selected" : ""}>2</option>
+                  <option value="3" ${savedEditDistance === "3" ? "selected" : ""}>3</option>
+                  <option value="4" ${savedEditDistance === "4" ? "selected" : ""}>4</option>
+                  <option value="5" ${savedEditDistance === "5" ? "selected" : ""}>5</option>
                 </select>
+              </div>
+            </div>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
                     <path
@@ -266,14 +533,18 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                   </svg>
                 </div>
               </div>
-                <div id="searchDescription" class="mt-2 text-sm">
-                Boolean search is a type of search allowing users to combine keywords with operators (or modifiers) such as AND, NOT and OR to further produce more relevant results.
-                </div>
                 <button type="button" class="btn-search mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Search !</button><br>
 
               <div id="output" class="output-container mt-4 rounded shadow"></div>
           </div>
               <script nonce="${nonce}" src="${scriptUri}"></script>
+              <script>const jsLogoPath = "${jsLogoUri}";</script>
+              <script>const cssLogoPath = "${cssLogoUri}";</script>
+              <script>const htmlLogoPath = "${htmlLogoUri}";</script>
+              <script>const jsonLogoPath = "${jsonLogoUri}";</script>
+              <script>const tsLogoPath = "${tsLogoUri}";</script>
+              <script>const pyLogoPath = "${pyLogoUri}";</script>
+              <script>const defaultLogoPath = "${defaultLogoUri}";</script>
            </body>
         </html>`;
   }
