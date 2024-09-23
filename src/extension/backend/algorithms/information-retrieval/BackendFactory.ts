@@ -65,7 +65,7 @@ export default class BackendFactory {
                     processDirectory(fullPath);
                 } else if (fs.lstatSync(fullPath).isFile()) {
                     const fileOutput: string = fs.readFileSync(fullPath, 'utf-8').toLocaleLowerCase();
-                    documents.push({ id: uuidv7(), filename: files[i], contents: fileOutput });
+                    documents.push({ id: uuidv7(), filename: files[i], contents: fileOutput, filePath: fullPath });
                 }
             }
         };

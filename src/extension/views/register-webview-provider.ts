@@ -129,7 +129,8 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       if (data.command === "openFile") {
         const workspaceFolder =
           vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-        const fullPath = path.join(workspaceFolder || "", data.filePath);
+        // const fullPath = path.join(workspaceFolder || "", data.filePath);
+        const fullPath = data.fullPath;
 
         const document = await vscode.workspace.openTextDocument(fullPath);
         const editor = await vscode.window.showTextDocument(document);
@@ -231,6 +232,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               if (fuzzyQuery !== null) {
                 const result = fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
                 if (result && webviewView.webview) {
+                  console.log(result.results);
                   webviewView.webview.postMessage({
                     type: "searchResults",
                     results: result.results,
