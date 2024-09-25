@@ -137,7 +137,7 @@
                         codeSnippet.dataset.word = queryResult.word;
                         codeSnippet.dataset.fullPath = queryResult.filePath;
 
-                        codeSnippet.innerHTML = `<span class="line-number">${queryResult.position}</span> ${queryResult.word}`;
+                        codeSnippet.innerHTML = `<span class="line-number">${queryResult.position.line}</span> ${queryResult.word}`;
                         matchesContainer.appendChild(codeSnippet);
                     });
 

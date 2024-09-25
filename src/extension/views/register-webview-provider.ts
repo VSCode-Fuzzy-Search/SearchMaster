@@ -137,17 +137,25 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
 
         // Highlight the word if specified
         if (data.word) {
-          const wordPosition = document.getText().indexOf(data.word);
-          if (wordPosition !== -1) {
-            const startPos = document.positionAt(wordPosition);
-            const endPos = document.positionAt(wordPosition + data.word.length);
-            const range = new vscode.Range(startPos, endPos);
-
-            // Set the selection and reveal the range
-            editor.selection = new vscode.Selection(startPos, endPos);
-            editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+          const positionData = document.getText().split("\n").reduce((acc: { line: number, wordIndex: number }[], line, index) => {
+              if (line.includes(data.word)) {
+                  const wordIndex = line.indexOf(data.word);
+                  acc.push({ line: index, wordIndex });
+              }
+              return acc;
+          }, []);
+      
+          if (positionData.length > 0) {
+              const { line, wordIndex } = positionData[0];
+              const startPos = new vscode.Position(line, wordIndex);
+              const endPos = new vscode.Position(line, wordIndex + data.word.length);
+              const range = new vscode.Range(startPos, endPos);
+      
+              // Set the selection and reveal the range
+              editor.selection = new vscode.Selection(startPos, endPos);
+              editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
           }
-        }
+      }      
       }
 
       if (data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
