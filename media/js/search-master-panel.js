@@ -136,6 +136,7 @@
                         codeSnippet.dataset.position = queryResult.position;
                         codeSnippet.dataset.word = queryResult.word;
                         codeSnippet.dataset.fullPath = queryResult.filePath;
+                        codeSnippet.dataset.line = queryResult.position.line;
 
                         codeSnippet.innerHTML = `<span class="line-number">${queryResult.position.line}</span> ${queryResult.word}`;
                         matchesContainer.appendChild(codeSnippet);
@@ -222,13 +223,15 @@
         const position = event.currentTarget.querySelector('.code-snippet').dataset.position;
         const word = event.currentTarget.querySelector('.code-snippet').dataset.word;
         const fullPath = event.currentTarget.querySelector('.code-snippet').dataset.fullPath;
+        const line = event.currentTarget.querySelector('.code-snippet').dataset.line;
 
         vscode.postMessage({
             command: 'openFile',
             filePath: filePath,
             position: position,
             word: word,
-            fullPath: fullPath
+            fullPath: fullPath,
+            line: line,
         });
     }
 }());

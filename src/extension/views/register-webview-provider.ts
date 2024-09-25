@@ -135,27 +135,22 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
         const document = await vscode.workspace.openTextDocument(fullPath);
         const editor = await vscode.window.showTextDocument(document);
 
-        // Highlight the word if specified
-        if (data.word) {
-          const positionData = document.getText().split("\n").reduce((acc: { line: number, wordIndex: number }[], line, index) => {
-              if (line.includes(data.word)) {
-                  const wordIndex = line.indexOf(data.word);
-                  acc.push({ line: index, wordIndex });
-              }
-              return acc;
-          }, []);
-      
-          if (positionData.length > 0) {
-              const { line, wordIndex } = positionData[0];
-              const startPos = new vscode.Position(line, wordIndex);
-              const endPos = new vscode.Position(line, wordIndex + data.word.length);
-              const range = new vscode.Range(startPos, endPos);
-      
-              // Set the selection and reveal the range
-              editor.selection = new vscode.Selection(startPos, endPos);
-              editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
-          }
-      }      
+        // Use the line number from the data to reveal the line
+        if (data.line !== undefined) {
+          const lineNumber = Number(data.line);
+          const lineText = document.lineAt(lineNumber).text;
+
+          const startPos = new vscode.Position(lineNumber, 0); // Start of the line
+          const endPos = new vscode.Position(lineNumber, lineText.length); // End of the line
+          const range = new vscode.Range(startPos, endPos);
+
+          // Set the selection and reveal the range
+          editor.selection = new vscode.Selection(startPos, startPos);
+          editor.revealRange(range, vscode.TextEditorRevealType.InCenter); // Reveal the line in the center of the editor
+        }
+        else{
+          vscode.window.showInformationMessage("Position not found");
+        }
       }
 
       if (data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
@@ -165,7 +160,6 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
         if (editDistance === "") {
           editDistance = 2;
         }
-        console.log(data);
         let path = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
         /*  */
 
@@ -231,7 +225,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
             }
             break;
           case "fuzzy":
-            if (searchTerm.length/2 > parseInt(editDistance)){
+            if (searchTerm.length / 2 > parseInt(editDistance)) {
               let fuzzyQuery = queryFactory.createQuery(
                 searchTerm.toLocaleLowerCase() + "/" + editDistance,
                 AlgorithmEnum.Fuzzy
@@ -247,9 +241,8 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                   });
                 }
               }
-            }
-            else {
-              console.log("TOO SHORT")
+            } else {
+              console.log("TOO SHORT");
               webviewView.webview.postMessage({
                 type: "errorScreen",
                 results: "Search Query too Short for given Edit Distance",

@@ -9,16 +9,6 @@ export function activate(context: ExtensionContext) {
 	registerCacheCommand(context);
 	registerWebViewProvider(context, op);
 	commands.executeCommand('setContext', 'isPrintContextMenu', true);
-
-	let disposable = commands.registerCommand('extension.openFile', async (filePath: string) => {
-		// Resolve the file path to the workspace
-		const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-		const fullPath = path.join(workspaceFolder || '', filePath);
-		
-		// Use vscode API to open the file
-		const document = await vscode.workspace.openTextDocument(fullPath);
-		await vscode.window.showTextDocument(document);
-	});
 }
 
 export function deactivate() { }

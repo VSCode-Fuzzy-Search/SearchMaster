@@ -58,7 +58,7 @@ export default class FuzzyBackend extends QueryBackend {
     
         // Split the document into lines to track line positions
         const lines = document.split("\n");
-        let lineIndex = 0;
+        let lineIndex = 1;
         let lineOffset = 0;  // Character offset for the current line
     
         for (const line of lines) {
