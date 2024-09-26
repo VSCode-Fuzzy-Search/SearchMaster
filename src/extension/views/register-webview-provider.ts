@@ -127,31 +127,41 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       }
 
       if (data.command === "openFile") {
-        const workspaceFolder =
-          vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-        // const fullPath = path.join(workspaceFolder || "", data.filePath);
-        const fullPath = data.fullPath;
-
-        const document = await vscode.workspace.openTextDocument(fullPath);
-        const editor = await vscode.window.showTextDocument(document);
-
-        // Use the line number from the data to reveal the line
-        if (data.line !== undefined) {
-          const lineNumber = Number(data.line);
-          const lineText = document.lineAt(lineNumber).text;
-
-          const startPos = new vscode.Position(lineNumber, 0); // Start of the line
-          const endPos = new vscode.Position(lineNumber, lineText.length); // End of the line
-          const range = new vscode.Range(startPos, endPos);
-
-          // Set the selection and reveal the range
-          editor.selection = new vscode.Selection(startPos, startPos);
-          editor.revealRange(range, vscode.TextEditorRevealType.InCenter); // Reveal the line in the center of the editor
+        try {
+            const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+            // const fullPath = path.join(workspaceFolder || "", data.filePath);
+            const fullPath = data.fullPath;
+    
+            const document = await vscode.workspace.openTextDocument(fullPath);
+            const editor = await vscode.window.showTextDocument(document);
+    
+            // Use the line number from the data to reveal the line
+            if (data.line !== undefined && data.word) {
+                const lineNumber = Number(data.line);
+                const lineText = document.lineAt(lineNumber - 1).text;  // -1 because lines are 0-based in the editor
+    
+                // Find the index of the word in the line
+                const wordIndex = lineText.indexOf(data.word);
+    
+                if (wordIndex !== -1) {
+                    // Highlight the word by setting the start and end positions
+                    const startPos = new vscode.Position(lineNumber - 1, wordIndex);  // Line number needs to be zero-based
+                    const endPos = new vscode.Position(lineNumber - 1, wordIndex + data.word.length);
+                    const range = new vscode.Range(startPos, endPos);
+    
+                    // Set the selection to the word and reveal the range
+                    editor.selection = new vscode.Selection(startPos, endPos);
+                    editor.revealRange(range, vscode.TextEditorRevealType.InCenter);  // Reveal the word in the center of the editor
+                } else {
+                    vscode.window.showInformationMessage(`Word "${data.word}" not found on line ${lineNumber}`);
+                }
+            } else {
+                vscode.window.showInformationMessage("Line number or word not provided");
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error opening document: ${error}`);
         }
-        else{
-          vscode.window.showInformationMessage("Position not found");
-        }
-      }
+    }
 
       if (data.length > 1 && vscode.workspace.workspaceFolders !== undefined) {
         let searchTerm = data[0].value;

@@ -8,7 +8,11 @@
     const searchDesc = document.getElementById('searchDescription');
 
     searchBtn.addEventListener('click', () => {
-        vscode.postMessage([{ type: 'btn-search', value: txtbox.value }, { type: 'search-select', value: 'fuzzy' }, { type: 'edit-distance', value: editDistance.value }]);
+        vscode.postMessage([
+            { type: 'btn-search', value: txtbox.value },
+            { type: 'search-select', value: 'fuzzy' },
+            { type: 'edit-distance', value: editDistance.value }
+        ]);
     });
 
     window.addEventListener('message', event => {
@@ -133,7 +137,7 @@
                         
                         // Add data attributes to store file path, position, and word
                         codeSnippet.dataset.filePath = documentID;
-                        codeSnippet.dataset.position = queryResult.position;
+                        codeSnippet.dataset.position = JSON.stringify(queryResult.position);
                         codeSnippet.dataset.word = queryResult.word;
                         codeSnippet.dataset.fullPath = queryResult.filePath;
                         codeSnippet.dataset.line = queryResult.position.line;
@@ -206,10 +210,8 @@
                 }
             });
 
-            // Attach event listeners to each result
-            document.querySelectorAll('.file-container').forEach(item => {
-                item.addEventListener('click', handleClick);
-            });
+            // After generating the search results, attach click event listeners
+            attachEventListeners();
         }
 
         if (message.type === "errorScreen") {
@@ -219,19 +221,34 @@
     });
 
     function handleClick(event) {
-        const filePath = event.currentTarget.querySelector('.code-snippet').dataset.filePath;
-        const position = event.currentTarget.querySelector('.code-snippet').dataset.position;
-        const word = event.currentTarget.querySelector('.code-snippet').dataset.word;
-        const fullPath = event.currentTarget.querySelector('.code-snippet').dataset.fullPath;
-        const line = event.currentTarget.querySelector('.code-snippet').dataset.line;
+        // Find the specific .code-snippet element that was clicked
+        const target = event.target.closest('.code-snippet');
 
-        vscode.postMessage({
-            command: 'openFile',
-            filePath: filePath,
-            position: position,
-            word: word,
-            fullPath: fullPath,
-            line: line,
+        if (target) {
+            const filePath = target.dataset.filePath;
+            const position = target.dataset.position;
+            const word = target.dataset.word;
+            const fullPath = target.dataset.fullPath;
+            const line = target.dataset.line;
+
+            // Post the message with the correct data
+            vscode.postMessage({
+                command: 'openFile',
+                filePath: filePath,
+                position: JSON.parse(position),  // Parse the position back to an object
+                word: word,
+                fullPath: fullPath,
+                line: parseInt(line, 10),  // Parse the line to an integer
+            });
+        } else {
+            console.error("No target found for the click event.");
+        }
+    }
+
+    // Attach the event listeners to each .code-snippet element
+    function attachEventListeners() {
+        document.querySelectorAll('.code-snippet').forEach(item => {
+            item.addEventListener('click', handleClick);
         });
     }
 }());
