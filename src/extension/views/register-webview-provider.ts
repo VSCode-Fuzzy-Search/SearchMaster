@@ -516,7 +516,7 @@ body {
                   id="searchmastereditdistanceid"
                   class="search-select h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
                   name="searchEditDistanceSelect"
-                  style="flex: 30%;" >
+                  style="flex: 30%;color: black;" >
                   <option value="0">0 (exact)</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
