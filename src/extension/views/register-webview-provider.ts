@@ -138,7 +138,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
             // Use the line number from the data to reveal the line
             if (data.line !== undefined && data.word) {
                 const lineNumber = Number(data.line);
-                const lineText = document.lineAt(lineNumber - 1).text;  // -1 because lines are 0-based in the editor
+                const lineText = document.lineAt(lineNumber - 1).text.toLowerCase();  // -1 because lines are 0-based in the editor
     
                 // Find the index of the word in the line
                 const wordIndex = lineText.indexOf(data.word);
@@ -463,6 +463,12 @@ body {
             .result-container:hover {
                 background-color: #2d2d2d;
             }
+            
+            .code-snippet:hover {
+              text-decoration: underline;
+              cursor: pointer;
+          }
+
             .file-details {
                 display: flex;
                 align-items: center;

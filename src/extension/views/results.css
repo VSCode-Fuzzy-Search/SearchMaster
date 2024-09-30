@@ -12,7 +12,6 @@
 .result-container:hover {
     background-color: #2d2d2d; /* Hover effect */
 }
-
 .file-details {
     display: flex;
     align-items: center;
