@@ -34,7 +34,7 @@ export default class BooleanBackend extends QueryBackend {
      * updates the index used to handle queries
      * @param documents list of documents used to create the index
      */
-    protected updateIndex(documents: Document[]): void {
+    public updateIndex(documents: Document): void {
         // TODO: implement this.
     }
 
@@ -73,7 +73,7 @@ export default class BooleanBackend extends QueryBackend {
         }
 
         for (let i = 0; i < andArray.length; i++){
-            response.results.push({documentID: andArray[i]});
+            
         }
         
         return response;

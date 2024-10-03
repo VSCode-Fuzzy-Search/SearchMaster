@@ -4,6 +4,8 @@ import { AlgorithmEnum } from "../../AlgorithmEnum";
 import Document from "../../Document";
 import QueryBackend from "./QueryBackend";
 import FuzzyBackend from './Fuzzy/FuzzyBackend';
+import { ExtensionContext } from 'vscode';
+import * as path from 'path';
  
 export default class BackendFactory {
     private backends: Map<AlgorithmEnum, QueryBackend> = new Map<AlgorithmEnum, QueryBackend>;
@@ -20,11 +22,11 @@ export default class BackendFactory {
      * Creates all query backends
      * @param path path in which to look for documents
      */
-    public createAllBackends(path: string): void {
+    public createAllBackends(path: string, extensionContext: ExtensionContext): void {
 
         let documents: Document[] = this.getDocuments(path);
 
-         this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents));
+        this.backends.set(AlgorithmEnum.Fuzzy, new FuzzyBackend(documents, extensionContext));
      }
 
     /**
@@ -55,6 +57,10 @@ export default class BackendFactory {
     
         // Helper function to process files recursively
         const processDirectory = (directoryPath: string) => {
+            if (directoryPath.includes('node_modules')) {
+                return;
+            }
+
             const files = fs.readdirSync(directoryPath);
     
             for (let i = 0; i < files.length; i++) {
@@ -69,10 +75,21 @@ export default class BackendFactory {
                 }
             }
         };
+
+        // 
     
         // Start processing from the root path
         processDirectory(path);
     
         return documents;
+    }
+
+    updateBackendIndex(filePath: string, extensionContext: ExtensionContext): void {
+        if (!filePath.includes('node_modules') && fs.lstatSync(filePath).isFile()) {
+            let fileName = path.basename(filePath);
+            let documentContents: string = fs.readFileSync(filePath, 'utf-8').toLocaleLowerCase();
+            let document: Document = { id: uuidv7(), filename: fileName, contents: documentContents, filePath: filePath }
+            this.getBackend(AlgorithmEnum.Fuzzy)?.updateIndex(document, extensionContext);
+        }
     }
 }

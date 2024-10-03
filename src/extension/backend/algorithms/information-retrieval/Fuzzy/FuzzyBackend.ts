@@ -5,6 +5,7 @@ import QueryResponse from "../../../results/QueryResponse";
 import Query from "../../../queries/Query";
 import Node from "./Node";
 import FuzzyQuery from "../../../queries/FuzzyQuery";
+import { ExtensionContext } from "vscode";
 
 export default class FuzzyBackend extends QueryBackend {
     
@@ -12,15 +13,27 @@ export default class FuzzyBackend extends QueryBackend {
      * Creates the index used to handle queries
      * @param documents list of documents used to create the index
      */
-    protected generateIndex(documents: Document[]): void {
-        const index: { [documentName: string]: Node } = {};
-        for (let i = 0; i < documents.length; i++) {
-            let words = documents[i].contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
-            index[documents[i].filename] = this.createTrie(words, documents[i].contents, documents[i].filePath);  // Pass the document contents and filePath
-            console.log(`Fuzzy backend, generate index ${documents[i].filePath}`);
-        }
-    
-        this.index = index;
+    protected generateIndex(documents: Document[], extensionContext: ExtensionContext): void {
+        // Try to retrieve existing index
+        const existingIndex = extensionContext.workspaceState.get<{ [documentName: string]: Node }>("index");
+        
+        // Use existing index or create new one if it doesn't exist
+        if (existingIndex) {
+            this.index = existingIndex;
+            console.log("using existing index");
+        } else {
+            console.log("creating index");
+
+            const index: { [documentName: string]: Node } = {};
+            for (let i = 0; i < documents.length; i++) {
+                let words = documents[i].contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
+                index[documents[i].filename] = this.createTrie(words, documents[i].contents, documents[i].filePath);  // Pass the document contents
+            }
+            extensionContext.workspaceState.update("index", index);
+            this.index = index;
+            
+            console.log("created new index");
+        }            
     }
 
     // private createTrie(words: string[], document: string, filePath: string): Node {
@@ -125,8 +138,19 @@ export default class FuzzyBackend extends QueryBackend {
      * updates the index used to handle queries
      * @param documents list of documents used to create the index
      */
-    protected updateIndex(documents: Document[]): void {
+    public updateIndex(document: Document, extensionContext: ExtensionContext): void {
         // TODO: implement this.
+        const existingIndex = extensionContext.workspaceState.get<{ [documentName: string]: Node }>("index");
+        if (existingIndex) {
+            this.index = existingIndex;
+
+            let words = document.contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
+            this.index[document.filename] = this.createTrie(words, document.contents, document.filePath);
+
+            extensionContext.workspaceState.update("index", this.index);
+        }
+
+
     }
 
     /**

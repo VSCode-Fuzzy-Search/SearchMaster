@@ -1,6 +1,7 @@
 import Query from "../../queries/Query";
 import QueryResponse from "../../results/QueryResponse";
 import Document from "../../Document";
+import { ExtensionContext } from "vscode";
 
 export default abstract class QueryBackend {
     // Data structure used to perform the query matching on
@@ -11,8 +12,8 @@ export default abstract class QueryBackend {
     protected doc_details: {[key: string]: number} = {};
     // {"doc_id": num_words_in_doc}
 
-    constructor(documents: Document[]){
-        this.generateIndex(documents);
+    constructor(documents: Document[], extensionContext: ExtensionContext){
+        this.generateIndex(documents, extensionContext);
     }
 
     /**
@@ -21,7 +22,7 @@ export default abstract class QueryBackend {
      * ^^^ Will have to just do it on the implementation side at the moment. - James
      * @param documents list of documents used to create the index
      */
-    protected abstract generateIndex(documents: Document[]): void;
+    protected abstract generateIndex(documents: Document[], extensionContext: ExtensionContext): void;
 
     /**
      * updates the index used to handle queries
@@ -31,7 +32,7 @@ export default abstract class QueryBackend {
      * ^^^ There could be more effecient ways to do this, maybe we can check if any files have been modified. This can be a later implementation, not required for MVP yet. - James
      * @param documents list of documents used to create the index
      */
-    protected abstract updateIndex(documents: Document[]): void;
+    public abstract updateIndex(documents: Document, extensionContext: ExtensionContext): void;
 
     /**
      * Checks if the backend has an index
