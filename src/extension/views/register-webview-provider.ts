@@ -83,7 +83,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
        */
       console.log(data);
       switch (data.command) {
-        case "search":
+        case "search": {
           /**
            * Switch case for searchType
            * Currently only for fuzzy search but kept for extensibility
@@ -94,57 +94,61 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                 vscode.workspace.workspaceFolders[0].uri.path.substring(1);
               const backendFactory = BackendFactory.getInstance(); // Backend factory is a singleton instance
               backendFactory.createAllBackends(path, this.extensionContext);
-              
             } catch (error) {
               vscode.window.showErrorMessage(
-                "Error creating Backened and Query Factories: " + error
+                "Error creating Backend Factory: " + error
               );
             }
+          } else {
+            vscode.window.showInformationMessage(
+              "Could not find workspace, relaunch and try again"
+            );
           }
-          else{
-            // Handle workspaceFolders undefined
-          }
+
           switch (data.searchType) {
-            case "fuzzy":
+            case "fuzzy": {
               console.log("Fuzzy searchType");
-              const queryFactory = QueryFactory.getInstance(); // QueryFactory is a singleton
+              // Checking edit distance is less than half the word length
+              // This is done for search efficiency and accuracy
+              if (data.searchTerm.length / 2 > parseInt(data.editDistance)) {
+                let fuzzyQuery = QueryFactory.getInstance().createQuery(
+                  // case handling
 
-                // Checking edit distance is less than half the word length
-                // This is done for search efficiency and accuracy
-                if (data.searchTerm.length / 2 > parseInt(data.editDistance)) {
-                  let fuzzyQuery = queryFactory.createQuery(
-                    // case handling
-                    data.searchTerm.toLocaleLowerCase() + "/" + data.editDistance,
-                    AlgorithmEnum.Fuzzy
-                  );
-                  let fuzzyBackend = data.backendFactory.getBackend(
-                    AlgorithmEnum.Fuzzy
-                  );
-                  if (fuzzyQuery !== null) {
-                    const result =
-                      fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
-                    if (result && webviewView.webview) {
-                      webviewView.webview.postMessage({
-                        type: "searchResults",
-                        results: result.results,
-                      });
-                    }
+                  data.searchTerm.toLocaleLowerCase() + "/" + data.editDistance,
+                  AlgorithmEnum.Fuzzy
+                );
+                let fuzzyBackend = BackendFactory.getInstance().getBackend(
+                  AlgorithmEnum.Fuzzy
+                );
+                if (fuzzyQuery !== null) {
+                  const result = fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
+                  console.log("Results collected and being posted");
+                  if (result && webviewView.webview) {
+                    webviewView.webview.postMessage({
+                      type: "searchResults",
+                      results: result.results,
+                    });
                   }
-                } else {
-                  // Window message for edit distance too short
-                  webviewView.webview.postMessage({
-                    type: "errorScreen",
-                    results: "Search Query too Short for given Edit Distance",
-                  });
                 }
-
+                break;
+              } else {
+                // Window message for edit distance too short
+                webviewView.webview.postMessage({
+                  type: "errorScreen",
+                  results: "Search Query too Short for given Edit Distance",
+                });
+                break;
+              }
+            }
+            // Add in extra search algorithms here
             default: {
               vscode.window.showErrorMessage("Search type not found");
               break;
             }
           }
-
-        case "openFile":
+          break;
+        }
+        case "openFile": {
           try {
             const fullPath = data.fullPath;
             const document = await vscode.workspace.openTextDocument(fullPath);
@@ -188,9 +192,12 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
           } catch (error) {
             vscode.window.showErrorMessage(`Error opening document: ${error}`);
           }
-        default:
+          break;
+        }
+        default: {
           vscode.window.showErrorMessage("Invalid command");
           break;
+        }
       }
     });
   }
@@ -294,138 +301,146 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               <link href="${styleVSCodeUri}" rel="stylesheet">
               <script nonce="${nonce}"></script>
               <style>
-body {
-                background-color: #1e1e1e;
-                color: #d4d4d4;
-                padding: 10px;
-            }
+                body {
+                    background-color: #1e1e1e;
+                    color: #d4d4d4;
+                    padding: 10px;
+                }
+
                 .label {
-    display: block;
-    margin-bottom: 5px;
-}
+                    display: block;
+                    margin-bottom: 5px;
+                }
 
-.txt-box {
-    width: 100%;
-    flex: 70%; /* Ensure the input takes 70% of the container */
-}
+                .txt-box {
+                    width: 100%;
+                    flex: 70%;
+                    /* Ensure the input takes 70% of the container */
+                }
 
-.search-select {
-    flex: 30%; /* Ensure the select takes 30% of the container */
-    padding: 5px;
-}
-    .file-container {
-    border: 1px solid #3c3c3c;
-    background-color: #1e1e1e;
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-}
+                .search-select {
+                    flex: 30%;
+                    /* Ensure the select takes 30% of the container */
+                    padding: 5px;
+                }
 
-.file-details {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
+                .file-container {
+                    border: 1px solid #3c3c3c;
+                    background-color: #1e1e1e;
+                    padding: 10px;
+                    margin-bottom: 15px;
+                    border-radius: 4px;
+                }
 
-.file-icon {
-    margin-right: 10px;
-}
+                .file-details {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 10px;
+                }
 
-.filename {
-    font-weight: bold;
-    color: #d4d4d4;
-}
+                .file-icon {
+                    margin-right: 10px;
+                }
 
-.distance-container {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #2d2d2d;
-    border-radius: 4px;
-}
+                .filename {
+                    font-weight: bold;
+                    color: #d4d4d4;
+                }
 
-.distance-label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #cccccc;
-}
+                .distance-container {
+                    margin-top: 10px;
+                    padding: 10px;
+                    background-color: #2d2d2d;
+                    border-radius: 4px;
+                }
 
-.matches-container {
-    margin-left: 10px;
-}
+                .distance-label {
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                    color: #cccccc;
+                }
 
-.code-snippet {
-    padding: 5px;
-    margin-bottom: 5px;
-    background-color: #333333;
-    border-radius: 4px;
-    color: #e0e0e0;
-}
+                .matches-container {
+                    margin-left: 10px;
+                }
 
-.line-number {
-    color: #569cd6;
-    margin-right: 5px;
-}
+                .code-snippet {
+                    padding: 5px;
+                    margin-bottom: 5px;
+                    background-color: #333333;
+                    border-radius: 4px;
+                    color: #e0e0e0;
+                }
 
-.show-more-button, .show-less-button {
-    background-color: #007acc;
-    color: #ffffff;
-    border: none;
-    padding: 5px 10px;
-    margin-top: 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 12px;
-}
+                .line-number {
+                    color: #569cd6;
+                    margin-right: 5px;
+                }
 
-.show-more-button:hover, .show-less-button:hover {
-    background-color: #005f9e;
-}
+                .show-more-button,
+                .show-less-button {
+                    background-color: #007acc;
+                    color: #ffffff;
+                    border: none;
+                    padding: 5px 10px;
+                    margin-top: 10px;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    font-size: 12px;
+                }
+
+                .show-more-button:hover,
+                .show-less-button:hover {
+                    background-color: #005f9e;
+                }
 
 
-            .result-container {
-                background-color: #1e1e1e;
-                border: 1px solid #3c3c3c;
-                border-radius: 4px;
-                padding: 10px;
-                margin: 10px 0;
-                cursor: pointer;
-            }
-            .result-container:hover {
-                background-color: #2d2d2d;
-            }
-            
-            .code-snippet:hover {
-              text-decoration: underline;
-              cursor: pointer;
-          }
+                .result-container {
+                    background-color: #1e1e1e;
+                    border: 1px solid #3c3c3c;
+                    border-radius: 4px;
+                    padding: 10px;
+                    margin: 10px 0;
+                    cursor: pointer;
+                }
 
-            .file-details {
-                display: flex;
-                align-items: center;
-                margin-bottom: 5px;
-            }
-            .file-icon {
+                .result-container:hover {
+                    background-color: #2d2d2d;
+                }
 
-            }
-            .filename {
-                font-weight: bold;
-            }
-            .code-snippet {
-                background-color: #252526;
-                padding: 5px;
-                border-radius: 3px;
-                white-space: pre;
-            }
-            .line-number {
-                color: #569cd6;
-                margin-right: 10px;
-            }
+                .code-snippet:hover {
+                    text-decoration: underline;
+                    cursor: pointer;
+                }
+
+                .file-details {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 5px;
+                }
+
+                .filename {
+                    font-weight: bold;
+                }
+
+                .code-snippet {
+                    background-color: #252526;
+                    padding: 5px;
+                    border-radius: 3px;
+                    white-space: pre;
+                }
+
+                .line-number {
+                    color: #569cd6;
+                    margin-right: 10px;
+                }
+
                 .file-icon-img {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-    vertical-align: middle;
-}
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 8px;
+                    vertical-align: middle;
+                }
           </style>
            </head>
            <body>
