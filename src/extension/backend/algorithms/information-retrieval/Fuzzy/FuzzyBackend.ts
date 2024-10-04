@@ -123,8 +123,8 @@ export default class FuzzyBackend extends QueryBackend {
         let current: Node = root;
 
         for (let i = 0; i < string.length; i++){
-            if (current.children[string[i]] != undefined){
-                current = current.children[string[i]]
+            if (current.children[string[i]] !== undefined){
+                current = current.children[string[i]];
             }
             else {
                 return undefined;
