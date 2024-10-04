@@ -281,6 +281,14 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
         "default.svg"
       )
     );
+    const helpIconUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "icons",
+        "help-icon.png"
+      )
+    );
 
     return `<!DOCTYPE html>
         <html lang="en">
@@ -441,6 +449,41 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                     margin-right: 8px;
                     vertical-align: middle;
                 }
+                .hover-container {
+                    position: relative;
+                    display: inline-block;
+                }
+
+                .hover-icon {
+                    max-width: 24px;
+                    height: 24px; 
+                    cursor: pointer;
+                }
+
+                .hover-text {
+                    position: absolute;
+                    right: 100%;
+                    top: 100%;
+                    transform: translateY(5px);
+                    background-color: #333;
+                    color: #fff;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                    font-size: 14px;
+                    white-space: normal; 
+                    max-width: 300px;
+                    width: 200px;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    z-index: 1000;
+                    pointer-events: none;
+                }
+
+                .hover-container:hover .hover-text {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+
           </style>
            </head>
            <body>
@@ -466,14 +509,14 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                   id="searchmastereditdistanceid"
                   class="search-select h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline"
                   name="searchEditDistanceSelect"
-                  style="flex: 30%;" >
+                  style="flex: 30%; color: black;" >
                   <option value="0" ${
                     savedEditDistance === "0"
                       ? "selected"
                       : savedEditDistance === undefined
                       ? "selected"
                       : ""
-                  }>0 (exact)</option>
+                  }>0</option>
                   <option value="1" ${
                     savedEditDistance === "1" ? "selected" : ""
                   }>1</option>
@@ -490,6 +533,14 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                     savedEditDistance === "5" ? "selected" : ""
                   }>5</option>
                 </select>
+                <div class="hover-container">
+                    <img src="${helpIconUri}" class="hover-icon">
+                    <span class="hover-text">
+                      Adjust the edit distance<br>
+                      using the dropdown menu.<br>
+                      Set to 0 for exact matches.<br>
+                      Increase for fuzzier matches.
+                </div>
               </div>
             </div>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
