@@ -88,7 +88,7 @@ export default class BackendFactory {
         if (!filePath.includes('node_modules') && fs.lstatSync(filePath).isFile()) {
             let fileName = path.basename(filePath);
             let documentContents: string = fs.readFileSync(filePath, 'utf-8').toLocaleLowerCase();
-            let document: Document = { id: uuidv7(), filename: fileName, contents: documentContents, filePath: filePath }
+            let document: Document = { id: uuidv7(), filename: fileName, contents: documentContents, filePath: filePath };
             this.getBackend(AlgorithmEnum.Fuzzy)?.updateIndex(document, extensionContext);
         }
     }
