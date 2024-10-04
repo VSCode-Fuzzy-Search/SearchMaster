@@ -2,17 +2,26 @@
     const vscode = acquireVsCodeApi();
 
     const searchBtn = document.querySelector('.btn-search');
-    const txtbox = document.querySelector('.txt-box');
-    const searchType = document.querySelector('.search-select');
+    const inputBox = document.querySelector('.txt-box');
     const editDistance = document.getElementById('searchmastereditdistanceid');
     const searchDesc = document.getElementById('searchDescription');
 
+    // TODO: change this message format here and in register
     searchBtn.addEventListener('click', () => {
-        vscode.postMessage([
-            { type: 'btn-search', value: txtbox.value },
-            { type: 'search-select', value: 'fuzzy' },
-            { type: 'edit-distance', value: editDistance.value }
-        ]);
+        // vscode.postMessage([
+        //     { type: 'btn-search', value: inputBox.value },
+        //     { type: 'search-select', value: 'fuzzy' },
+        //     { type: 'edit-distance', value: editDistance.value }
+        // ]);
+        vscode.postMessage(
+            {
+                command: "search",
+                value: inputBox.value,
+                searchType: "fuzzy",
+                editDistance: editDistance.value
+
+            }
+        );
     });
 
     window.addEventListener('message', event => {
