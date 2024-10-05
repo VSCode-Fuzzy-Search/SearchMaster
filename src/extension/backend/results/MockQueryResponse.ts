@@ -12,11 +12,12 @@ export default class MockQueryResponse implements QueryResponse {
         this.duration = 100; // Example duration in ms
         this.matchCount = 10; // Example match count
         this.corpusSize = 1000; // Example corpus size
+        this.results = [];
 
         // Generate random document IDs
-        this.results = Array.from({ length: 10 }, (_, index) => ({
-            documentID: `doc${index + 1}_${this.generateRandomString()}`
-        }));
+        // this.results = Array.from({ length: 10 }, (_, index) => ({
+        //     documentID: `doc${index + 1}_${this.generateRandomString()}`
+        // }));
     }
 
     private generateRandomString(): string {

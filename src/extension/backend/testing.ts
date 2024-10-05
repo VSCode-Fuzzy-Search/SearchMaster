@@ -2,11 +2,11 @@ import { AlgorithmEnum } from './AlgorithmEnum';
 import BackendFactory from './algorithms/information-retrieval/BackendFactory';
 import QueryFactory from './queries/QueryFactory';
 
-let backendFactory = new BackendFactory();
+let backendFactory = BackendFactory.getInstance();
 
 var startTimeIndex = performance.now();
 
-backendFactory.createAllBackends('./');
+// backendFactory.createAllBackends('./', extensionContext);
 
 let queryFactory = new QueryFactory();
 /** 

@@ -61,7 +61,7 @@ export default class LanguageModelBackend extends QueryBackend {
      * updates the index used to handle queries
      * @param documents list of documents used to create the index
      */
-    protected updateIndex(documents: Document): void {
+    public updateIndex(documents: Document): void {
         // TODO: implement this.
     }
 
@@ -96,9 +96,10 @@ export default class LanguageModelBackend extends QueryBackend {
         }
         
         //add files to response
-        for (let file in files){
-            response.results.push({documentID: file});
-        }
+        // for (let file in files){
+        //     response.results.push({documentID: file});
+        // }
+        // add files to response
         return response;
     }
 
