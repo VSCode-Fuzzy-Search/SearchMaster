@@ -27,7 +27,7 @@ export default class FuzzyBackend extends QueryBackend {
             const index: { [documentName: string]: Node } = {};
             for (let i = 0; i < documents.length; i++) {
                 let words = documents[i].contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
-                index[documents[i].filename] = this.createTrie(words, documents[i].contents);  // Pass the document contents
+                index[documents[i].filename] = this.createTrie(words, documents[i].contents, documents[i].filePath);  // Pass the document contents
             }
             extensionContext.workspaceState.update("index", index);
             this.index = index;
@@ -36,41 +36,95 @@ export default class FuzzyBackend extends QueryBackend {
         }            
     }
 
-    private createTrie(words: string[], document: string): Node {
-        const root = new Node("", "");  // Initialize the root of the trie
+    // private createTrie(words: string[], document: string, filePath: string): Node {
+    //     const root = new Node("", "", filePath);  // Initialize the root of the trie with filePath
+    //     let currentPosition = 0;
+    
+    //     for (const word of words) {
+    //         let current = root;
+    //         const wordPosition = document.indexOf(word, currentPosition);  // Find the position of the word in the document
+    
+    //         for (let j = 0; j < word.length; j++) {
+    //             const letter = word[j];
+    //             // Add the letter to the trie if it doesn't exist
+    //             if (!(letter in current.children)) {
+    //                 const node = new Node(letter, word.substring(0, j + 1), filePath);  // Store filePath in each node
+    //                 current.children[letter] = node;
+    //             }
+    //             current = current.children[letter];
+    //             // Add the position of the substring within the entire document
+    //             if (j === word.length - 1) {
+    //                 current.positions.push(wordPosition);
+    //             }
+    //         }
+    //         current.endOfPattern = true; // Mark the end of a pattern
+    
+    //         currentPosition = wordPosition + word.length;  // Update currentPosition to continue the search
+    //     }
+    
+    //     return root;
+    // }
+
+    private createTrie(words: string[], document: string, filePath: string): Node {
+        const root = new Node("", "", filePath);  // Initialize the root of the trie with filePath
         let currentPosition = 0;
     
-        for (const word of words) {
-            let current = root;
-            const wordPosition = document.indexOf(word, currentPosition);  // Find the position of the word in the document
+        // Split the document into lines to track line positions
+        const lines = document.split("\n");
+        let lineIndex = 1;
+        let lineOffset = 0;  // Character offset for the current line
     
-            for (let j = 0; j < word.length; j++) {
-                const letter = word[j];
-                // Add the letter to the trie if it doesn't exist
-                if (!(letter in current.children)) {
-                    const node = new Node(letter, word.substring(0, j + 1));
-                    current.children[letter] = node;
+        for (const line of lines) {
+            let wordsInLine = line.replace(/[^a-z0-9]/gi, ' ').split(" ");  // Split line into words
+    
+            for (const word of wordsInLine) {
+                let current = root;
+    
+                // Calculate word position based on the character offset in the current line
+                const wordPosition = line.indexOf(word, currentPosition);  // Character position in the line
+    
+                // Store the word's line and word index, relative to the entire document
+                const wordIndexInLine = wordsInLine.indexOf(word);  // Get the word index within the line
+    
+                // Iterate through each letter of the word to build the trie
+                for (let j = 0; j < word.length; j++) {
+                    const letter = word[j];
+    
+                    // Add the letter to the trie if it doesn't exist
+                    if (!(letter in current.children)) {
+                        const node = new Node(letter, word.substring(0, j + 1), filePath);  // Store filePath in each node
+                        current.children[letter] = node;
+                    }
+                    current = current.children[letter];
+    
+                    // When we reach the end of the word, store the position info
+                    if (j === word.length - 1) {
+                        current.positions.push({
+                            wordPosition: wordPosition + lineOffset,  // Character position within the line
+                            line: lineIndex,  // Line number
+                            wordIndex: wordIndexInLine  // Word index within the line
+                        } as any);
+                    }
                 }
-                current = current.children[letter];
-                // Add the position of the substring within the entire document
-                if (j === word.length - 1) {
-                    current.positions.push(wordPosition);
-                }
+    
+                current.endOfPattern = true;  // Mark the end of a pattern
+                currentPosition = wordPosition + word.length;  // Update current position in the line
             }
-            current.endOfPattern = true; // Mark the end of a pattern
     
-            currentPosition = wordPosition + word.length;  // Update currentPosition to continue the search
+            lineOffset += line.length + 1;  // Adjust offset for next line (include newline character)
+            lineIndex++;  // Move to the next line
         }
     
         return root;
     }
+    
 
     private searchTrie(root: Node, string: String){
         let current: Node = root;
 
         for (let i = 0; i < string.length; i++){
-            if (current.children[string[i]] != undefined){
-                current = current.children[string[i]]
+            if (current.children[string[i]] !== undefined){
+                current = current.children[string[i]];
             }
             else {
                 return undefined;
@@ -91,7 +145,7 @@ export default class FuzzyBackend extends QueryBackend {
             this.index = existingIndex;
 
             let words = document.contents.replace(/[^a-z0-9]/gi, ' ').split(" ");
-            this.index[document.filename] = this.createTrie(words, document.contents);
+            this.index[document.filename] = this.createTrie(words, document.contents, document.filePath);
 
             extensionContext.workspaceState.update("index", this.index);
         }
@@ -111,7 +165,7 @@ export default class FuzzyBackend extends QueryBackend {
         const response: QueryResponse = { results: [] };
     
         for (const [filename, document] of Object.entries(this.index)) {
-            let endNodes: { prefix: string; positions: number[], actualDistance: number }[] = [];
+            let endNodes: { prefix: string; positions: number[], actualDistance: number, filePath: string }[] = []; // Add filePath
     
             for (const child of Object.values((document as Node).children)) {
                 let firstRow: number[] = [];
@@ -122,12 +176,12 @@ export default class FuzzyBackend extends QueryBackend {
                 this.matchStringRecursive(child as Node, word, distance, endNodes, firstRow, 0);
             }
     
-            // Process results with actual distances
+            // Process results with actual distances and file paths
             for (let j = 0; j < endNodes.length; j++) {
                 endNodes[j].positions.forEach(position => {
                     response.results.push({
                         documentID: filename,
-                        filePath: filename,
+                        filePath: endNodes[j].filePath,   // Return the filePath from the Node
                         position: position,   // Position within the document
                         distance: endNodes[j].actualDistance,   // Actual distance of the match
                         word: endNodes[j].prefix
@@ -143,7 +197,7 @@ export default class FuzzyBackend extends QueryBackend {
         node: Node,
         string: string,
         distance: number,
-        endNodes: { prefix: string; positions: number[], actualDistance: number }[],
+        endNodes: { prefix: string; positions: number[], actualDistance: number, filePath: string }[], // Add filePath
         previousRow: number[],
         currentStart: number
     ): void {
@@ -171,7 +225,8 @@ export default class FuzzyBackend extends QueryBackend {
             endNodes.push({ 
                 prefix: node.prefix, 
                 positions: node.positions, 
-                actualDistance: currentRow[size - 1]  // Store the actual edit distance
+                actualDistance: currentRow[size - 1],
+                filePath: node.filePath // Pass the filePath from the current node
             });
         }
         
@@ -181,5 +236,5 @@ export default class FuzzyBackend extends QueryBackend {
                 this.matchStringRecursive(child, string, distance, endNodes, currentRow, currentStart);
             }
         }
-    }    
+    }
 }

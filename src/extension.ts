@@ -23,14 +23,14 @@ export function activate(context: ExtensionContext) {
 	const watcher = vscode.workspace.createFileSystemWatcher('**/*.*');
 
 	watcher.onDidChange((uri) => {
-		console.log("Change to file " + uri.fsPath)
-		BackendFactory.getInstance().updateBackendIndex(uri.fsPath, context)
-	})
+		console.log("Change to file " + uri.fsPath);
+		BackendFactory.getInstance().updateBackendIndex(uri.fsPath, context);
+	});
 
 	watcher.onDidCreate((uri) => {
-		console.log("Create file " + uri.fsPath)
-		BackendFactory.getInstance().updateBackendIndex(uri.fsPath, context)
-	})
+		console.log("Create file " + uri.fsPath);
+		BackendFactory.getInstance().updateBackendIndex(uri.fsPath, context);
+	});
 
 	let disposable = commands.registerCommand('extension.openFile', async (filePath: string) => {
 		// Resolve the file path to the workspace

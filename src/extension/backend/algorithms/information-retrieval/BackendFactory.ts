@@ -71,7 +71,7 @@ export default class BackendFactory {
                     processDirectory(fullPath);
                 } else if (fs.lstatSync(fullPath).isFile()) {
                     const fileOutput: string = fs.readFileSync(fullPath, 'utf-8').toLocaleLowerCase();
-                    documents.push({ id: uuidv7(), filename: files[i], contents: fileOutput });
+                    documents.push({ id: uuidv7(), filename: files[i], contents: fileOutput, filePath: fullPath });
                 }
             }
         };
@@ -88,7 +88,7 @@ export default class BackendFactory {
         if (!filePath.includes('node_modules') && fs.lstatSync(filePath).isFile()) {
             let fileName = path.basename(filePath);
             let documentContents: string = fs.readFileSync(filePath, 'utf-8').toLocaleLowerCase();
-            let document: Document = { id: uuidv7(), filename: fileName, contents: documentContents }
+            let document: Document = { id: uuidv7(), filename: fileName, contents: documentContents, filePath: filePath };
             this.getBackend(AlgorithmEnum.Fuzzy)?.updateIndex(document, extensionContext);
         }
     }
