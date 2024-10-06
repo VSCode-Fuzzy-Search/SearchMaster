@@ -37,7 +37,7 @@ export default class VectorBackend extends QueryBackend {
      * updates the index used to handle queries
      * @param documents list of documents used to create the index
      */
-    protected updateIndex(documents: Document): void {
+    public updateIndex(documents: Document): void {
         // TODO: implement this.
     }
 
@@ -100,8 +100,8 @@ export default class VectorBackend extends QueryBackend {
             // if (res[i][1] > 0) {      
                 
             // }
-            const rankedResult: RankedQueryResult = {documentID: res[i][0], relativeRank: i+1, score: res[i][1], word: "Word"};
-            response.results.push(rankedResult);
+            // const rankedResult: RankedQueryResult = {documentID: res[i][0], relativeRank: i+1, score: res[i][1], word: "Word"};
+            // response.results.push(rankedResult);
         }
         console.log(response);
         let filteredResponse: QueryResponse = {results: []};

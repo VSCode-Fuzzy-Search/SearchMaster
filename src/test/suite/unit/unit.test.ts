@@ -37,7 +37,7 @@ function searchBackend(algorithm: AlgorithmEnum, query: string): QueryResponse |
 	);
 
 	let result = queryObject && backend?.handle(queryObject);
-	return result
+	return result;
 }
 
 
@@ -61,23 +61,12 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		a.should.be.a('number');
 	});
 
-	test('Boolean Backend', () => {
+	test('Boolean Backend example', () => {
 		//testing backend for boolean retrieval
 
-		//Arrange
-		const backendFactory = new BackendFactory();
-		const backend = backendFactory.getBackend(AlgorithmEnum.Boolean);
-		const queryFactory = new QueryFactory();
 
-		let booleanQuery = queryFactory.createQuery(
-			"hello world",
-			AlgorithmEnum.Boolean
-		);
-
-
-		//Act
-		const result = booleanQuery && backend?.handle(booleanQuery);
-
+		//Arrange + Act
+		const result = searchBackend(AlgorithmEnum.Boolean, "hello world");
 
 		//Assert
 		result?.should.be.a('object');
