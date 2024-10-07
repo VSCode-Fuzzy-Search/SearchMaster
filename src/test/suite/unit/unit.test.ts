@@ -19,6 +19,8 @@ import * as mockFs from 'mock-fs';
 import * as sinon from 'sinon';
 import { suite, test, beforeEach, afterEach } from 'mocha';
 import * as path from 'path';
+import { expect } from 'chai';
+
 
 
 
@@ -185,6 +187,61 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 
 		restoreMocks();
 	});
+
+	test('fuzzy 1 edit distance: add, delete and modify string operations work', () => {
+		// Arrange
+		const backendFactory = BackendFactory.getInstance();
+
+		let mockExtensionContext = setUpMockExtensionContext();
+		
+		mockFs({
+			'test-path': {
+				'file1.txt': 'This is a test file.',
+				'file2.txt': 'Another text file.',
+				'file3.txt': 'We are testing text files in this test of texts.',
+				'file4.txt': 'My name is Tex.',
+			}
+		});
+
+		backendFactory.createAllBackends('test-path', mockExtensionContext);
+		//let query = searchBackend(AlgorithmEnum.Fuzzy, "this");
+		let result = runFuzzySearch("text", 1);
+
+		// Assert
+		result?.should.not.be.undefined;
+		result?.should.have.property('results');
+		result!.results.length.should.equal(6);
+
+
+		restoreMocks();
+	});
+
+
+	test('fuzzy testing location', () => {
+		// Arrange
+		const backendFactory = BackendFactory.getInstance();
+
+		let mockExtensionContext = setUpMockExtensionContext();
+		const filesPath = path.join(__dirname, '../../../../src/test/files');
+		backendFactory.createAllBackends(filesPath, mockExtensionContext);
+
+
+		let result = runFuzzySearch("Mocking", 0);
+
+		// Assert
+		result?.should.not.be.undefined;
+		result?.should.have.property('results');
+		expect(result!.results[0].position).to.deep.equal({
+			wordPosition: 54,
+			line: 1,
+			wordIndex: 12,
+		});
+
+		restoreMocks();
+	});
 });
+
+
+
 
 
