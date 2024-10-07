@@ -108,37 +108,26 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
           switch (data.searchType) {
             case "fuzzy": {
               console.log("Fuzzy searchType");
-              // Checking edit distance is less than half the word length
-              // This is done for search efficiency and accuracy
-              if (data.searchTerm.length / 2 > parseInt(data.editDistance)) {
-                let fuzzyQuery = QueryFactory.getInstance().createQuery(
-                  // case handling
+              let fuzzyQuery = QueryFactory.getInstance().createQuery(
+                // case handling
 
-                  data.searchTerm.toLocaleLowerCase() + "/" + data.editDistance,
-                  AlgorithmEnum.Fuzzy
-                );
-                let fuzzyBackend = BackendFactory.getInstance().getBackend(
-                  AlgorithmEnum.Fuzzy
-                );
-                if (fuzzyQuery !== null) {
-                  const result = fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
-                  console.log("Results collected and being posted");
-                  if (result && webviewView.webview) {
-                    webviewView.webview.postMessage({
-                      type: "searchResults",
-                      results: result.results,
-                    });
-                  }
+                data.searchTerm.toLocaleLowerCase() + "/" + data.editDistance,
+                AlgorithmEnum.Fuzzy
+              );
+              let fuzzyBackend = BackendFactory.getInstance().getBackend(
+                AlgorithmEnum.Fuzzy
+              );
+              if (fuzzyQuery !== null) {
+                const result = fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
+                console.log("Results collected and being posted");
+                if (result && webviewView.webview) {
+                  webviewView.webview.postMessage({
+                    type: "searchResults",
+                    results: result.results,
+                  });
                 }
-                break;
-              } else {
-                // Window message for edit distance too short
-                webviewView.webview.postMessage({
-                  type: "errorScreen",
-                  results: "Search Query too Short for given Edit Distance",
-                });
-                break;
               }
+              break;
             }
             // Add in extra search algorithms here
             default: {
@@ -194,8 +183,47 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
           }
           break;
         }
+        case "inputError": {
+          try {
+            switch (data.errorType) {
+              case "space": {
+                webviewView.webview.postMessage({
+                  type: "errorScreen",
+                  results: "Search Query contains spaces",
+                });
+                break;
+              }
+              case "length": {
+                webviewView.webview.postMessage({
+                  type: "errorScreen",
+                  results: "Search Query too Short for given Edit Distance",
+                });
+                break;
+              }
+              case "nonalphanumeric": {
+                webviewView.webview.postMessage({
+                  type: "errorScreen",
+                  results: "Search Query contains non-alphanumeric characters",
+                });
+                break;
+              }
+              default: {
+                vscode.window.showErrorMessage(
+                  `Unknown error occured while error checking: ${data.errorType}`
+                );
+                break;
+              }
+            }
+            break;
+          } catch (error) {
+            vscode.window.showErrorMessage(
+              `Error type not specified: ${error}`
+            );
+            break;
+          }
+        }
         default: {
-          vscode.window.showErrorMessage("Invalid command");
+          vscode.window.showErrorMessage(`Unknown command: ${data.command}`);
           break;
         }
       }
@@ -282,12 +310,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       )
     );
     const helpIconUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "media",
-        "icons",
-        "help-icon.png"
-      )
+      vscode.Uri.joinPath(this._extensionUri, "media", "icons", "help-icon.png")
     );
 
     return `<!DOCTYPE html>
