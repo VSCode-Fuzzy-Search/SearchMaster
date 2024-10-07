@@ -1,0 +1,136 @@
+on:
+    push:
+        branches:
+            - 'main'
+        tags:
+            - '*'
+
+jobs:
+    ci-test:
+        strategy:
+            matrix:
+                os: [macos-latest, ubuntu-latest, windows-latest]
+        name: Test on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+        permissions: write-all # This is required to comment on PRs.
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: 'Install Node.js'
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
+
+            - name: Install Dependencies
+              run: npm install
+
+            # In headless Linux CI machines XVFB is required to run VS Code, so if Linux is the current OS run the tests in an XVFB enabled environment.
+            - name: Run Tests
+              run: ${{ runner.os == 'Linux' && 'xvfb-run -a' || '' }} npm run coverage
+
+            - name: Check if Pull Request
+              id: check-pr
+              uses: 8BitJonny/gh-get-current-pr@3.0.0
+
+            # For specifically pull requests, we want to comment the coverage results on the PR.
+            - name: Comment Coverage
+              # We don't want to upload the coverage file multiple times.
+              if: matrix.os == 'ubuntu-latest' && steps.check-pr.outputs.pr_found == 'true'
+              uses: kcjpop/coverage-comments@v2.2
+              with:
+                  coverage-file: ./coverage/lcov.info
+
+            # Upload the coverage files as an artifact.
+            - name: Upload Coverage File
+              # We don't want to upload the coverage file multiple times.
+              if: matrix.os == 'ubuntu-latest'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: coverage
+                  path: ./coverage/
+
+    # Adapted from: https://github.com/prettier/prettier-vscode/blob/main/.github/workflows/main.yml
+    cd-package:
+        name: Package
+        runs-on: ubuntu-latest
+        needs: ci-test
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: 'Install Node.js'
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
+
+            - name: Install Dependencies
+              run: npm install
+
+            - name: Generate VSIX (via VSCE)
+              run: npx @vscode/vsce package
+
+            - name: Set VSIX Name and Path in Output
+              id: vsix-output
+              run: |
+                  echo "VSIX_PATH=$(find . -maxdepth 1 -type f -iname "*.vsix" | head -1)" >> $GITHUB_OUTPUT
+                  echo "VSIX_NAME=$(basename $(find . -maxdepth 1 -type f -iname "*.vsix" | head -1))" >> $GITHUB_OUTPUT
+
+            - name: Upload VSIX Artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  # prettier-ignore
+                  path: ${{ steps.vsix-output.outputs.VSIX_PATH }}
+                  name: ${{ steps.vsix-output.outputs.VSIX_NAME }}
+
+        outputs:
+            VSIX_PATH: ${{ steps.vsix-output.outputs.VSIX_PATH }}
+            VSIX_NAME: ${{ steps.vsix-output.outputs.VSIX_NAME }}
+
+    # Automatically create a release:
+    # - If no tag is present, the release will be a prerelease with an automatically generated 'latest' tag.
+    # - If a tag is present, the release will be a stable release with the tag name.
+    # NOTE: In future, if CD encounters issues after the release step (for example, failing to publish),
+    # it's possible to rollback the release: https://github.com/author/action-rollback
+    cd-release:
+        name: Release
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        needs: cd-package
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  # See: https://github.com/actions/checkout/issues/1471
+                  fetch-depth: 0
+                  fetch-tags: true
+                  filter: tree:0
+
+            - name: Download VSIX Artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ needs.cd-package.outputs.VSIX_NAME }}
+                  path: ${{ needs.cd-package.outputs.VSIX_PATH }}
+
+            - name: Automatic Release
+              uses: dciborow/action-github-releases@v1.0.1
+              with:
+                  repo_token: ${{ secrets.GITHUB_TOKEN }}
+                  automatic_release_tag: latest
+                  prerelease: true
+                  title: Development Build [${{ github.ref }}] [${{ github.sha }}]
+                  files: |
+                      LICENSE
+                      ${{ needs.cd-package.outputs.VSIX_PATH }}/${{ needs.cd-package.outputs.VSIX_NAME }}
+
+            - name: Manual Release
+              uses: ncipollo/release-action@v1
+              # Only proceed if a manual tag is present - this will result in a release parallel to the 'latest' tag, but this one will remain static.
+              if: startsWith(github.ref, 'refs/tags/')
+              with:
+                  artifacts: ${{ needs.cd-package.outputs.VSIX_PATH }}/${{ needs.cd-package.outputs.VSIX_NAME }}
+                  # Tags ending in '-snapshot', '-alpha', '-beta', or '-rc' (release candidate) are considered prereleases.
+                  prerelease: ${{ endsWith(github.ref, '-snapshot') || endsWith(github.ref, '-alpha') || endsWith(github.ref, '-beta') || endsWith(github.ref, '-rc') }}

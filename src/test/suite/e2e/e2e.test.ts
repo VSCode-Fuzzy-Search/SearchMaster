@@ -1,8 +1,8 @@
 /**
- * @file integration.test.ts
- * @fileoverview This file contains the test suite for integration testing of the extension.
+ * @file e2e.test.ts
+ * @fileoverview This file contains the test suite for end-to-end testing of the extension.
  *               Testing is powered by the Chai assertion library.
- * @see {@link https://martinfowler.com/articles/practical-test-pyramid.html#IntegrationTests}
+ * @see {@link https://martinfowler.com/articles/practical-test-pyramid.html#End-to-endTests}
  * @see {@link https://www.chaijs.com/guide/styles/}
  */
 
@@ -12,7 +12,7 @@ import * as vscode from 'vscode';
 // import * as myExtension from '../../extension';
 
 // Name of the test suite. Also used as a prefix for the test messages.
-const SUITE_NAME = 'Integration';
+const SUITE_NAME = 'End-to-End';
 
 // Extends objects with a `should` property for chaining assertions.
 var should = require('chai').should();
