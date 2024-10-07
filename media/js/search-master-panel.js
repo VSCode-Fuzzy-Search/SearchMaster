@@ -10,12 +10,35 @@
    * Search button posts message
    */
   searchBtn.addEventListener("click", () => {
-    vscode.postMessage({
+    const data = {
       command: "search",
       searchTerm: inputBox.value,
       searchType: "fuzzy",
       editDistance: editDistance.value,
-    });
+    };
+    // check the search term length
+    if (data.searchTerm.length / 2 < parseInt(data.editDistance)) {
+      vscode.postMessage({
+        command: "inputError",
+        errorType: "length",
+      });
+    }
+    // Check the search term format
+    else if (data.searchTerm.includes(" ")) {
+      vscode.postMessage({
+        command: "inputError",
+        errorType: "space",
+      });
+    }
+    // check the search term non alphanumeric characters
+    else if (!data.searchTerm.match(/^[a-zA-Z0-9]+$/)) {
+      vscode.postMessage({
+        command: "inputError",
+        errorType: "nonalphanumeric",
+      });
+    } else {
+      vscode.postMessage(data);
+    }
   });
 
   /**
@@ -228,7 +251,7 @@
         // notify the user of edit distance issue
         const outputContainer = document.getElementById("output");
         outputContainer.innerHTML =
-          "<p class='border-b border-gray-200 pb-2'>Query length too short for given edit distance.</p>";
+          `<p class='border-b border-gray-200 pb-2'>${message.results}</p>`;
       }
     }
   });
