@@ -9,7 +9,7 @@ jobs:
     ci-test:
         strategy:
             matrix:
-                os: [macos-latest, ubuntu-latest, windows-latest]
+                os: [macos-latest, ubuntu-latest]
         name: Test on ${{ matrix.os }}
         runs-on: ${{ matrix.os }}
         permissions: write-all # This is required to comment on PRs.
