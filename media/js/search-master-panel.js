@@ -6,9 +6,6 @@
   const editDistance = document.getElementById("searchmastereditdistanceid");
   const searchDesc = document.getElementById("searchDescription");
 
-  /**
-   * Search button posts message
-   */
   searchBtn.addEventListener("click", () => {
     const data = {
       command: "search",
@@ -16,22 +13,17 @@
       searchType: "fuzzy",
       editDistance: editDistance.value,
     };
-    // check the search term length
     if (data.searchTerm.length / 2 < parseInt(data.editDistance)) {
       vscode.postMessage({
         command: "inputError",
         errorType: "length",
       });
-    }
-    // Check the search term format
-    else if (data.searchTerm.includes(" ")) {
+    } else if (data.searchTerm.includes(" ")) {
       vscode.postMessage({
         command: "inputError",
         errorType: "space",
       });
-    }
-    // check the search term non alphanumeric characters
-    else if (!data.searchTerm.match(/^[a-zA-Z0-9]+$/)) {
+    } else if (!data.searchTerm.match(/^[a-zA-Z0-9]+$/)) {
       vscode.postMessage({
         command: "inputError",
         errorType: "nonalphanumeric",
@@ -41,48 +33,30 @@
     }
   });
 
-  /**
-   * Return message listener
-   */
   window.addEventListener("message", (event) => {
     const message = event.data;
     switch (message.type) {
       case "searchResults": {
         const outputContainer = document.getElementById("output");
-        outputContainer.innerHTML =
-          "<p class='border-b border-gray-200 pb-2'>Query Results:</p>";
+        outputContainer.innerHTML = "<p class='border-b border-gray-200 pb-2'>Query Results:</p>";
 
-        // Object to store result containers by document ID and distance
         const resultsByFileAndDistance = {};
-
-        // Group results by document and distance
         message.results.forEach((queryResult) => {
           const { documentID, distance } = queryResult;
-
           if (!resultsByFileAndDistance[documentID]) {
             resultsByFileAndDistance[documentID] = {};
           }
-
           if (!resultsByFileAndDistance[documentID][distance]) {
             resultsByFileAndDistance[documentID][distance] = [];
           }
-
-          // Add the match to the group for the specific file and distance
           resultsByFileAndDistance[documentID][distance].push(queryResult);
         });
 
-        // Loop through each file and its associated distances
         Object.keys(resultsByFileAndDistance).forEach((documentID) => {
-          // Sort distances in ascending order
-          const distances = Object.keys(
-            resultsByFileAndDistance[documentID]
-          ).sort((a, b) => a - b);
-
-          // Create the main file container
+          const distances = Object.keys(resultsByFileAndDistance[documentID]).sort((a, b) => a - b);
           const fileContainer = document.createElement("div");
           fileContainer.classList.add("file-container");
 
-          // File icon and filename
           const fileDetails = document.createElement("div");
           fileDetails.classList.add("file-details");
 
@@ -91,7 +65,6 @@
 
           const fileImage = document.createElement("img");
           const fileExtension = documentID.split(".").pop();
-
           switch (fileExtension) {
             case "ts":
               fileImage.src = tsLogoPath;
@@ -129,46 +102,34 @@
           const filename = document.createElement("span");
           filename.textContent = documentID;
           filename.classList.add("filename");
+          filename.dataset.fullPath = resultsByFileAndDistance[documentID][distances[0]][0].filePath;
 
           fileDetails.appendChild(fileIcon);
           fileDetails.appendChild(filename);
-
-          // Add file details to the main file container
           fileContainer.appendChild(fileDetails);
 
-          // Create a container to hold all the subcontainers for different distances
           const allMatchesContainer = document.createElement("div");
           allMatchesContainer.classList.add("all-matches-container");
 
-          // Create a separate subcontainer for each distance
           distances.forEach((distance) => {
-            const matchesForDistance =
-              resultsByFileAndDistance[documentID][distance];
-
-            // Create a subcontainer for each distance
+            const matchesForDistance = resultsByFileAndDistance[documentID][distance];
             const distanceContainer = document.createElement("div");
             distanceContainer.classList.add("distance-container");
 
-            // Add a label for the distance
             const distanceLabel = document.createElement("p");
             distanceLabel.textContent = `Edit Distance: ${distance}`;
             distanceLabel.classList.add("distance-label");
             distanceContainer.appendChild(distanceLabel);
 
-            // Create a matches container to hold the individual matches for this distance
             const matchesContainer = document.createElement("div");
             matchesContainer.classList.add("matches-container");
 
-            // Add the matches to the matches container
             matchesForDistance.forEach((queryResult) => {
               const codeSnippet = document.createElement("p");
               codeSnippet.classList.add("code-snippet");
 
-              // Add data attributes to store file path, position, and word
               codeSnippet.dataset.filePath = documentID;
-              codeSnippet.dataset.position = JSON.stringify(
-                queryResult.position
-              );
+              codeSnippet.dataset.position = JSON.stringify(queryResult.position);
               codeSnippet.dataset.word = queryResult.word;
               codeSnippet.dataset.fullPath = queryResult.filePath;
               codeSnippet.dataset.line = queryResult.position.line;
@@ -177,89 +138,26 @@
               matchesContainer.appendChild(codeSnippet);
             });
 
-            // Append matches container to the distance container
             distanceContainer.appendChild(matchesContainer);
-
-            // Append the distance container to the all matches container
             allMatchesContainer.appendChild(distanceContainer);
           });
 
-          // Append the all matches container to the main file container
           fileContainer.appendChild(allMatchesContainer);
-
-          // Append the main file container to the output
           outputContainer.appendChild(fileContainer);
-
-          // Handle showing only the first 15 matches across all distances and adding Show More/Show Less
-          const allMatches = Array.from(
-            allMatchesContainer.querySelectorAll(".code-snippet")
-          );
-          const maxToShow = 15;
-
-          if (allMatches.length > maxToShow) {
-            // Hide the extra matches (beyond the first 15)
-            allMatches.slice(maxToShow).forEach((match) => {
-              match.style.display = "none";
-            });
-
-            // Create the "Show More" button
-            const showMoreButton = document.createElement("button");
-            showMoreButton.classList.add("show-more-button");
-            showMoreButton.textContent = "Show More";
-
-            // Create the "Show Less" button
-            const showLessButton = document.createElement("button");
-            showLessButton.classList.add("show-less-button");
-            showLessButton.textContent = "Show Less";
-            showLessButton.style.display = "none"; // Initially hidden
-
-            // Show More button functionality
-            showMoreButton.addEventListener("click", () => {
-              // Show all hidden matches
-              allMatches.slice(maxToShow).forEach((match) => {
-                match.style.display = "block";
-              });
-
-              // Hide the "Show More" button and display the "Show Less" button
-              showMoreButton.style.display = "none";
-              showLessButton.style.display = "block";
-            });
-
-            // Show Less button functionality
-            showLessButton.addEventListener("click", () => {
-              // Hide the extra matches again
-              allMatches.slice(maxToShow).forEach((match) => {
-                match.style.display = "none";
-              });
-
-              // Hide the "Show Less" button and display the "Show More" button
-              showLessButton.style.display = "none";
-              showMoreButton.style.display = "block";
-            });
-
-            // Append both buttons after the all matches container
-            allMatchesContainer.appendChild(showMoreButton);
-            allMatchesContainer.appendChild(showLessButton);
-          }
         });
 
-        // After generating the search results, attach click event listeners
         attachEventListeners();
         break;
       }
       case "errorScreen": {
-        // notify the user of edit distance issue
         const outputContainer = document.getElementById("output");
-        outputContainer.innerHTML =
-          `<p class='border-b border-gray-200 pb-2'>${message.results}</p>`;
+        outputContainer.innerHTML = `<p class='border-b border-gray-200 pb-2'>${message.results}</p>`;
       }
     }
   });
 
   function handleClick(event) {
-    // Find the specific .code-snippet element that was clicked
     const target = event.target.closest(".code-snippet");
-
     if (target) {
       const filePath = target.dataset.filePath;
       const position = target.dataset.position;
@@ -267,24 +165,43 @@
       const fullPath = target.dataset.fullPath;
       const line = target.dataset.line;
 
-      // Post the message with the correct data
       vscode.postMessage({
         command: "openFile",
         filePath: filePath,
-        position: JSON.parse(position), // Parse the position back to an object
+        position: JSON.parse(position),
         word: word,
         fullPath: fullPath,
-        line: parseInt(line, 10), // Parse the line to an integer
+        line: parseInt(line, 10),
       });
-    } else {
-      console.error("No target found for the click event.");
     }
   }
 
-  // Attach the event listeners to each .code-snippet element
+  function showTooltip(event) {
+    const target = event.target;
+    const fullPath = target.dataset.fullPath;
+
+    // Create tooltip element
+    const tooltip = document.createElement("div");
+    tooltip.classList.add("custom-tooltip");
+    tooltip.textContent = fullPath;
+
+    document.body.appendChild(tooltip);
+
+    tooltip.style.left = `${event.pageX + 10}px`;
+    tooltip.style.top = `${event.pageY - 10}px`;
+
+    target.addEventListener("mouseleave", () => {
+      tooltip.remove();
+    });
+  }
+
   function attachEventListeners() {
     document.querySelectorAll(".code-snippet").forEach((item) => {
       item.addEventListener("click", handleClick);
+    });
+
+    document.querySelectorAll(".filename").forEach((item) => {
+      item.addEventListener("mouseenter", showTooltip);
     });
   }
 })();
