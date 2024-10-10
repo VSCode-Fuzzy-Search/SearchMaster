@@ -16,15 +16,15 @@ You will also find instructions on how to use the extension
 <!-- The link below should be updated if the extension file name changes -->
 1. Firstly, download the extension by clicking [here](./search-master-0.0.1.vsix) and downloading the file.
 
-![](./readme_assets/image.png)
+![](./readme-assets/image.png)
 
 2. Open VS Code and navigate to the extensions panel.
 
-![](./readme_assets/image2.png)
+![](./readme-assets/image2.png)
 
 3. click on the ellipses for more actions, and select __Install from VSIX...__
 
-![](./readme_assets/image3.png)
+![](./readme-assets/image3.png)
 
 4. Navigate to and select the file that was downloaded in Step 1. 
 
