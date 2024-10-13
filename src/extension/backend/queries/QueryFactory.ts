@@ -19,7 +19,7 @@ export default class QueryFactory {
         return QueryFactory.instance;
     }
 
-    public createQuery(query: string, queryType: AlgorithmEnum){
+    public createQuery(query: any, queryType: AlgorithmEnum){
 
         if (queryType === AlgorithmEnum.Fuzzy){
             return new FuzzyQuery(query);

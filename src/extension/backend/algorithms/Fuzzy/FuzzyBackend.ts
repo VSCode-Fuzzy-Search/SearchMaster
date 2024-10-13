@@ -160,8 +160,8 @@ export default class FuzzyBackend extends QueryBackend {
      */
     public handle(query: FuzzyQuery): QueryResponse {
         let processedQuery = query.getFormattedQuery();
-        let word = processedQuery[0];
-        let distance = parseInt(processedQuery[1]);
+        let word = processedQuery.query;
+        let distance = parseInt(processedQuery.editDistance);
         const response: QueryResponse = { results: [] };
     
         for (const [filename, document] of Object.entries(this.index)) {

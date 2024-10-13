@@ -110,8 +110,10 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
               console.log("Fuzzy searchType");
               let fuzzyQuery = QueryFactory.getInstance().createQuery(
                 // case handling
-
-                data.searchTerm.toLocaleLowerCase() + "/" + data.editDistance,
+                {
+                  query: data.searchTerm.toLocaleLowerCase(),
+                  editDistance: data.editDistance
+                },
                 AlgorithmEnum.Fuzzy
               );
               let fuzzyBackend = BackendFactory.getInstance().getBackend(
