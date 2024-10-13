@@ -1,10 +1,10 @@
 
-import Document from "../../../Document";
+import Document from "../../Document";
 import QueryBackend from "../QueryBackend";
-import QueryResponse from "../../../results/QueryResponse";
-import Query from "../../../queries/Query";
+import QueryResponse from "../../results/QueryResponse";
+import Query from "../../queries/Query";
 import Node from "./Node";
-import FuzzyQuery from "../../../queries/FuzzyQuery";
+import FuzzyQuery from "../../queries/FuzzyQuery";
 import { ExtensionContext } from "vscode";
 
 export default class FuzzyBackend extends QueryBackend {

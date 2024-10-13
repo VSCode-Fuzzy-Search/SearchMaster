@@ -11,7 +11,7 @@ import {
 } from "vscode";
 import { getNonce } from "../util";
 import * as vscode from "vscode";
-import BackendFactory from "../backend/algorithms/information-retrieval/BackendFactory";
+import BackendFactory from "../backend/algorithms/BackendFactory";
 import QueryFactory from "../backend/queries/QueryFactory";
 import { AlgorithmEnum } from "../backend/AlgorithmEnum";
 import path = require("path");

@@ -3,7 +3,7 @@ import { registerCacheCommand } from './extension/features/cache-operation';
 import { registerWebViewProvider } from "./extension/views/register-webview-provider";
 import * as vscode from 'vscode';
 import * as path from 'path';
-import BackendFactory from './extension/backend/algorithms/information-retrieval/BackendFactory';
+import BackendFactory from './extension/backend/algorithms/BackendFactory';
 
 let globalContext: ExtensionContext;
 
