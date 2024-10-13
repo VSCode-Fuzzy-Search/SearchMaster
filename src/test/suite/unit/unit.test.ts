@@ -52,7 +52,10 @@ function searchBackend(algorithm: AlgorithmEnum, query: string): QueryResponse |
 
 function runFuzzySearch(query: string, editDistance: number): QueryResponse | undefined {
 	let fuzzyQuery = QueryFactory.getInstance().createQuery(
-		query.toLocaleLowerCase() + "/" + editDistance,
+		{
+			query: query.toLocaleLowerCase(),
+			editDistance: editDistance
+		},
 		AlgorithmEnum.Fuzzy
 	);
 	let fuzzyBackend = BackendFactory.getInstance().getBackend(
