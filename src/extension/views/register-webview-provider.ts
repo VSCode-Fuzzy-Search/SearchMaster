@@ -508,6 +508,18 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                     opacity: 1;
                     pointer-events: auto;
                 }
+                .custom-tooltip {
+                  position: absolute;
+                  background: rgba(50, 50, 50, 0.9);
+                  color: #ffffff;
+                  border-radius: 4px;
+                  padding: 5px;
+                  font-size: 12px;
+                  z-index: 1000;
+                  pointer-events: none;
+                  transition: opacity 0.3s;
+                  opacity: 0.9;
+                }
 
           </style>
            </head>
