@@ -11,7 +11,7 @@ import {
 } from "vscode";
 import { getNonce } from "../util";
 import * as vscode from "vscode";
-import BackendFactory from "../backend/algorithms/information-retrieval/BackendFactory";
+import BackendFactory from "../backend/algorithms/BackendFactory";
 import QueryFactory from "../backend/queries/QueryFactory";
 import { AlgorithmEnum } from "../backend/AlgorithmEnum";
 import path = require("path");
@@ -109,7 +109,11 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
             case "fuzzy": {
               console.log("Fuzzy searchType");
               let fuzzyQuery = QueryFactory.getInstance().createQuery(
-                data.searchTerm.toLocaleLowerCase() + "/" + data.editDistance,
+                // case handling
+                {
+                  query: data.searchTerm.toLocaleLowerCase(),
+                  editDistance: data.editDistance
+                },
                 AlgorithmEnum.Fuzzy
               );
               let fuzzyBackend = BackendFactory.getInstance().getBackend(

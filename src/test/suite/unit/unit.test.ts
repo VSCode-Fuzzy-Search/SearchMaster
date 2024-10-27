@@ -9,11 +9,11 @@
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
-import BackendFactory from '../../../extension/backend/algorithms/information-retrieval/BackendFactory';
+import BackendFactory from '../../../extension/backend/algorithms/BackendFactory';
 import { AlgorithmEnum } from '../../../extension/backend/AlgorithmEnum';
 import Query from '../../../extension/backend/queries/Query';
 import QueryFactory from '../../../extension/backend/queries/QueryFactory';
-import QueryBackend from '../../../extension/backend/algorithms/information-retrieval/QueryBackend';
+import QueryBackend from '../../../extension/backend/algorithms/QueryBackend';
 import QueryResponse from '../../../extension/backend/results/QueryResponse';
 import * as mockFs from 'mock-fs';
 import * as sinon from 'sinon';
@@ -52,7 +52,10 @@ function searchBackend(algorithm: AlgorithmEnum, query: string): QueryResponse |
 
 function runFuzzySearch(query: string, editDistance: number): QueryResponse | undefined {
 	let fuzzyQuery = QueryFactory.getInstance().createQuery(
-		query.toLocaleLowerCase() + "/" + editDistance,
+		{
+			query: query.toLocaleLowerCase(),
+			editDistance: editDistance
+		},
 		AlgorithmEnum.Fuzzy
 	);
 	let fuzzyBackend = BackendFactory.getInstance().getBackend(
@@ -94,20 +97,6 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 	suiteTeardown(done => {
 		vscode.window.showInformationMessage(`${SUITE_NAME} | All tests completed!`);
 		done();
-	});
-
-	test('Boolean Backend eg', () => {
-		//testing backend for boolean retrieval
-
-
-		//Arrange + Act
-		const result = searchBackend(AlgorithmEnum.Boolean, "hello world");
-
-		//Assert
-		result?.should.be.a('object');
-		result?.should.have.property('results');
-		result?.results.should.be.a('array');
-		result?.results.should.have.length.above(0);
 	});
 
 	test('fuzzy index retieval and update', () => {

@@ -1,8 +1,5 @@
 import { AlgorithmEnum } from "../AlgorithmEnum";
-import BooleanQuery from "./BooleanQuery";
 import FuzzyQuery from "./FuzzyQuery";
-import LanguageModelQuery from "./LanguageModelQuery";
-import VectorQuery from "./VectorQuery";
 
 // potentially not an ideal approach, but can live with it for now - James
 export default class QueryFactory {
@@ -22,21 +19,9 @@ export default class QueryFactory {
         return QueryFactory.instance;
     }
 
-    public createQuery(query: string, queryType: AlgorithmEnum){
+    public createQuery(query: any, queryType: AlgorithmEnum){
 
-        if (queryType === AlgorithmEnum.Boolean){
-            return new BooleanQuery(query);
-
-        }
-        else if (queryType === AlgorithmEnum.LanguageModel){
-            return new LanguageModelQuery(query);
-        }
-
-        else if (queryType === AlgorithmEnum.Vector){
-            return new VectorQuery(query);
-        }
-
-        else if (queryType === AlgorithmEnum.Fuzzy){
+        if (queryType === AlgorithmEnum.Fuzzy){
             return new FuzzyQuery(query);
         }
 

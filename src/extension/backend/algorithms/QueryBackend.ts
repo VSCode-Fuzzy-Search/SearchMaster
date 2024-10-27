@@ -1,6 +1,6 @@
-import Query from "../../queries/Query";
-import QueryResponse from "../../results/QueryResponse";
-import Document from "../../Document";
+import Query from "../queries/Query";
+import QueryResponse from "../results/QueryResponse";
+import Document from "../Document";
 import { ExtensionContext } from "vscode";
 
 export default abstract class QueryBackend {

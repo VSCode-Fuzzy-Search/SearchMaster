@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { uuidv7 } from 'uuidv7';
-import { AlgorithmEnum } from "../../AlgorithmEnum";
-import Document from "../../Document";
+import { AlgorithmEnum } from "../AlgorithmEnum";
+import Document from "../Document";
 import QueryBackend from "./QueryBackend";
 import FuzzyBackend from './Fuzzy/FuzzyBackend';
 import { ExtensionContext } from 'vscode';
