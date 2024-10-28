@@ -66,7 +66,7 @@ export default class BackendFactory {
             for (let i = 0; i < files.length; i++) {
                 const fullPath = `${directoryPath}/${files[i]}`;
     
-                if (fs.lstatSync(fullPath).isDirectory()) {
+                if (fs.lstatSync(fullPath).isDirectory() && files[i][0] != '.') {
                     // Recursively process subdirectories
                     processDirectory(fullPath);
                 } else if (fs.lstatSync(fullPath).isFile()) {
