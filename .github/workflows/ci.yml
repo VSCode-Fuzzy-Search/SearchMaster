@@ -28,14 +28,10 @@ jobs:
             - name: Run Tests
               run: ${{ runner.os == 'Linux' && 'xvfb-run -a' || '' }} npm run coverage
 
-            - name: Check if Pull Request
-              id: check-pr
-              uses: 8BitJonny/gh-get-current-pr@3.0.0
-
-            # For specifically pull requests, we want to comment the coverage results on the PR.
+            # Comment the coverage results on the PR.
             - name: Comment Coverage
               # We don't want to upload the coverage file multiple times.
-              if: matrix.os == 'ubuntu-latest' && steps.check-pr.outputs.pr_found == 'true'
+              if: matrix.os == 'ubuntu-latest'
               uses: kcjpop/coverage-comments@v2.2
               with:
                   coverage-file: ./coverage/lcov.info
