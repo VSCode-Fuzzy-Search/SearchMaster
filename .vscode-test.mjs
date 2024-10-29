@@ -7,5 +7,9 @@ export default defineConfig({
 		timeout: 20000,
 		require: 'ts-node/register',
 		loader: 'ts-node/esm'
+	},
+	coverage: {
+		exclude: ['test/**'],
+		reporter: ['text', 'lcov']
 	}
 });
