@@ -1,0 +1,50 @@
+on:
+    pull_request:
+        branches:
+            - 'main'
+
+jobs:
+    test:
+        strategy:
+            matrix:
+                os: [macos-latest, ubuntu-latest, windows-latest]
+        name: Test on ${{ matrix.os }}${{ matrix.os == 'ubuntu-latest' && ' (+ Generate Coverage)' || '' }}
+        runs-on: ${{ matrix.os }}
+        permissions: write-all # This is required to comment on PRs.
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: 'Install Node.js'
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
+
+            - name: Install Dependencies
+              run: npm ci
+
+            # In headless Linux CI machines XVFB is required to run VS Code, so if Linux is the current OS run the tests in an XVFB enabled environment.
+            - name: Run Tests
+              run: ${{ runner.os == 'Linux' && 'xvfb-run -a' || '' }} npm run coverage
+
+            - name: Check if Pull Request
+              id: check-pr
+              uses: 8BitJonny/gh-get-current-pr@3.0.0
+
+            # For specifically pull requests, we want to comment the coverage results on the PR.
+            - name: Comment Coverage
+              # We don't want to upload the coverage file multiple times.
+              if: matrix.os == 'ubuntu-latest' && steps.check-pr.outputs.pr_found == 'true'
+              uses: kcjpop/coverage-comments@v2.2
+              with:
+                  coverage-file: ./coverage/lcov.info
+
+            # Upload the coverage files as an artifact.
+            - name: Upload Coverage File
+              # We don't want to upload the coverage file multiple times.
+              if: matrix.os == 'ubuntu-latest'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: coverage
+                  path: ./coverage/

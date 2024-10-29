@@ -1,0 +1,83 @@
+on:
+    push:
+        branches:
+            - 'main'
+        tags:
+            - '*'
+
+jobs:
+    package:
+        name: Package
+        runs-on: ubuntu-latest
+        outputs:
+            VSIX_NAME: ${{ steps.vsix-output.outputs.VSIX_NAME }}
+            VSIX_PATH: ${{ steps.vsix-output.outputs.VSIX_PATH }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: 'Install Node.js'
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
+
+            - name: Install Dependencies
+              run: npm ci
+
+            - name: Generate VSIX (via VSCE)
+              run: npx @vscode/vsce package
+
+            - name: Set VSIX Name and Path in Output
+              id: vsix-output
+              run: |
+                  echo "VSIX_PATH=$(find . -maxdepth 1 -type f -iname "*.vsix" | head -1)" >> $GITHUB_OUTPUT
+                  echo "VSIX_NAME=$(basename $(find . -maxdepth 1 -type f -iname "*.vsix" | head -1))" >> $GITHUB_OUTPUT
+
+            - name: Upload VSIX Artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  # prettier-ignore
+                  path: ${{ steps.vsix-output.outputs.VSIX_PATH }}
+                  name: ${{ steps.vsix-output.outputs.VSIX_NAME }}
+
+    release:
+        name: Release
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        needs: package
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  # See: https://github.com/actions/checkout/issues/1471
+                  fetch-depth: 0
+                  fetch-tags: true
+                  filter: tree:0
+
+            - name: Download VSIX Artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ needs.package.outputs.VSIX_NAME }}
+                  path: ${{ needs.package.outputs.VSIX_PATH }}
+
+            - name: Automatic Release
+              uses: dciborow/action-github-releases@v1.0.1
+              with:
+                  repo_token: ${{ secrets.GITHUB_TOKEN }}
+                  automatic_release_tag: latest
+                  prerelease: true
+                  title: Development Build [${{ github.ref }}] [${{ github.sha }}]
+                  files: |
+                      LICENSE
+                      ${{ needs.package.outputs.VSIX_PATH }}/${{ needs.package.outputs.VSIX_NAME }}
+
+            - name: Manual Release
+              uses: ncipollo/release-action@v1
+              # Only proceed if a manual tag is present - this will result in a release parallel to the 'latest' tag, but this one will remain static.
+              if: startsWith(github.ref, 'refs/tags/')
+              with:
+                  artifacts: ${{ needs.package.outputs.VSIX_PATH }}/${{ needs.package.outputs.VSIX_NAME }}
+                  # Tags ending in '-snapshot', '-alpha', '-beta', or '-rc' (release candidate) are considered prereleases.
+                  prerelease: ${{ endsWith(github.ref, '-snapshot') || endsWith(github.ref, '-alpha') || endsWith(github.ref, '-beta') || endsWith(github.ref, '-rc') }}
