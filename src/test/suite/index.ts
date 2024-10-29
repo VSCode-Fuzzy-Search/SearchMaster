@@ -4,7 +4,7 @@ import * as path from 'path';
 
 export function run(): Promise<void> {
 	// Create the mocha test runner.
-	const MOCHA = new Mocha({ ui: 'bdd', color: true });
+	const MOCHA = new Mocha({ ui: 'tdd', color: true });
 	const TESTS_ROOT = path.resolve(__dirname, '..');
 
 	return new Promise((resolve, reject) => {
