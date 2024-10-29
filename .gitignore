@@ -354,7 +354,7 @@ MigrationBackup/
 .vscode-test/
 
 # Coverage
-.nyc_output/
+coverage/
 
 # Build
 out/
