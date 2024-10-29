@@ -6,11 +6,14 @@
 	Search Master | Visual Studio Code
 	<br>
 </h1>
+
 <span>
 	<img alt = "License Badge" src = "https://img.shields.io/github/license/VSCode-Fuzzy-Search/SearchMaster?style=flat-square" />
 	&nbsp; <img alt = "Latest Release Badge" src = "https://img.shields.io/github/v/release/VSCode-Fuzzy-Search/SearchMaster?style=flat-square" />
 	&nbsp; <img alt = "Latest (Pre-)Release Badge" src = "https://img.shields.io/github/v/release/VSCode-Fuzzy-Search/SearchMaster?style=flat-square&include_prereleases" />
 </span><br><br>
+ 
+**Search Master is a VS Code extension that allows the user to perform exact and inexact text searches across their workspace** 
 
 ## Contents
 1. [Installation](#installation)
@@ -36,12 +39,10 @@
 
 ## Usage
 
-### Searching
-
-#### Exact Matches
+### Exact Matches
 To search for exact matches, type the search term in the text box, and hit search
 
-#### Fuzzy Matches
+### Fuzzy Matches
 Fuzzy (inexact) matches can be found by adjusting the edit distance of the search (the number dropdown next to the text box); the greater the edit distance, the greater the degree of allowed inexactness.
 
 > [!NOTE]
@@ -49,6 +50,6 @@ Fuzzy (inexact) matches can be found by adjusting the edit distance of the searc
 >
 > For instance, the edit distance between the strings "hello" and "jello" is 1, where they only differ by the substitution of the letter "j" or "h".
 
-#### Results
+### Results
 - Results in a file are ranked in order of increasing edit distance to make finding closer matches easier.
 - Selecting a result will open the corresponding document to the highlighted match.
