@@ -56,6 +56,13 @@ jobs:
                   fetch-tags: true
                   filter: tree:0
 
+            # I have no idea why, as separate jobs should use fresh runners,
+            # but download-artifact complains that the file already exists.
+            - name: Delete Old VSIX Artifact (If Exists)
+              uses: JesseTG/rm@v1.0.3
+              with:
+                  path: ${{ needs.package.outputs.VSIX_PATH }}/${{ needs.package.outputs.VSIX_NAME }}
+
             - name: Download VSIX Artifact
               uses: actions/download-artifact@v4
               with:
