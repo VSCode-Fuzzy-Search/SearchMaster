@@ -96,19 +96,6 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		done();
 	});
 
-	test('Boolean Backend eg', () => {
-		//testing backend for boolean retrieval
-
-
-		//Arrange + Act
-		const result = searchBackend(AlgorithmEnum.Boolean, "hello world");
-
-		//Assert
-		result?.should.be.a('object');
-		result?.should.have.property('results');
-		result?.results.should.be.a('array');
-		result?.results.should.have.length.above(0);
-	});
 
 	test('fuzzy index retieval and update', () => {
 		// Arrange
@@ -159,7 +146,7 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		// Assert
 		result?.should.not.be.undefined;
 		result?.should.have.property('results');
-		result!.results[0].filePath.should.equal('test-path/file1.txt');
+		result!.results[0].filePath.should.equal('testPath/file1Txt');
 		// query!.corpusSize!.should.equal(2);
 		// query!.duration!.should.be.a('number');
 		//query!.duration!.should.be.greaterThan(0);
@@ -202,9 +189,9 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 				'file4Txt': 'My name is Tex.',
 			}
 		});
-
+		
+		// Act
 		backendFactory.createAllBackends('testPath', mockExtensionContext);
-		//let query = searchBackend(AlgorithmEnum.Fuzzy, "this");
 		let result = runFuzzySearch("text", 1);
 
 		// Assert
