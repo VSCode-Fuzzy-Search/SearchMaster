@@ -40,6 +40,6 @@ export default defineConfig({
 			'**/node_modules/**',
 			'**/.mocha-multi-reporter.cjs'
 		],
-		reporter: ['text', 'lcov'] // "lcov" also generates HTML report.
+		reporter: ['text', 'lcov'] // "lcov" also generates a HTML report.
 	}
 });
