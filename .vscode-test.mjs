@@ -16,7 +16,7 @@ const createTestEntry = label => ({
 		timeout: 20000,
 		require: 'ts-node/register',
 		loader: 'ts-node/esm',
-		reporter: path.join(__dirname, '.mocha-reporter.js'),
+		reporter: path.join(__dirname, '.mocha-multi-reporter.js'),
 		reporterOptions: {
 			jsonReporterOptions: {
 				output: path.join(__dirname, 'test-results', `mocha-${label.toLowerCase()}-tests.json`)
