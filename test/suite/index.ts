@@ -8,7 +8,7 @@ export function run(): Promise<void> {
 	const TESTS_ROOT = path.resolve(__dirname, '..');
 
 	return new Promise((resolve, reject) => {
-		glob('**/**.test.js', { cwd: TESTS_ROOT }).then(files => {
+		glob('**/**.test.ts', { cwd: TESTS_ROOT }).then(files => {
 			// Add files to the test suite
 			files.forEach(f => MOCHA.addFile(path.resolve(TESTS_ROOT, f)));
 
