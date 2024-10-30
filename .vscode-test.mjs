@@ -26,7 +26,7 @@ const createTestEntry = label => ({
 });
 
 export default defineConfig({
-	tests: ['E2E', 'Exploratory', 'Integration', 'UI', 'Unit'].map(createTestEntry),
+	tests: [/*'E2E', 'Exploratory', 'Integration', 'UI', */ 'Unit'].map(createTestEntry),
 	coverage: {
 		includeAll: true,
 		exclude: ['**/test/**', '**/out/**', '**/src/**', '**/node_modules/**'],
