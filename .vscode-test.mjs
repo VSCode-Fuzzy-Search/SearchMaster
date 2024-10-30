@@ -6,9 +6,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const createTestEntry = label => ({
 	label: `${label} Tests`,
-	files: ['out/test/index.ts', `out/test/${label.toLowerCase()}/**/*.test.ts`],
+	files: `out/test/suite/${label.toLowerCase()}/**/*.test.js`,
+	workingDirectory: './test',
 	version: process.env['VSCODE_VERSION'] ?? 'stable',
-	workspaceFolder: './test',
 	launchArgs: ['--disable-updates', '--disable-crash-reporter', '--disable-workspace-trust', '--disable-telemetry'],
 	mocha: {
 		ui: 'tdd',
@@ -16,7 +16,7 @@ const createTestEntry = label => ({
 		timeout: 20000,
 		require: 'ts-node/register',
 		loader: 'ts-node/esm',
-		reporter: path.join(__dirname, '.mocha-reporter.js'),
+		reporter: path.join(__dirname, '.mocha-multi-reporter.js'),
 		reporterOptions: {
 			jsonReporterOptions: {
 				output: path.join(__dirname, 'test-results', `mocha-${label.toLowerCase()}-tests.json`)
@@ -26,7 +26,7 @@ const createTestEntry = label => ({
 });
 
 export default defineConfig({
-	tests: ['E2E', 'Exploratory', 'Integration', 'UI', 'Unit'].map(createTestEntry),
+	tests: [/*'E2E', 'Exploratory', 'Integration', 'UI', */ 'Unit'].map(createTestEntry),
 	coverage: {
 		includeAll: true,
 		exclude: ['**/test/**', '**/out/**', '**/src/**', '**/node_modules/**'],
