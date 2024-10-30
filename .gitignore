@@ -352,7 +352,6 @@ MigrationBackup/
 
 # Testing & Coverage
 .vscode-test/
-test/
 test-results/
 coverage/
 
