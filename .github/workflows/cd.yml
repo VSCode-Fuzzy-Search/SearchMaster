@@ -48,12 +48,6 @@ jobs:
             contents: write
         needs: package
         steps:
-            # I have no idea why, as separate jobs should use fresh runners,
-            # but download-artifact complains that the VSIX file already exists,
-            # so we clean the home directory to avoid this.
-            - name: Clean Home Directory
-              uses: pmatos/action-home-clean@v2
-
             - name: Checkout
               uses: actions/checkout@v4
               with:
