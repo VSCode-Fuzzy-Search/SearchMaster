@@ -5,6 +5,10 @@
 	"description": "VScode Search Engine extension",
 	"version": "0.0.1",
 	"icon": "media/icons/research-svgrepo-com.png",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/VSCode-Fuzzy-Search/SearchMaster/"
+	},
 	"engines": {
 		"vscode": "^1.72.0"
 	},
