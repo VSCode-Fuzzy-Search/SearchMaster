@@ -116,16 +116,16 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 
 		// Mock file system with test files
 		mockFs({
-			'test-path': {
-				'file1.txt': 'This is a test file.',
-				'file2.txt': 'Another test file.',
+			'testPath': {
+				'file1Txt': 'This is a test file.',
+				'file2Txt': 'Another test file.',
 			}
 		});
 
 		let mockExtensionContext = setUpMockExtensionContext();
 
 		// Act
-		backendFactory.createAllBackends('test-path', mockExtensionContext);
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
 		const fuzzyBackend = backendFactory.getBackend(AlgorithmEnum.Fuzzy);
 
 		// Assert
@@ -143,16 +143,16 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 
 
 		mockFs({
-			'test-path': {
-				'file1.txt': 'This is a test file.',
-				'file2.txt': 'Another test file.',
+			'testPath': {
+				'file1Txt': 'This is a test file.',
+				'file2Txt': 'Another test file.',
 			}
 		});
 
 		let mockExtensionContext = setUpMockExtensionContext();
 
 		// Act
-		backendFactory.createAllBackends('test-path', mockExtensionContext);
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
 
 		let result = runFuzzySearch("test", 0);
 
@@ -195,15 +195,15 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		let mockExtensionContext = setUpMockExtensionContext();
 		
 		mockFs({
-			'test-path': {
-				'file1.txt': 'This is a test file.',
-				'file2.txt': 'Another text file.',
-				'file3.txt': 'We are testing text files in this test of texts.',
-				'file4.txt': 'My name is Tex.',
+			'testPath': {
+				'file1Txt': 'This is a test file.',
+				'file2Txt': 'Another text file.',
+				'file3Txt': 'We are testing text files in this test of texts.',
+				'file4Txt': 'My name is Tex.',
 			}
 		});
 
-		backendFactory.createAllBackends('test-path', mockExtensionContext);
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
 		//let query = searchBackend(AlgorithmEnum.Fuzzy, "this");
 		let result = runFuzzySearch("text", 1);
 
