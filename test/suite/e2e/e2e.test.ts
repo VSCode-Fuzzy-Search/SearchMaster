@@ -26,7 +26,7 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		done();
 	});
 
-	// Example test using Chai assertion library.
+	// Example test using Chai assertion library!
 	// TODO: Replace with real tests!
 	test('Example Test', () => {
 		let a = 1;
