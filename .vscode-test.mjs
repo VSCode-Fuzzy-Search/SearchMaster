@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const createTestEntry = label => ({
 	label: `${label} Tests`,
-	files: ['out/test/index.ts', `out/test/${label.toLowerCase()}/**/*.test.ts`],
+	files: [`out/test/${label.toLowerCase()}/**/*.test.ts`],
 	version: process.env['VSCODE_VERSION'] ?? 'stable',
 	workspaceFolder: './test',
 	launchArgs: ['--disable-updates', '--disable-crash-reporter', '--disable-workspace-trust', '--disable-telemetry'],
