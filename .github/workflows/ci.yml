@@ -24,6 +24,9 @@ jobs:
             - name: Install Dependencies
               run: npm ci
 
+            - name: Compile Tests
+              run: npm run compile-tests
+
             # In headless Linux CI machines XVFB is required to run VS Code, so if Linux is the current OS run the tests in an XVFB enabled environment.
             - name: Run Tests
               run: ${{ runner.os == 'Linux' && 'xvfb-run -a' || '' }} npm run coverage
@@ -35,7 +38,7 @@ jobs:
               uses: dorny/test-reporter@v1
               with:
                   name: Mocha Tests
-                  path: test-results/mocha-*.json
+                  path: ./test-results/mocha-*.json
                   reporter: mocha-json
 
             # Comment the coverage results on the PR.

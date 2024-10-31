@@ -6,8 +6,7 @@
  * @see {@link https://www.chaijs.com/guide/styles/}
  */
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
+// You can import and use all API from the 'vscode' module as well as import your extension to test it.
 import * as vscode from 'vscode';
 // import * as myExtension from '../../extension';
 
@@ -27,7 +26,7 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		done();
 	});
 
-	// Example test using Chai assertion library.
+	// Example test using Chai assertion library!
 	// TODO: Replace with real tests!
 	test('Example Test', () => {
 		let a = 1;

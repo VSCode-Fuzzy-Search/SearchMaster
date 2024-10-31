@@ -1,7 +1,7 @@
 <h1>
 	<picture>
-	  <source media="(prefers-color-scheme: dark)" srcset="./media/icons/research-svgrepo-com-white.svg">
-	  <img width="100" align="left" alt="Search Master Logo" src="./media/icons/research-svgrepo-com.svg">
+	  <source media="(prefers-color-scheme: dark)" srcset="./media/icons/research-svgrepo-com-white.png">
+	  <img width="100" align="left" alt="Search Master Logo" src="./media/icons/research-svgrepo-com.png">
 	</picture>
 	Search Master | Visual Studio Code
 	<br>
@@ -13,8 +13,9 @@
 </span><br><br>
 
 ## Contents
-1. [Installation](#installation)
-2. [Usage](#usage)
+- [Contents](#contents)
+- [Installation](#installation)
+- [Usage](#usage)
 	- [Searching](#searching)
 		- [Exact Matches](#exact-matches)
 		- [Fuzzy Matches](#fuzzy-matches)
