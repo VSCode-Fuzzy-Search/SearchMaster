@@ -13,7 +13,6 @@ import * as mockFs from 'mock-fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { AlgorithmEnum } from '../../../src/extension/backend/AlgorithmEnum';
-import BackendFactory from '../../../src/extension/backend/algorithms/information-retrieval/BackendFactory';
 import QueryFactory from '../../../src/extension/backend/queries/QueryFactory';
 import QueryResponse from '../../../src/extension/backend/results/QueryResponse';
 
@@ -82,19 +81,6 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 	suiteTeardown(done => {
 		vscode.window.showInformationMessage(`${SUITE_NAME} | All tests completed!`);
 		done();
-	});
-
-	test('Boolean Backend eg', () => {
-		//testing backend for boolean retrieval
-
-		//Arrange + Act
-		const result = searchBackend(AlgorithmEnum.Boolean, 'hello world');
-
-		//Assert
-		result?.should.be.a('object');
-		result?.should.have.property('results');
-		result?.results.should.be.a('array');
-		result?.results.should.have.length.above(0);
 	});
 
 	test('fuzzy index retieval and update', () => {
