@@ -38,7 +38,7 @@ jobs:
               uses: dorny/test-reporter@v1
               with:
                   name: Mocha Tests
-                  path: test-results/mocha-*.json
+                  path: ./test-results/mocha-*.json
                   reporter: mocha-json
 
             # Comment the coverage results on the PR.
