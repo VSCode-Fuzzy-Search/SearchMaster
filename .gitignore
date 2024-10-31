@@ -350,14 +350,13 @@ MigrationBackup/
 .ionide/
 /dist
 
-# Testing
+# Testing & Coverage
 .vscode-test/
-
-# Coverage
-.nyc_output/
+test-results/
+coverage/
 
 # Build
 out/
+dist/
 
 .DS_Store
-*.js

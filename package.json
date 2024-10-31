@@ -180,10 +180,9 @@
 		"pretest": "npm run compile-tests && npm run compile && npm run lint",
 		"lint": "eslint src --ext ts",
 		"test": "vscode-test",
-		"coverage": "nyc npm run test"
+		"coverage": "vscode-test --coverage"
 	},
 	"devDependencies": {
-		"@istanbuljs/nyc-config-typescript": "^1.0.2",
 		"@stylistic/eslint-plugin-js": "^2.1.0",
 		"@stylistic/eslint-plugin-ts": "^2.1.0",
 		"@types/chai": "^4.3.16",
@@ -195,7 +194,7 @@
 		"@types/vscode": "^1.72.0",
 		"@typescript-eslint/eslint-plugin": "^6.21.0",
 		"@typescript-eslint/parser": "^6.21.0",
-		"@vscode/test-cli": "^0.0.9",
+		"@vscode/test-cli": "^0.0.10",
 		"@vscode/test-electron": "^2.3.10",
 		"chai": "^4.5.0",
 		"eslint": "^8.24.0",
@@ -203,7 +202,6 @@
 		"minimatch": "^9.0.4",
 		"mocha": "^10.7.3",
 		"mock-fs": "^5.3.0",
-		"nyc": "^15.1.0",
 		"sinon": "^19.0.2",
 		"ts-loader": "^9.4.1",
 		"ts-node": "^10.9.2",

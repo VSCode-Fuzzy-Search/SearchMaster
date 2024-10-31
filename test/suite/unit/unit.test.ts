@@ -8,21 +8,16 @@
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import * as vscode from 'vscode';
-import BackendFactory from '../../../extension/backend/algorithms/BackendFactory';
-import { AlgorithmEnum } from '../../../extension/backend/AlgorithmEnum';
-import Query from '../../../extension/backend/queries/Query';
-import QueryFactory from '../../../extension/backend/queries/QueryFactory';
-import QueryBackend from '../../../extension/backend/algorithms/QueryBackend';
-import QueryResponse from '../../../extension/backend/results/QueryResponse';
-import * as mockFs from 'mock-fs';
-import * as sinon from 'sinon';
-import { suite, test, beforeEach, afterEach } from 'mocha';
-import * as path from 'path';
 import { expect } from 'chai';
-
-
-
+import { suite, test } from 'mocha';
+import * as mockFs from 'mock-fs';
+import * as path from 'path';
+import * as sinon from 'sinon';
+import * as vscode from 'vscode';
+import { AlgorithmEnum } from '../../extension/backend/AlgorithmEnum';
+import BackendFactory from '../../extension/backend/algorithms/information-retrieval/BackendFactory';
+import QueryFactory from '../../extension/backend/queries/QueryFactory';
+import QueryResponse from '../../extension/backend/results/QueryResponse';
 
 // import * as myExtension from '../../extension';
 
@@ -32,6 +27,7 @@ const SUITE_NAME = 'Unit';
 // Extends objects with a `should` property for chaining assertions.
 var should = require('chai').should();
 
+// Mock extension context and workspace state.
 let mockExtensionContext: vscode.ExtensionContext;
 let mockWorkspaceState: any;
 
@@ -41,10 +37,7 @@ function searchBackend(algorithm: AlgorithmEnum, query: string): QueryResponse |
 	const backend = backendFactory.getBackend(algorithm);
 
 	const queryFactory = new QueryFactory();
-	const queryObject = queryFactory.createQuery(
-		query,
-		algorithm
-	);
+	const queryObject = queryFactory.createQuery(query, algorithm);
 
 	let result = queryObject && backend?.handle(queryObject);
 	return result;
@@ -52,15 +45,10 @@ function searchBackend(algorithm: AlgorithmEnum, query: string): QueryResponse |
 
 function runFuzzySearch(query: string, editDistance: number): QueryResponse | undefined {
 	let fuzzyQuery = QueryFactory.getInstance().createQuery(
-		{
-			query: query.toLocaleLowerCase(),
-			editDistance: editDistance
-		},
+		query.toLocaleLowerCase() + '/' + editDistance,
 		AlgorithmEnum.Fuzzy
 	);
-	let fuzzyBackend = BackendFactory.getInstance().getBackend(
-		AlgorithmEnum.Fuzzy
-	);
+	let fuzzyBackend = BackendFactory.getInstance().getBackend(AlgorithmEnum.Fuzzy);
 	return fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
 }
 
@@ -75,9 +63,9 @@ function setUpMockExtensionContext(): vscode.ExtensionContext {
 		workspaceState: mockWorkspaceState,
 		globalState: {
 			get: sinon.stub(),
-			update: sinon.stub(),
+			update: sinon.stub()
 		},
-		storagePath: 'mock-storage-path',
+		storagePath: 'mock-storage-path'
 	} as unknown as vscode.ExtensionContext;
 
 	return mockExtensionContext;
@@ -87,7 +75,6 @@ function restoreMocks() {
 	mockFs.restore();
 	sinon.restore();
 }
-
 
 suite(`${SUITE_NAME} Test Suite`, () => {
 	// Show a message before running the tests.
@@ -99,22 +86,35 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		done();
 	});
 
+	test('Boolean Backend eg', () => {
+		//testing backend for boolean retrieval
+
+		//Arrange + Act
+		const result = searchBackend(AlgorithmEnum.Boolean, 'hello world');
+
+		//Assert
+		result?.should.be.a('object');
+		result?.should.have.property('results');
+		result?.results.should.be.a('array');
+		result?.results.should.have.length.above(0);
+	});
+
 	test('fuzzy index retieval and update', () => {
 		// Arrange
 		const backendFactory = BackendFactory.getInstance();
 
 		// Mock file system with test files
 		mockFs({
-			'test-path': {
-				'file1.txt': 'This is a test file.',
-				'file2.txt': 'Another test file.',
+			testPath: {
+				file1Txt: 'This is a test file.',
+				file2Txt: 'Another test file.'
 			}
 		});
 
 		let mockExtensionContext = setUpMockExtensionContext();
 
 		// Act
-		backendFactory.createAllBackends('test-path', mockExtensionContext);
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
 		const fuzzyBackend = backendFactory.getBackend(AlgorithmEnum.Fuzzy);
 
 		// Assert
@@ -125,25 +125,23 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		restoreMocks();
 	});
 
-
 	test('fuzzy 0 edit distance: 2 results across 2 files', () => {
 		// Arrange
 		const backendFactory = BackendFactory.getInstance();
 
-
 		mockFs({
-			'test-path': {
-				'file1.txt': 'This is a test file.',
-				'file2.txt': 'Another test file.',
+			testPath: {
+				file1Txt: 'This is a test file.',
+				file2Txt: 'Another test file.'
 			}
 		});
 
 		let mockExtensionContext = setUpMockExtensionContext();
 
 		// Act
-		backendFactory.createAllBackends('test-path', mockExtensionContext);
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
 
-		let result = runFuzzySearch("test", 0);
+		let result = runFuzzySearch('test', 0);
 
 		// Assert
 		result?.should.not.be.undefined;
@@ -154,8 +152,6 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		//query!.duration!.should.be.greaterThan(0);
 
 		restoreMocks();
-
-
 	});
 
 	test('fuzzy 0 edit distance, larger file with multiple results', () => {
@@ -166,9 +162,8 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		const filesPath = path.join(__dirname, '../../../../src/test/files');
 		backendFactory.createAllBackends(filesPath, mockExtensionContext);
 
-
 		//let query = searchBackend(AlgorithmEnum.Fuzzy, "this");
-		let result = runFuzzySearch("this", 0);
+		let result = runFuzzySearch('this', 0);
 
 		// Assert
 		result?.should.not.be.undefined;
@@ -182,29 +177,27 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		const backendFactory = BackendFactory.getInstance();
 
 		let mockExtensionContext = setUpMockExtensionContext();
-		
+
 		mockFs({
-			'test-path': {
-				'file1.txt': 'This is a test file.',
-				'file2.txt': 'Another text file.',
-				'file3.txt': 'We are testing text files in this test of texts.',
-				'file4.txt': 'My name is Tex.',
+			testPath: {
+				file1Txt: 'This is a test file.',
+				file2Txt: 'Another text file.',
+				file3Txt: 'We are testing text files in this test of texts.',
+				file4Txt: 'My name is Tex.'
 			}
 		});
 
-		backendFactory.createAllBackends('test-path', mockExtensionContext);
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
 		//let query = searchBackend(AlgorithmEnum.Fuzzy, "this");
-		let result = runFuzzySearch("text", 1);
+		let result = runFuzzySearch('text', 1);
 
 		// Assert
 		result?.should.not.be.undefined;
 		result?.should.have.property('results');
 		result!.results.length.should.equal(6);
 
-
 		restoreMocks();
 	});
-
 
 	test('fuzzy testing location', () => {
 		// Arrange
@@ -214,8 +207,7 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		const filesPath = path.join(__dirname, '../../../../src/test/files');
 		backendFactory.createAllBackends(filesPath, mockExtensionContext);
 
-
-		let result = runFuzzySearch("Mocking", 0);
+		let result = runFuzzySearch('Mocking', 0);
 
 		// Assert
 		result?.should.not.be.undefined;
@@ -223,14 +215,9 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		expect(result!.results[0].position).to.deep.equal({
 			wordPosition: 54,
 			line: 1,
-			wordIndex: 12,
+			wordIndex: 12
 		});
 
 		restoreMocks();
 	});
 });
-
-
-
-
-
