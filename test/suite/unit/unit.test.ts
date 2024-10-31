@@ -13,6 +13,7 @@ import * as mockFs from 'mock-fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { AlgorithmEnum } from '../../../src/extension/backend/AlgorithmEnum';
+import BackendFactory from '../../../src/extension/backend/algorithms/BackendFactory';
 import QueryFactory from '../../../src/extension/backend/queries/QueryFactory';
 import QueryResponse from '../../../src/extension/backend/results/QueryResponse';
 

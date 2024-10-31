@@ -1,5 +1,7 @@
 import { commands, ExtensionContext, window } from "vscode";
 
+
+//helper functions to manage cache and store, retrieve, and delete the index from cache
 export function registerCacheCommand(context: ExtensionContext) {
     registerShowCache(context);
     registerClearCache(context);

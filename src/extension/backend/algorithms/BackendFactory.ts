@@ -83,7 +83,7 @@ export default class BackendFactory {
     
         return documents;
     }
-
+    //function called when a file is created or changed to update the index
     updateBackendIndex(filePath: string, extensionContext: ExtensionContext): void {
         if (!filePath.includes('node_modules') && fs.lstatSync(filePath).isFile()) {
             let fileName = path.basename(filePath);
