@@ -168,28 +168,84 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		restoreMocks();
 	});
 
-	// TODO: Fix below to use mock fs.
-	/*
 	test('fuzzy testing location', () => {
 		// Arrange
 		const backendFactory = BackendFactory.getInstance();
-
-		let mockExtensionContext = setUpMockExtensionContext();
-		const filesPath = path.resolve(__dirname, '../../../test/files');
-		backendFactory.createAllBackends(filesPath, mockExtensionContext);
-
-		let result = runFuzzySearch('Mocking', 0);
-
+		const mockExtensionContext = setUpMockExtensionContext();
+	
+		// Set up mock filesystem
+		mockFs({
+			testPath: {
+				file1Txt: 'This is a test file containing the word Mocking.',
+				file2Txt: 'Another text file without the keyword.',
+				file3Txt: 'Mockingbird is a different word that contains Mocking.',
+			}
+		});
+	
+		// Create backends with mock path and context
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
+	
+		// Act
+		const result = runFuzzySearch('Mocking', 0);
+	
 		// Assert
 		result?.should.not.be.undefined;
 		result?.should.have.property('results');
+		
 		expect(result!.results[0].position).to.deep.equal({
-			wordPosition: 54,
+			wordPosition: 40,
 			line: 1,
-			wordIndex: 12
+			wordIndex: 8 
 		});
-
+	
 		restoreMocks();
 	});
-	*/
+
+	test('should return no results for a search term not present in any file', () => {
+		// Arrange
+		const backendFactory = BackendFactory.getInstance();
+		let mockExtensionContext = setUpMockExtensionContext();
+	
+		mockFs({
+			testPath: {
+				file1Txt: 'This is a test file.',
+				file2Txt: 'Another test file with content.'
+			}
+		});
+	
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
+	
+		// Act
+		let result = runFuzzySearch('nonexistent', 0);
+	
+		// Assert
+		expect(result?.results).to.be.empty;
+	
+		restoreMocks();
+	});
+	
+	test('should return no results for an empty search query', () => {
+		// Arrange
+		const backendFactory = BackendFactory.getInstance();
+		let mockExtensionContext = setUpMockExtensionContext();
+		
+		mockFs({
+			testPath: {
+				file1Txt: 'Some sample content in file one.',
+				file2Txt: 'Some more content in file two.'
+			}
+		});
+	
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
+	
+		// Act
+		let result = runFuzzySearch('', 0);
+	
+		// Assert
+		expect(result?.results).to.be.empty;
+	
+		restoreMocks();
+	});
+	
+	
 });
