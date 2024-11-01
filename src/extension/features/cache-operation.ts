@@ -12,10 +12,11 @@ function registersearchmasterShowSecretStorage(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand('searchmaster.show.secret.storage', async () => {
             const value = await context.secrets.get('searchmasterCacheKey');
-            window.showInformationMessage('Value from SecretStorage: ' + value ?? '', '');
+            window.showInformationMessage('Value from SecretStorage: ' + (value || ''));
         })
     );
 }
+
 
 function registerShowCache(context: ExtensionContext) {
     context.subscriptions.push(

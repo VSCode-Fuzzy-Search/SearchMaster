@@ -43,7 +43,10 @@ function searchBackend(algorithm: AlgorithmEnum, query: string): QueryResponse |
 
 function runFuzzySearch(query: string, editDistance: number): QueryResponse | undefined {
 	let fuzzyQuery = QueryFactory.getInstance().createQuery(
-		query.toLocaleLowerCase() + '/' + editDistance,
+		{
+			query: query.toLocaleLowerCase(),
+			editDistance: editDistance
+		},
 		AlgorithmEnum.Fuzzy
 	);
 	let fuzzyBackend = BackendFactory.getInstance().getBackend(AlgorithmEnum.Fuzzy);
@@ -132,34 +135,11 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		result?.should.not.be.undefined;
 		result?.should.have.property('results');
 		result!.results[0].filePath.should.equal('testPath/file1Txt');
-		// query!.corpusSize!.should.equal(2);
-		// query!.duration!.should.be.a('number');
-		//query!.duration!.should.be.greaterThan(0);
+		result!.results[1].filePath.should.equal('testPath/file2Txt');
 
 		restoreMocks();
 	});
 
-	// TODO: Fix below to use mock fs.
-	/*
-	test('fuzzy 0 edit distance, larger file with multiple results', () => {
-		// Arrange
-		const backendFactory = BackendFactory.getInstance();
-
-		let mockExtensionContext = setUpMockExtensionContext();
-		const filesPath = path.resolve(__dirname, '../../../test/files');
-
-		backendFactory.createAllBackends(filesPath, mockExtensionContext);
-
-		//let query = searchBackend(AlgorithmEnum.Fuzzy, "this");
-		let result = runFuzzySearch('this', 0);
-
-		// Assert
-		result?.should.not.be.undefined;
-		result?.should.have.property('results');
-
-		restoreMocks();
-	});
-	*/
 
 	test('fuzzy 1 edit distance: add, delete and modify string operations work', () => {
 		// Arrange
