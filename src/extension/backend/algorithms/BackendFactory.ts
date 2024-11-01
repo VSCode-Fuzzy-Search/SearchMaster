@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { uuidv7 } from 'uuidv7';
-import { AlgorithmEnum } from "../../AlgorithmEnum";
-import Document from "../../Document";
+import { AlgorithmEnum } from "../AlgorithmEnum";
+import Document from "../Document";
 import QueryBackend from "./QueryBackend";
 import FuzzyBackend from './Fuzzy/FuzzyBackend';
 import { ExtensionContext } from 'vscode';
@@ -66,7 +66,7 @@ export default class BackendFactory {
             for (let i = 0; i < files.length; i++) {
                 const fullPath = `${directoryPath}/${files[i]}`;
     
-                if (fs.lstatSync(fullPath).isDirectory()) {
+                if (fs.lstatSync(fullPath).isDirectory() && files[i][0] != '.') {
                     // Recursively process subdirectories
                     processDirectory(fullPath);
                 } else if (fs.lstatSync(fullPath).isFile()) {
@@ -83,7 +83,7 @@ export default class BackendFactory {
     
         return documents;
     }
-
+    //function called when a file is created or changed to update the index
     updateBackendIndex(filePath: string, extensionContext: ExtensionContext): void {
         if (!filePath.includes('node_modules') && fs.lstatSync(filePath).isFile()) {
             let fileName = path.basename(filePath);

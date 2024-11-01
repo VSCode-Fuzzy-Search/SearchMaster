@@ -1,3 +1,4 @@
+//helper class for the trie
 export default class Node {
     letter: string;
     prefix: string;

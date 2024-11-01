@@ -13,7 +13,7 @@ import * as mockFs from 'mock-fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { AlgorithmEnum } from '../../../src/extension/backend/AlgorithmEnum';
-import BackendFactory from '../../../src/extension/backend/algorithms/information-retrieval/BackendFactory';
+import BackendFactory from '../../../src/extension/backend/algorithms/BackendFactory';
 import QueryFactory from '../../../src/extension/backend/queries/QueryFactory';
 import QueryResponse from '../../../src/extension/backend/results/QueryResponse';
 
@@ -43,7 +43,10 @@ function searchBackend(algorithm: AlgorithmEnum, query: string): QueryResponse |
 
 function runFuzzySearch(query: string, editDistance: number): QueryResponse | undefined {
 	let fuzzyQuery = QueryFactory.getInstance().createQuery(
-		query.toLocaleLowerCase() + '/' + editDistance,
+		{
+			query: query.toLocaleLowerCase(),
+			editDistance: editDistance
+		},
 		AlgorithmEnum.Fuzzy
 	);
 	let fuzzyBackend = BackendFactory.getInstance().getBackend(AlgorithmEnum.Fuzzy);
@@ -82,19 +85,6 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 	suiteTeardown(done => {
 		vscode.window.showInformationMessage(`${SUITE_NAME} | All tests completed!`);
 		done();
-	});
-
-	test('Boolean Backend eg', () => {
-		//testing backend for boolean retrieval
-
-		//Arrange + Act
-		const result = searchBackend(AlgorithmEnum.Boolean, 'hello world');
-
-		//Assert
-		result?.should.be.a('object');
-		result?.should.have.property('results');
-		result?.results.should.be.a('array');
-		result?.results.should.have.length.above(0);
 	});
 
 	test('fuzzy index retieval and update', () => {
@@ -145,34 +135,11 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		result?.should.not.be.undefined;
 		result?.should.have.property('results');
 		result!.results[0].filePath.should.equal('testPath/file1Txt');
-		// query!.corpusSize!.should.equal(2);
-		// query!.duration!.should.be.a('number');
-		//query!.duration!.should.be.greaterThan(0);
+		result!.results[1].filePath.should.equal('testPath/file2Txt');
 
 		restoreMocks();
 	});
 
-	// TODO: Fix below to use mock fs.
-	/*
-	test('fuzzy 0 edit distance, larger file with multiple results', () => {
-		// Arrange
-		const backendFactory = BackendFactory.getInstance();
-
-		let mockExtensionContext = setUpMockExtensionContext();
-		const filesPath = path.resolve(__dirname, '../../../test/files');
-
-		backendFactory.createAllBackends(filesPath, mockExtensionContext);
-
-		//let query = searchBackend(AlgorithmEnum.Fuzzy, "this");
-		let result = runFuzzySearch('this', 0);
-
-		// Assert
-		result?.should.not.be.undefined;
-		result?.should.have.property('results');
-
-		restoreMocks();
-	});
-	*/
 
 	test('fuzzy 1 edit distance: add, delete and modify string operations work', () => {
 		// Arrange
@@ -201,28 +168,84 @@ suite(`${SUITE_NAME} Test Suite`, () => {
 		restoreMocks();
 	});
 
-	// TODO: Fix below to use mock fs.
-	/*
 	test('fuzzy testing location', () => {
 		// Arrange
 		const backendFactory = BackendFactory.getInstance();
-
-		let mockExtensionContext = setUpMockExtensionContext();
-		const filesPath = path.resolve(__dirname, '../../../test/files');
-		backendFactory.createAllBackends(filesPath, mockExtensionContext);
-
-		let result = runFuzzySearch('Mocking', 0);
-
+		const mockExtensionContext = setUpMockExtensionContext();
+	
+		// Set up mock filesystem
+		mockFs({
+			testPath: {
+				file1Txt: 'This is a test file containing the word Mocking.',
+				file2Txt: 'Another text file without the keyword.',
+				file3Txt: 'Mockingbird is a different word that contains Mocking.',
+			}
+		});
+	
+		// Create backends with mock path and context
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
+	
+		// Act
+		const result = runFuzzySearch('Mocking', 0);
+	
 		// Assert
 		result?.should.not.be.undefined;
 		result?.should.have.property('results');
+		
 		expect(result!.results[0].position).to.deep.equal({
-			wordPosition: 54,
+			wordPosition: 40,
 			line: 1,
-			wordIndex: 12
+			wordIndex: 8 
 		});
-
+	
 		restoreMocks();
 	});
-	*/
+
+	test('should return no results for a search term not present in any file', () => {
+		// Arrange
+		const backendFactory = BackendFactory.getInstance();
+		let mockExtensionContext = setUpMockExtensionContext();
+	
+		mockFs({
+			testPath: {
+				file1Txt: 'This is a test file.',
+				file2Txt: 'Another test file with content.'
+			}
+		});
+	
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
+	
+		// Act
+		let result = runFuzzySearch('nonexistent', 0);
+	
+		// Assert
+		expect(result?.results).to.be.empty;
+	
+		restoreMocks();
+	});
+	
+	test('should return no results for an empty search query', () => {
+		// Arrange
+		const backendFactory = BackendFactory.getInstance();
+		let mockExtensionContext = setUpMockExtensionContext();
+		
+		mockFs({
+			testPath: {
+				file1Txt: 'Some sample content in file one.',
+				file2Txt: 'Some more content in file two.'
+			}
+		});
+	
+		backendFactory.createAllBackends('testPath', mockExtensionContext);
+	
+		// Act
+		let result = runFuzzySearch('', 0);
+	
+		// Assert
+		expect(result?.results).to.be.empty;
+	
+		restoreMocks();
+	});
+	
+	
 });

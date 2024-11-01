@@ -1,5 +1,7 @@
 import { commands, ExtensionContext, window } from "vscode";
 
+
+//helper functions to manage cache and store, retrieve, and delete the index from cache
 export function registerCacheCommand(context: ExtensionContext) {
     registerShowCache(context);
     registerClearCache(context);
@@ -10,10 +12,11 @@ function registersearchmasterShowSecretStorage(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand('searchmaster.show.secret.storage', async () => {
             const value = await context.secrets.get('searchmasterCacheKey');
-            window.showInformationMessage('Value from SecretStorage: ' + value ?? '', '');
+            window.showInformationMessage('Value from SecretStorage: ' + (value || ''));
         })
     );
 }
+
 
 function registerShowCache(context: ExtensionContext) {
     context.subscriptions.push(

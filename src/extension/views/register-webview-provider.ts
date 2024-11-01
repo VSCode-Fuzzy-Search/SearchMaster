@@ -11,7 +11,7 @@ import {
 } from "vscode";
 import { getNonce } from "../util";
 import * as vscode from "vscode";
-import BackendFactory from "../backend/algorithms/information-retrieval/BackendFactory";
+import BackendFactory from "../backend/algorithms/BackendFactory";
 import QueryFactory from "../backend/queries/QueryFactory";
 import { AlgorithmEnum } from "../backend/AlgorithmEnum";
 import path = require("path");
@@ -108,37 +108,28 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
           switch (data.searchType) {
             case "fuzzy": {
               console.log("Fuzzy searchType");
-              // Checking edit distance is less than half the word length
-              // This is done for search efficiency and accuracy
-              if (data.searchTerm.length / 2 > parseInt(data.editDistance)) {
-                let fuzzyQuery = QueryFactory.getInstance().createQuery(
-                  // case handling
-
-                  data.searchTerm.toLocaleLowerCase() + "/" + data.editDistance,
-                  AlgorithmEnum.Fuzzy
-                );
-                let fuzzyBackend = BackendFactory.getInstance().getBackend(
-                  AlgorithmEnum.Fuzzy
-                );
-                if (fuzzyQuery !== null) {
-                  const result = fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
-                  console.log("Results collected and being posted");
-                  if (result && webviewView.webview) {
-                    webviewView.webview.postMessage({
-                      type: "searchResults",
-                      results: result.results,
-                    });
-                  }
+              let fuzzyQuery = QueryFactory.getInstance().createQuery(
+                // case handling
+                {
+                  query: data.searchTerm.toLocaleLowerCase(),
+                  editDistance: data.editDistance
+                },
+                AlgorithmEnum.Fuzzy
+              );
+              let fuzzyBackend = BackendFactory.getInstance().getBackend(
+                AlgorithmEnum.Fuzzy
+              );
+              if (fuzzyQuery !== null) {
+                const result = fuzzyQuery && fuzzyBackend?.handle(fuzzyQuery);
+                console.log("Results collected and being posted");
+                if (result && webviewView.webview) {
+                  webviewView.webview.postMessage({
+                    type: "searchResults",
+                    results: result.results,
+                  });
                 }
-                break;
-              } else {
-                // Window message for edit distance too short
-                webviewView.webview.postMessage({
-                  type: "errorScreen",
-                  results: "Search Query too Short for given Edit Distance",
-                });
-                break;
               }
+              break;
             }
             // Add in extra search algorithms here
             default: {
@@ -194,8 +185,47 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
           }
           break;
         }
+        case "inputError": {
+          try {
+            switch (data.errorType) {
+              case "space": {
+                webviewView.webview.postMessage({
+                  type: "errorScreen",
+                  results: "Search Query contains spaces",
+                });
+                break;
+              }
+              case "length": {
+                webviewView.webview.postMessage({
+                  type: "errorScreen",
+                  results: "Search Query too Short for given Edit Distance",
+                });
+                break;
+              }
+              case "nonalphanumeric": {
+                webviewView.webview.postMessage({
+                  type: "errorScreen",
+                  results: "Search Query contains non-alphanumeric characters",
+                });
+                break;
+              }
+              default: {
+                vscode.window.showErrorMessage(
+                  `Unknown error occured while error checking: ${data.errorType}`
+                );
+                break;
+              }
+            }
+            break;
+          } catch (error) {
+            vscode.window.showErrorMessage(
+              `Error type not specified: ${error}`
+            );
+            break;
+          }
+        }
         default: {
-          vscode.window.showErrorMessage("Invalid command");
+          vscode.window.showErrorMessage(`Unknown command: ${data.command}`);
           break;
         }
       }
@@ -282,12 +312,7 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
       )
     );
     const helpIconUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "media",
-        "icons",
-        "help-icon.png"
-      )
+      vscode.Uri.joinPath(this._extensionUri, "media", "icons", "help-icon.png")
     );
 
     return `<!DOCTYPE html>
@@ -482,6 +507,18 @@ export class SidebarWebViewProvider implements WebviewViewProvider {
                 .hover-container:hover .hover-text {
                     opacity: 1;
                     pointer-events: auto;
+                }
+                .custom-tooltip {
+                  position: absolute;
+                  background: rgba(50, 50, 50, 0.9);
+                  color: #ffffff;
+                  border-radius: 4px;
+                  padding: 5px;
+                  font-size: 12px;
+                  z-index: 1000;
+                  pointer-events: none;
+                  transition: opacity 0.3s;
+                  opacity: 0.9;
                 }
 
           </style>
